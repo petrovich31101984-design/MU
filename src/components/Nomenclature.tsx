@@ -209,26 +209,31 @@ export default function Nomenclature() {
         </div>
       </div>
 
-      {/* Price History */}
+      {/* Price History Modal */}
       {showHistory && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-800">
-              История цен: {nomenclature.find(n => n.id === showHistory)?.name}
-            </h3>
-            <button onClick={() => setShowHistory(null)} className="text-gray-400 hover:text-gray-600">×</button>
-          </div>
-          <div className="space-y-2">
-            {priceHistory
-              .filter(p => p.nomenclatureId === showHistory)
-              .sort((a, b) => b.changeDate.localeCompare(a.changeDate))
-              .map(p => (
-                <div key={p.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm text-gray-500 w-24">{p.changeDate}</span>
-                  <span className="font-medium text-gray-800">{p.price} ₽</span>
-                  <span className="text-xs text-gray-400 ml-auto">изменил: {p.changedBy}</span>
-                </div>
-              ))}
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">
+                История цен: {nomenclature.find(n => n.id === showHistory)?.name}
+              </h3>
+              <button onClick={() => setShowHistory(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+            </div>
+            <div className="space-y-2">
+              {priceHistory
+                .filter(p => p.nomenclatureId === showHistory)
+                .sort((a, b) => b.changeDate.localeCompare(a.changeDate))
+                .map(p => (
+                  <div key={p.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm text-gray-500 w-24">{p.changeDate}</span>
+                    <span className="font-medium text-gray-800">{p.price} ₽</span>
+                    <span className="text-xs text-gray-400 ml-auto">изменил: {p.changedBy}</span>
+                  </div>
+                ))}
+              {priceHistory.filter(p => p.nomenclatureId === showHistory).length === 0 && (
+                <p className="text-center text-gray-400 py-8">История цен пуста</p>
+              )}
+            </div>
           </div>
         </div>
       )}
