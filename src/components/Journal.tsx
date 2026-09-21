@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
+import { formatDateTime } from '../utils/dateFormat';
 
 export default function Journal() {
   const journal = useStore(s => s.journal);
@@ -77,7 +78,7 @@ export default function Journal() {
               {filtered.map(entry => (
                 <tr key={entry.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                    <div className="text-sm">{entry.dateTime.replace('T', ' ')}</div>
+                    <div className="text-sm">{formatDateTime(entry.dateTime)}</div>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-1 rounded-full ${

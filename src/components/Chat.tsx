@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
+import { formatDateTime } from '../utils/dateFormat';
 
 export default function Chat() {
   const employees = useStore(s => s.employees);
@@ -135,7 +136,7 @@ export default function Chat() {
                     >
                       <p className="text-sm">{msg.text}</p>
                       <p className={`text-xs mt-1 ${msg.fromId === 'admin' ? 'text-blue-200' : 'text-gray-400'}`}>
-                        {msg.date.replace('T', ' ')}
+                        {formatDateTime(msg.date)}
                       </p>
                     </div>
                   </div>

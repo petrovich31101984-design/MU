@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { UNIT_LABELS } from '../types';
+import { formatDate } from '../utils/dateFormat';
 
 export default function Returns() {
   const returns = useStore(s => s.returns);
@@ -83,7 +84,7 @@ export default function Returns() {
                 const unit = getNomenclatureUnit(ret.nomenclatureId);
                 return (
                   <tr key={ret.id} className={`hover:bg-gray-50 ${!ret.corrected ? 'bg-amber-50' : ''}`}>
-                    <td className="px-4 py-3 text-gray-600">{ret.date}</td>
+                    <td className="px-4 py-3 text-gray-600">{formatDate(ret.date)}</td>
                     <td className="px-4 py-3 font-medium text-gray-800">{getEmployeeName(ret.employeeId)}</td>
                     <td className="px-4 py-3 text-gray-700">
                       {getNomenclatureName(ret.nomenclatureId)}

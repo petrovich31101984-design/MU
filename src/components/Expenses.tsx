@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { STATUS_LABELS, STATUS_COLORS, UNIT_LABELS } from '../types';
+import { formatDate } from '../utils/dateFormat';
 
 export default function Expenses() {
   const employees = useStore(s => s.employees);
@@ -148,7 +149,7 @@ export default function Expenses() {
                 const price = getCurrentPrice(exp.nomenclatureId);
                 return (
                   <tr key={exp.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{exp.visitDate}</td>
+                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(exp.visitDate)}</td>
                     <td className="px-4 py-3 text-gray-800">{emp?.fullName || '—'}</td>
                     <td className="px-4 py-3 text-gray-700">{pat?.fullName || '—'}</td>
                     <td className="px-4 py-3 text-gray-700">

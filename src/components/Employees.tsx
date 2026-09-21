@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { EmployeeStatus, STATUS_LABELS, STATUS_COLORS, UNIT_LABELS, Employee } from '../types';
+import { formatDate } from '../utils/dateFormat';
 
 export default function Employees() {
   const employees = useStore(s => s.employees);
@@ -90,8 +91,8 @@ export default function Employees() {
                 <span className={`text-xs px-2 py-1 rounded-full border ${STATUS_COLORS[emp.status]}`}>
                   {STATUS_LABELS[emp.status]}
                 </span>
-                <span className="text-xs text-gray-500">Принят: {emp.hireDate}</span>
-                <span className="text-xs text-gray-500">Последняя активность: {emp.lastActivityDate}</span>
+                <span className="text-xs text-gray-500">Принят: {formatDate(emp.hireDate)}</span>
+                <span className="text-xs text-gray-500">Последняя активность: {formatDate(emp.lastActivityDate)}</span>
               </div>
             </div>
             <div className="flex gap-2">
@@ -214,8 +215,8 @@ export default function Employees() {
                 {patients.slice(0, 20).map(p => (
                   <tr key={p.id} className="hover:bg-gray-50">
                     <td className="px-4 py-2">{p.fullName}</td>
-                    <td className="px-4 py-2 text-gray-600">{p.birthDate}</td>
-                    <td className="px-4 py-2 text-gray-600">{p.visitDate}</td>
+                    <td className="px-4 py-2 text-gray-600">{formatDate(p.birthDate)}</td>
+                    <td className="px-4 py-2 text-gray-600">{formatDate(p.visitDate)}</td>
                   </tr>
                 ))}
               </tbody>

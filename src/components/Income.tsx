@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { STATUS_LABELS, STATUS_COLORS } from '../types';
+import { formatDate } from '../utils/dateFormat';
 
 export default function Income() {
   const employees = useStore(s => s.employees);
@@ -123,7 +124,7 @@ export default function Income() {
                       {inc.amount.toLocaleString('ru')}
                     </td>
                     <td className="px-4 py-3 text-center text-gray-700">{inc.shifts}</td>
-                    <td className="px-4 py-3 text-gray-600">{inc.date}</td>
+                    <td className="px-4 py-3 text-gray-600">{formatDate(inc.date)}</td>
                   </tr>
                 );
               })}

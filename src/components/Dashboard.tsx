@@ -1,4 +1,5 @@
 import { useStore } from '../store/useStore';
+import { formatDateTime } from '../utils/dateFormat';
 
 export default function Dashboard() {
   const employees = useStore(s => s.employees);
@@ -143,7 +144,7 @@ export default function Dashboard() {
                             {getEmployeeName(msg.fromId)}
                           </p>
                           <span className="text-xs text-gray-400 flex-shrink-0">
-                            {msg.date.split('T')[1] || msg.date}
+                            {formatDateTime(msg.date).split(' ')[1]}
                           </span>
                         </div>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-2">{msg.text}</p>
@@ -199,7 +200,7 @@ export default function Dashboard() {
                         <p className="font-medium text-sm text-gray-800">{notification.title}</p>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-2">{notification.description}</p>
                         <p className="text-xs text-gray-400 mt-1">
-                          {notification.date.replace('T', ' ')}
+                          {formatDateTime(notification.date)}
                         </p>
                       </div>
                     </div>
