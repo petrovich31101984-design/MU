@@ -93,7 +93,7 @@ export default function Nomenclature() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Всего позиций</p>
           <p className="text-2xl font-bold text-gray-800">{nomenclature.length}</p>
@@ -103,8 +103,16 @@ export default function Nomenclature() {
           <p className="text-2xl font-bold text-purple-700">{nomenclature.filter(n => n.category === 'medicine').length}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Изменений цен</p>
-          <p className="text-2xl font-bold text-amber-700">{priceHistory.length}</p>
+          <p className="text-sm text-gray-500">ПКУ ЛС</p>
+          <p className="text-2xl font-bold text-indigo-700">{nomenclature.filter(n => n.category === 'medicine_pku').length}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <p className="text-sm text-gray-500">Расходники</p>
+          <p className="text-2xl font-bold text-green-700">{nomenclature.filter(n => n.category === 'consumable').length}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <p className="text-sm text-gray-500">Оборудование</p>
+          <p className="text-2xl font-bold text-blue-700">{nomenclature.filter(n => n.category === 'equipment').length}</p>
         </div>
       </div>
 
