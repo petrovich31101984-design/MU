@@ -81,7 +81,7 @@ export default function Nomenclature() {
           <option value="medicine">💊 Лекарства</option>
           <option value="medicine_pku">💉пку Лекарства</option>
           <option value="equipment">🔧 Оборудование</option>
-          <option value="consumable">📦 Расходные материалы</option>
+          <option value="consumable">🩹 Расходные материалы</option>
         </select>
         <button
           onClick={() => setShowAddModal(true)}
@@ -262,7 +262,7 @@ export default function Nomenclature() {
                   <option value="medicine">💊 Лекарство</option>
                   <option value="medicine_pku">💊 ПКУ</option>
                   <option value="equipment">🔧 Оборудование</option>
-                  <option value="consumable">📦 Расходный материал</option>
+                  <option value="consumable">🩹 Расходный материал</option>
                 </select>
               </div>
               <div>
