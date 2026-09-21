@@ -29,11 +29,13 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
       <aside className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300 flex-shrink-0`}>
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">💊</span>
+            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              МУ
+            </div>
             {sidebarOpen && (
               <div>
-                <h1 className="font-bold text-gray-800 text-sm">Учёт лекарств</h1>
-                <p className="text-xs text-gray-500">Руководитель</p>
+                <h1 className="font-bold text-gray-800 text-sm">МедУчёт v.0.2</h1>
+                <p className="text-xs text-gray-500">выездное подразделение</p>
               </div>
             )}
           </div>
@@ -79,28 +81,13 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
           <div>
             <h2 className="text-lg font-semibold text-gray-800">
-              {menuItems.find(m => m.id === currentPage)?.label || 'Дашборд'}
+              {currentPage === 'dashboard' ? 'Панель руководителя' : menuItems.find(m => m.id === currentPage)?.label}
             </h2>
-            <p className="text-xs text-gray-500">Январь 2024</p>
           </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => onNavigate('notifications')}
-              className="relative p-2 rounded-lg hover:bg-gray-100"
-            >
-              <span className="text-xl">🔔</span>
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">👨‍💼</div>
-              <div className="text-sm">
-                <div className="font-medium text-gray-800">Руководитель</div>
-                <div className="text-xs text-gray-500">admin</div>
-              </div>
+              <div className="text-sm font-medium text-gray-800">Руководитель</div>
             </div>
           </div>
         </header>
