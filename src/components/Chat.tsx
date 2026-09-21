@@ -1,24 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useStore } from '../store/useStore';
 
-interface ChatProps {
-  initialTarget?: string | null;
-}
-
-export default function Chat({ initialTarget }: ChatProps) {
+export default function Chat() {
   const employees = useStore(s => s.employees);
   const messages = useStore(s => s.messages);
   const addMessage = useStore(s => s.addMessage);
 
-  const [selectedChat, setSelectedChat] = useState<string | null>(initialTarget || null);
+  const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [search, setSearch] = useState('');
-
-  useEffect(() => {
-    if (initialTarget) {
-      setSelectedChat(initialTarget);
-    }
-  }, [initialTarget]);
 
   // Получаем список диалогов (уникальные собеседники)
   const dialogPartners = [...new Set(

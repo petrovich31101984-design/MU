@@ -4,7 +4,7 @@ import { useStore } from '../store/useStore';
 interface LayoutProps {
   children: React.ReactNode;
   currentPage: string;
-  onNavigate: (page: string, target?: string) => void;
+  onNavigate: (page: string) => void;
 }
 
 export default function Layout({ children, currentPage, onNavigate }: LayoutProps) {

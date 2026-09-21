@@ -13,28 +13,20 @@ import Notifications from './components/Notifications';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const [chatTarget, setChatTarget] = useState<string | null>(null);
-
-  const handleNavigate = (page: string, target?: string) => {
-    setCurrentPage(page);
-    if (target) {
-      setChatTarget(target);
-    }
-  };
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'dashboard': return <Dashboard onNavigate={handleNavigate} />;
+      case 'dashboard': return <Dashboard />;
       case 'employees': return <Employees />;
       case 'nomenclature': return <Nomenclature />;
       case 'income': return <Income />;
       case 'expenses': return <Expenses />;
       case 'returns': return <Returns />;
-      case 'chat': return <Chat initialTarget={chatTarget} />;
+      case 'chat': return <Chat />;
       case 'report': return <Report />;
       case 'journal': return <Journal />;
       case 'notifications': return <Notifications />;
-      default: return <Dashboard onNavigate={handleNavigate} />;
+      default: return <Dashboard />;
     }
   };
 
