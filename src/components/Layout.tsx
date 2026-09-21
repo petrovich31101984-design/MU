@@ -13,14 +13,16 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const menuItems = [
-    { id: 'dashboard', label: 'Дашборд', icon: '📊' },
+    { id: 'dashboard', label: 'Панель руководителя', icon: '📊' },
     { id: 'employees', label: 'Сотрудники', icon: '👥' },
     { id: 'nomenclature', label: 'Номенклатура', icon: '💊' },
+    { id: 'income', label: 'Приход к сотруднику', icon: '📥' },
+    { id: 'expenses', label: 'Расход у сотрудника', icon: '📤' },
     { id: 'returns', label: 'Возвраты', icon: '↩️' },
-    { id: 'chat', label: 'Сообщения', icon: '💬' },
-    { id: 'report', label: 'Отчёт за месяц', icon: '📄' },
-    { id: 'journal', label: 'Журнал изменений', icon: '📜' },
-    { id: 'notifications', label: 'Уведомления', icon: '🔔', badge: unreadCount },
+    { id: 'chat', label: 'Сообщения', icon: '💬', badge: unreadCount },
+    { id: 'report', label: 'Отчеты', icon: '📄' },
+    { id: 'journal', label: 'Журнал', icon: '📜' },
+    { id: 'notifications', label: 'Уведомления', icon: '🔔' },
   ];
 
   return (
@@ -33,12 +35,28 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
               МУ
             </div>
             {sidebarOpen && (
-              <div>
+              <div className="flex-1">
                 <h1 className="font-bold text-gray-800 text-sm">МедУчёт v.0.2</h1>
-                <p className="text-xs text-gray-500">выездное подразделение</p>
+                <p className="text-xs text-gray-500">Выездное подразделение</p>
               </div>
             )}
           </div>
+          {sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 text-xs"
+            >
+              ◀ Свернуть
+            </button>
+          )}
+          {!sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="mt-2 w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 text-sm"
+            >
+              ▶
+            </button>
+          )}
         </div>
         <nav className="flex-1 p-2">
           {menuItems.map(item => (
@@ -65,14 +83,6 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
             </button>
           ))}
         </nav>
-        <div className="p-3 border-t border-gray-200">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-50 text-sm"
-          >
-            {sidebarOpen ? '◀ Свернуть' : '▶'}
-          </button>
-        </div>
       </aside>
 
       {/* Main Content */}
@@ -81,7 +91,7 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
           <div>
             <h2 className="text-lg font-semibold text-gray-800">
-              {currentPage === 'dashboard' ? 'Панель руководителя' : menuItems.find(m => m.id === currentPage)?.label}
+              {menuItems.find(m => m.id === currentPage)?.label}
             </h2>
           </div>
           <div className="flex items-center gap-4">
