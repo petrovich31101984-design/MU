@@ -247,11 +247,19 @@ export const mockReturns: ReturnOperation[] = [
 export const mockMessages: Message[] = [
   { id: 'msg_1', fromId: 'admin', toId: 'emp_1', text: 'Иван, обратите внимание на остаток Анальгина', date: '2024-01-14T10:30', read: true },
   { id: 'msg_2', fromId: 'emp_1', toId: 'admin', text: 'Принял к сведению, закажу дополнительно', date: '2024-01-14T11:15', read: true },
-  { id: 'msg_3', fromId: 'admin', toId: 'emp_3', text: 'Сидорова А.М., нужно сдать отчёт до пятницы', date: '2024-01-15T09:00', read: false },
-  { id: 'msg_4', fromId: 'emp_5', toId: 'storekeeper', text: 'Нужны дополнительные шприцы 20мл', date: '2024-01-15T08:45', read: false },
+  { id: 'msg_3', fromId: 'admin', toId: 'emp_3', text: 'Сидорова А.М., нужно сдать отчёт до пятницы', date: '2024-01-15T09:00', read: true },
+  { id: 'msg_4', fromId: 'emp_5', toId: 'admin', text: 'Нужны дополнительные шприцы 20мл', date: '2024-01-15T08:45', read: false },
   { id: 'msg_5', fromId: 'storekeeper', toId: 'emp_5', text: 'Принято, подготовлю к выдаче', date: '2024-01-15T09:30', read: true },
-  { id: 'msg_6', fromId: 'admin', toId: 'emp_9', text: 'Новикова О.Д., уточните статус', date: '2024-01-10T14:00', read: false },
-  { id: 'msg_7', fromId: 'emp_7', toId: 'storekeeper', text: 'Заканчивается Беродуал, нужно пополнение', date: '2024-01-15T11:20', read: false },
+  { id: 'msg_6', fromId: 'admin', toId: 'emp_9', text: 'Новикова О.Д., уточните статус', date: '2024-01-10T14:00', read: true },
+  { id: 'msg_7', fromId: 'emp_7', toId: 'admin', text: 'Заканчивается Беродуал, нужно пополнение', date: '2024-01-15T11:20', read: false },
+  { id: 'msg_8', fromId: 'emp_3', toId: 'admin', text: 'Отчёт подготовлю к четвергу, всё по пациентам внесено', date: '2024-01-15T09:30', read: false },
+  { id: 'msg_9', fromId: 'storekeeper', toId: 'admin', text: 'Адреналин подорожал, обновил цену в системе', date: '2024-01-15T10:00', read: false },
+  { id: 'msg_10', fromId: 'emp_10', toId: 'admin', text: 'У пациента Козлова А.П. аллергия на Анальгин, заменил на Кеторол', date: '2024-01-15T10:45', read: false },
+  { id: 'msg_11', fromId: 'emp_13', toId: 'admin', text: 'Прошу согласовать возврат 3 амп. Преднизолона — срок годности истекает', date: '2024-01-15T11:10', read: false },
+  { id: 'msg_12', fromId: 'emp_2', toId: 'admin', text: 'На выезде закончились катетеры 20G, запросил у кладовщика', date: '2024-01-15T12:00', read: false },
+  { id: 'msg_13', fromId: 'emp_15', toId: 'admin', text: 'Пациент Смирнов А.П. жалуется на головокружение после введения Фуросемида', date: '2024-01-15T12:30', read: false },
+  { id: 'msg_14', fromId: 'emp_8', toId: 'admin', text: 'Прошу заменить тонометр, старый неисправен', date: '2024-01-15T13:00', read: false },
+  { id: 'msg_15', fromId: 'emp_20', toId: 'admin', text: 'Сегодня 18 вызовов, все отчёты внесены', date: '2024-01-15T13:30', read: false },
 ];
 
 // Журнал изменений

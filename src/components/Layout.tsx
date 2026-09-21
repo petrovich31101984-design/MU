@@ -22,7 +22,6 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
     { id: 'chat', label: 'Сообщения', icon: '💬', badge: unreadCount },
     { id: 'report', label: 'Отчеты', icon: '📄' },
     { id: 'journal', label: 'Журнал', icon: '📜' },
-    { id: 'notifications', label: 'Уведомления', icon: '🔔' },
   ];
 
   return (
