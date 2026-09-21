@@ -53,6 +53,7 @@ interface AppState {
   getEmployeeIncome: (employeeId: string, period: string) => number;
   getEmployeeExpenseTotal: (employeeId: string, period: string) => number;
   getEmployeeStock: (employeeId: string, nomenclatureId: string) => number;
+  getEmployeeStockAtDate: (employeeId: string, nomenclatureId: string, date: string) => number;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -315,6 +316,20 @@ export const useStore = create<AppState>((set, get) => ({
       .reduce((sum, e) => sum + e.quantity, 0);
     const returned = state.returns
       .filter(r => r.employeeId === employeeId && r.nomenclatureId === nomenclatureId)
+      .reduce((sum, r) => sum + (r.corrected && r.newQuantity !== undefined ? r.newQuantity : r.quantity), 0);
+    return initial - consumed + returned;
+  },
+
+  getEmployeeStockAtDate: (employeeId, nomenclatureId, date) => {
+    const state = get();
+    const initial = state.initialStocks
+      .filter(s => s.employeeId === employeeId && s.nomenclatureId === nomenclatureId && s.date <= date)
+      .reduce((sum, s) => sum + s.quantity, 0);
+    const consumed = state.expenses
+      .filter(e => e.employeeId === employeeId && e.nomenclatureId === nomenclatureId && e.visitDate < date)
+      .reduce((sum, e) => sum + e.quantity, 0);
+    const returned = state.returns
+      .filter(r => r.employeeId === employeeId && r.nomenclatureId === nomenclatureId && r.date < date)
       .reduce((sum, r) => sum + (r.corrected && r.newQuantity !== undefined ? r.newQuantity : r.quantity), 0);
     return initial - consumed + returned;
   },

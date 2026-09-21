@@ -8,6 +8,7 @@ export default function Dashboard() {
   const messages = useStore(s => s.messages);
   const getCurrentPrice = useStore(s => s.getCurrentPrice);
   const getEmployeeStock = useStore(s => s.getEmployeeStock);
+  const getEmployeeStockAtDate = useStore(s => s.getEmployeeStockAtDate);
   const markNotificationRead = useStore(s => s.markNotificationRead);
   const markMessageRead = useStore(s => s.markMessageRead);
 
@@ -21,11 +22,14 @@ export default function Dashboard() {
   const previousMonth = `${previousMonthDate.getFullYear()}-${String(previousMonthDate.getMonth() + 1).padStart(2, '0')}`;
   const previousMonthLabel = `${previousMonthDate.toLocaleDateString('ru-RU', { month: 'long' })} ${previousMonthDate.getFullYear()}`;
 
-  // Общий остаток на подразделение
+  // 1-е число текущего месяца для расчёта остатка
+  const currentMonthStart = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+
+  // Общий остаток на подразделение на 1-е число текущего месяца
   let totalStockValue = 0;
   activeEmployees.forEach(emp => {
     nomenclature.forEach(nom => {
-      const stock = getEmployeeStock(emp.id, nom.id);
+      const stock = getEmployeeStockAtDate(emp.id, nom.id, currentMonthStart);
       if (stock > 0) {
         totalStockValue += stock * getCurrentPrice(nom.id);
       }
