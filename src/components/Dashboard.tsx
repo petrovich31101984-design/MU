@@ -52,11 +52,9 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Текущий месяц */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          {new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
-        </h2>
-      </div>
+      <h2 className="text-lg font-semibold text-gray-800 capitalize">
+        {new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
+      </h2>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
