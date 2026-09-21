@@ -14,6 +14,12 @@ export default function Dashboard() {
   const unreadNotifications = notifications.filter(n => !n.read);
   const unreadMessages = messages.filter(m => m.toId === 'admin' && !m.read);
 
+  // Вычисляем предыдущий месяц
+  const today = new Date();
+  const previousMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const previousMonth = `${previousMonthDate.getFullYear()}-${String(previousMonthDate.getMonth() + 1).padStart(2, '0')}`;
+  const previousMonthLabel = previousMonthDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+
   // Общий остаток на подразделение
   let totalStockValue = 0;
   activeEmployees.forEach(emp => {
@@ -25,10 +31,10 @@ export default function Dashboard() {
     });
   });
 
-  // Сводка по сотрудникам
+  // Сводка по сотрудникам за предыдущий месяц
   const employeeSummary = activeEmployees.map(emp => {
-    const income = useStore.getState().getEmployeeIncome(emp.id, '2024-01');
-    const expense = useStore.getState().getEmployeeExpenseTotal(emp.id, '2024-01');
+    const income = useStore.getState().getEmployeeIncome(emp.id, previousMonth);
+    const expense = useStore.getState().getEmployeeExpenseTotal(emp.id, previousMonth);
     return { emp, income, expense };
   });
 
@@ -64,7 +70,7 @@ export default function Dashboard() {
           <div className="pl-2">
             <p className="text-sm text-gray-500">Приход</p>
             <p className="text-2xl font-bold text-green-700 mt-1">{totalIncome.toLocaleString('ru')} ₽</p>
-            <p className="text-xs text-gray-400 mt-1">за январь 2024</p>
+            <p className="text-xs text-gray-400 mt-1">за {previousMonthLabel}</p>
           </div>
         </div>
 
@@ -74,7 +80,7 @@ export default function Dashboard() {
           <div className="pl-2">
             <p className="text-sm text-gray-500">Расход</p>
             <p className="text-2xl font-bold text-red-700 mt-1">{totalExpense.toLocaleString('ru')} ₽</p>
-            <p className="text-xs text-gray-400 mt-1">за январь 2024</p>
+            <p className="text-xs text-gray-400 mt-1">за {previousMonthLabel}</p>
           </div>
         </div>
 
