@@ -12,7 +12,7 @@ export default function Dashboard() {
   const markMessageRead = useStore(s => s.markMessageRead);
 
   const activeEmployees = employees.filter(e => e.status === 'active');
-  const unreadNotifications = notifications.filter(n => !n.read);
+  const unreadNotifications = notifications.filter(n => !n.read && n.type !== 'message');
   const unreadMessages = messages.filter(m => m.toId === 'admin' && !m.read);
 
   // Вычисляем предыдущий месяц
