@@ -116,7 +116,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
-                {unreadMessages.map(msg => (
+                {unreadMessages.slice(0, 3).map(msg => (
                   <div
                     key={msg.id}
                     onClick={() => handleMessageClick(msg.id)}
@@ -165,7 +165,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
-                {unreadNotifications.map(notification => (
+                {unreadNotifications.slice(0, 3).map(notification => (
                   <div
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification.id)}
@@ -218,7 +218,7 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {employeeSummary.slice(0, 10).map(row => {
+              {employeeSummary.filter(row => row.emp.status === 'active').slice(0, 4).map(row => {
                 const balance = row.income - row.expense;
                 return (
                   <tr key={row.emp.id} className={`hover:bg-gray-50 ${balance < 0 ? 'bg-red-50' : ''}`}>
@@ -246,17 +246,17 @@ export default function Dashboard() {
             </tbody>
             <tfoot>
               <tr className="bg-gray-50 font-bold">
-                <td className="px-4 py-3 text-gray-800">ИТОГО (показано 10 из {activeEmployees.length})</td>
+                <td className="px-4 py-3 text-gray-800">ИТОГО (показано 4 из {activeEmployees.length})</td>
                 <td className="px-4 py-3"></td>
                 <td className="px-4 py-3 text-right text-green-700">
-                  {employeeSummary.slice(0, 10).reduce((s, e) => s + e.income, 0).toLocaleString('ru')}
+                  {employeeSummary.filter(row => row.emp.status === 'active').slice(0, 4).reduce((s, e) => s + e.income, 0).toLocaleString('ru')}
                 </td>
                 <td className="px-4 py-3 text-right text-orange-700">
-                  {employeeSummary.slice(0, 10).reduce((s, e) => s + e.expense, 0).toLocaleString('ru')}
+                  {employeeSummary.filter(row => row.emp.status === 'active').slice(0, 4).reduce((s, e) => s + e.expense, 0).toLocaleString('ru')}
                 </td>
                 <td className="px-4 py-3 text-right text-blue-700">
                   {(() => {
-                    const total = employeeSummary.slice(0, 10).reduce((s, e) => s + (e.income - e.expense), 0);
+                    const total = employeeSummary.filter(row => row.emp.status === 'active').slice(0, 4).reduce((s, e) => s + (e.income - e.expense), 0);
                     return (total >= 0 ? '+' : '') + total.toLocaleString('ru');
                   })()}
                 </td>
