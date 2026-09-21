@@ -173,19 +173,39 @@ export const useStore = create<AppState>((set, get) => ({
 
   addNomenclature: (item) => {
     const id = `nom_${Date.now()}`;
-    set(state => ({
-      nomenclature: [...state.nomenclature, { ...item, id }],
-      journal: [...state.journal, {
-        id: `j_${Date.now()}`,
-        dateTime: new Date().toISOString().slice(0, 16),
-        userId: 'admin',
-        table: 'Номенклатура',
-        recordId: id,
-        field: 'Создание',
-        oldValue: '',
-        newValue: item.name,
-      }]
-    }));
+    set(state => {
+      // Рассчитываем начальную цену за единицу
+      const packageQuantity = item.packageQuantity || 1;
+      const pricePerPackage = item.pricePerPackage || 0;
+      const initialUnitPrice = packageQuantity > 0 ? pricePerPackage / packageQuantity : 0;
+
+      const newState: any = {
+        nomenclature: [...state.nomenclature, { ...item, id }],
+        journal: [...state.journal, {
+          id: `j_${Date.now()}`,
+          dateTime: new Date().toISOString().slice(0, 16),
+          userId: 'admin',
+          table: 'Номенклатура',
+          recordId: id,
+          field: 'Создание',
+          oldValue: '',
+          newValue: item.name,
+        }]
+      };
+
+      // Добавляем начальную цену в историю, если указана цена за упаковку
+      if (pricePerPackage > 0) {
+        newState.priceHistory = [...state.priceHistory, {
+          id: `ph_${Date.now()}`,
+          nomenclatureId: id,
+          price: initialUnitPrice,
+          changeDate: new Date().toISOString().slice(0, 10),
+          changedBy: 'admin',
+        }];
+      }
+
+      return newState;
+    });
   },
 
   updatePrice: (nomenclatureId, newPrice, userId) => {
