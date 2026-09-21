@@ -78,7 +78,7 @@ export default function Nomenclature() {
         >
           <option value="all">Все категории</option>
           <option value="medicine">💊 Лекарства</option>
-          <option value="medicine_pku">💊 Лекарства ПКУ</option>
+          <option value="medicine_pku">💊 ПКУ</option>
           <option value="equipment">🔧 Оборудование</option>
           <option value="consumable">📦 Расходные материалы</option>
         </select>
@@ -128,14 +128,23 @@ export default function Nomenclature() {
                       <div className="font-medium text-gray-800">{nom.name}</div>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        nom.category === 'medicine' ? 'bg-purple-100 text-purple-700' :
-                        nom.category === 'medicine_pku' ? 'bg-indigo-100 text-indigo-700' :
-                        nom.category === 'equipment' ? 'bg-blue-100 text-blue-700' :
-                        'bg-green-100 text-green-700'
-                      }`}>
-                        {CATEGORY_LABELS[nom.category]}
-                      </span>
+                      {nom.category === 'medicine_pku' ? (
+                        <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                          <svg width="16" height="16" viewBox="0 0 16 16" className="inline">
+                            <ellipse cx="8" cy="8" rx="7" ry="5" fill="#6366f1" stroke="#4f46e5" strokeWidth="0.5"/>
+                            <text x="8" y="10" fontSize="4" fontWeight="bold" textAnchor="middle" fill="white">ПКУ</text>
+                          </svg>
+                          ПКУ
+                        </span>
+                      ) : (
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          nom.category === 'medicine' ? 'bg-purple-100 text-purple-700' :
+                          nom.category === 'equipment' ? 'bg-blue-100 text-blue-700' :
+                          'bg-green-100 text-green-700'
+                        }`}>
+                          {CATEGORY_LABELS[nom.category]}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-center text-gray-600">{UNIT_LABELS[nom.unit]}</td>
                     <td className="px-4 py-3 text-right">
@@ -249,7 +258,7 @@ export default function Nomenclature() {
                   className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="medicine">💊 Лекарство</option>
-                  <option value="medicine_pku">💊 Лекарство ПКУ</option>
+                  <option value="medicine_pku">💊 ПКУ</option>
                   <option value="equipment">🔧 Оборудование</option>
                   <option value="consumable">📦 Расходный материал</option>
                 </select>
