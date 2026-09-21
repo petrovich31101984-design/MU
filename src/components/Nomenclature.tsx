@@ -78,7 +78,7 @@ export default function Nomenclature() {
         >
           <option value="all">Все категории</option>
           <option value="medicine">💊 Лекарства</option>
-          <option value="medicine_pku">💊 ПКУ</option>
+          <option value="medicine_pku">💊ₚₖᵤ</option>
           <option value="equipment">🔧 Оборудование</option>
           <option value="consumable">📦 Расходные материалы</option>
         </select>
