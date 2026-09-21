@@ -16,6 +16,7 @@ export default function Employees() {
   const [actionsMenuId, setActionsMenuId] = useState<string | null>(null);
   const [showStatusModal, setShowStatusModal] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState<Employee | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   // Form states for adding
   const [newEmpName, setNewEmpName] = useState('');
@@ -34,7 +35,12 @@ export default function Employees() {
     const matchesSearch = e.fullName.toLowerCase().includes(search.toLowerCase()) ||
       e.personalNumber.includes(search);
     const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
-    return matchesSearch && matchesStatus && !e.archived;
+    
+    if (showArchived) {
+      return matchesSearch && e.archived === true;
+    } else {
+      return matchesSearch && matchesStatus && !e.archived;
+    }
   });
 
   const handleAddEmployee = () => {
@@ -106,7 +112,8 @@ export default function Employees() {
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          disabled={showArchived}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <option value="all">Все статусы</option>
           <option value="active">Активен</option>
@@ -115,8 +122,19 @@ export default function Employees() {
           <option value="fired">Уволен</option>
         </select>
         <button
+          onClick={() => setShowArchived(!showArchived)}
+          className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+            showArchived 
+              ? 'bg-amber-600 text-white hover:bg-amber-700' 
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          <span>📁</span> {showArchived ? 'Активные' : 'Архив'}
+        </button>
+        <button
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          disabled={showArchived}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span>+</span> Добавить сотрудника
         </button>
@@ -124,6 +142,11 @@ export default function Employees() {
 
       {/* Employee List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {showArchived && (
+          <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-sm text-amber-800">
+            📁 Отображаются архивные сотрудники
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -131,7 +154,7 @@ export default function Employees() {
                 <th className="px-4 py-3 font-medium text-gray-600">№</th>
                 <th className="px-4 py-3 font-medium text-gray-600">ФИО</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Статус</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-center">Действия</th>
+                {!showArchived && <th className="px-4 py-3 font-medium text-gray-600 text-center">Действия</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -144,6 +167,7 @@ export default function Employees() {
                       {STATUS_LABELS[emp.status]}
                     </span>
                   </td>
+                  {!showArchived && (
                   <td className="px-4 py-3 text-center relative">
                     <button
                       onClick={() => setActionsMenuId(actionsMenuId === emp.id ? null : emp.id)}
@@ -200,6 +224,7 @@ export default function Employees() {
                       </>
                     )}
                   </td>
+                  )}
                 </tr>
               ))}
             </tbody>
