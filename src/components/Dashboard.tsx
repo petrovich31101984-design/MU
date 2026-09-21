@@ -53,7 +53,9 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Текущий месяц */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <h2 className="text-lg font-semibold text-gray-800">Январь 2024</h2>
+        <h2 className="text-lg font-semibold text-gray-800">
+          {new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
+        </h2>
       </div>
 
       {/* KPI Cards */}
