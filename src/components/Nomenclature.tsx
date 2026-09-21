@@ -38,13 +38,9 @@ export default function Nomenclature() {
       category: newCategory,
       unit: newUnit,
       active: true,
+      packageQuantity: Number(newPackageQuantity) || 0,
+      pricePerPackage: Number(newPricePerPackage) || 0,
     };
-    
-    // Для ПКУ добавляем данные об упаковке
-    if (newCategory === 'medicine_pku') {
-      newItem.packageQuantity = Number(newPackageQuantity) || 0;
-      newItem.pricePerPackage = Number(newPricePerPackage) || 0;
-    }
     
     addNomenclature(newItem);
     
@@ -168,7 +164,7 @@ export default function Nomenclature() {
                       ) : (
                         <div className="text-right">
                           <span className="font-medium text-gray-800">{price.toLocaleString('ru')}</span>
-                          {nom.category === 'medicine_pku' && nom.packageQuantity && nom.pricePerPackage && (
+                          {nom.packageQuantity && nom.pricePerPackage && (
                             <div className="text-xs text-gray-500 mt-1">
                               {nom.pricePerPackage} ₽ / {nom.packageQuantity} {UNIT_LABELS[nom.unit]}
                             </div>
@@ -272,62 +268,58 @@ export default function Nomenclature() {
                 </select>
               </div>
               
-              {/* Поля для ПКУ */}
-              {newCategory === 'medicine_pku' && (
-                <>
-                  <div className="border-t border-gray-200 pt-4 mt-4">
-                    <p className="text-sm font-medium text-gray-700 mb-3">Данные упаковки (ПКУ)</p>
-                  </div>
+              {/* Данные упаковки для всех категорий */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <p className="text-sm font-medium text-gray-700 mb-3">Данные упаковки</p>
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Количество в упаковке</label>
+                <input
+                  type="number"
+                  value={newPackageQuantity}
+                  onChange={e => setNewPackageQuantity(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Например: 10"
+                  min="1"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Цена за позицию (упаковку) (₽)</label>
+                <input
+                  type="number"
+                  value={newPricePerPackage}
+                  onChange={e => setNewPricePerPackage(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Например: 500"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              {/* Автоматический расчёт цены за единицу */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-4 mt-3">
+                <div className="flex items-center justify-between">
                   <div>
-                    <label className="text-sm text-gray-600">Количество в упаковке</label>
-                    <input
-                      type="number"
-                      value={newPackageQuantity}
-                      onChange={e => setNewPackageQuantity(e.target.value)}
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="Например: 10"
-                      min="1"
-                    />
+                    <p className="text-xs text-blue-600 font-medium mb-1">💡 Автоматический расчёт</p>
+                    <p className="text-sm text-gray-700">
+                      <span className="font-medium">Цена за единицу:</span>
+                    </p>
                   </div>
-                  <div>
-                    <label className="text-sm text-gray-600">Цена за упаковку (₽)</label>
-                    <input
-                      type="number"
-                      value={newPricePerPackage}
-                      onChange={e => setNewPricePerPackage(e.target.value)}
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="Например: 500"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                  {/* Автоматический расчёт цены за единицу */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-4 mt-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-blue-600 font-medium mb-1">💡 Автоматический расчёт</p>
-                        <p className="text-sm text-gray-700">
-                          <span className="font-medium">Цена за единицу:</span>
+                  <div className="text-right">
+                    {newPackageQuantity && newPricePerPackage && Number(newPackageQuantity) > 0 ? (
+                      <>
+                        <p className="text-2xl font-bold text-blue-700">
+                          {(Number(newPricePerPackage) / Number(newPackageQuantity)).toFixed(2)} ₽
                         </p>
-                      </div>
-                      <div className="text-right">
-                        {newPackageQuantity && newPricePerPackage && Number(newPackageQuantity) > 0 ? (
-                          <>
-                            <p className="text-2xl font-bold text-blue-700">
-                              {(Number(newPricePerPackage) / Number(newPackageQuantity)).toFixed(2)} ₽
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {newPricePerPackage} ₽ ÷ {newPackageQuantity} шт.
-                            </p>
-                          </>
-                        ) : (
-                          <p className="text-lg text-gray-400">— ₽</p>
-                        )}
-                      </div>
-                    </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {newPricePerPackage} ₽ ÷ {newPackageQuantity} шт.
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-lg text-gray-400">— ₽</p>
+                    )}
                   </div>
-                </>
-              )}
+                </div>
+              </div>
               
               <button
                 onClick={handleAddItem}
