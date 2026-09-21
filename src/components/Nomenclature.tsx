@@ -302,19 +302,30 @@ export default function Nomenclature() {
                     />
                   </div>
                   {/* Автоматический расчёт цены за единицу */}
-                  {newPackageQuantity && newPricePerPackage && Number(newPackageQuantity) > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <p className="text-sm text-blue-700">
-                        <span className="font-medium">Цена за единицу:</span>{' '}
-                        <span className="font-bold">
-                          {(Number(newPricePerPackage) / Number(newPackageQuantity)).toFixed(2)} ₽
-                        </span>
-                      </p>
-                      <p className="text-xs text-blue-600 mt-1">
-                        {newPricePerPackage} ₽ ÷ {newPackageQuantity} = {(Number(newPricePerPackage) / Number(newPackageQuantity)).toFixed(2)} ₽
-                      </p>
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-4 mt-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-blue-600 font-medium mb-1">💡 Автоматический расчёт</p>
+                        <p className="text-sm text-gray-700">
+                          <span className="font-medium">Цена за единицу:</span>
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        {newPackageQuantity && newPricePerPackage && Number(newPackageQuantity) > 0 ? (
+                          <>
+                            <p className="text-2xl font-bold text-blue-700">
+                              {(Number(newPricePerPackage) / Number(newPackageQuantity)).toFixed(2)} ₽
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {newPricePerPackage} ₽ ÷ {newPackageQuantity} шт.
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-lg text-gray-400">— ₽</p>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </>
               )}
               
