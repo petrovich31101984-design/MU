@@ -231,6 +231,7 @@ export default function Dashboard() {
                 <th className="px-4 py-3 font-medium text-gray-600 text-right">Приход (₽)</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-right">Расход (₽)</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-right">Баланс (₽)</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-center">Пациенты</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -255,6 +256,9 @@ export default function Dashboard() {
                     </td>
                     <td className={`px-4 py-3 text-right font-bold ${balance < 0 ? 'text-red-600' : 'text-blue-700'}`}>
                       {balance >= 0 ? '+' : ''}{balance.toLocaleString('ru')}
+                    </td>
+                    <td className="px-4 py-3 text-center font-medium text-purple-700">
+                      {useStore.getState().getEmployeePatients(row.emp.id).length}
                     </td>
                   </tr>
                 );
