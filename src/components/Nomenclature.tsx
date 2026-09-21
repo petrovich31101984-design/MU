@@ -114,8 +114,9 @@ export default function Nomenclature() {
               <tr className="bg-gray-50 text-left">
                 <th className="px-4 py-3 font-medium text-gray-600">Наименование</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Категория</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-center">Ед. изм.</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">Текущая цена (₽)</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-center">Единица измерения</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-right">Цена за упаковку (₽)</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-right">Цена за единицу (₽)</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Действия</th>
               </tr>
             </thead>
@@ -171,31 +172,31 @@ export default function Nomenclature() {
                           </button>
                         </div>
                       ) : (
-                        <div className="text-right">
-                          <span className="font-medium text-gray-800">{price.toLocaleString('ru')}</span>
-                          {nom.packageQuantity && nom.pricePerPackage && (
-                            <div className="text-xs text-gray-500 mt-1">
-                              {nom.pricePerPackage} ₽ / {nom.packageQuantity} {UNIT_LABELS[nom.unit]}
-                            </div>
-                          )}
-                        </div>
+                        <span className="font-medium text-gray-800">
+                          {nom.pricePerPackage ? nom.pricePerPackage.toLocaleString('ru') : '—'}
+                        </span>
                       )}
                     </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className="font-medium text-gray-800">
+                        {price.toLocaleString('ru')}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => { setEditingPrice(nom.id); setNewPrice(String(price)); }}
-                          className="p-1 rounded hover:bg-gray-100 text-gray-500"
+                          className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition"
                           title="Изменить цену"
                         >
-                          💰
+                          💰 Изменить цену
                         </button>
                         <button
                           onClick={() => setShowHistory(showHistory === nom.id ? null : nom.id)}
-                          className="p-1 rounded hover:bg-gray-100 text-gray-500"
+                          className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition"
                           title="История цен"
                         >
-                          📊
+                          📊 История цены
                         </button>
                       </div>
                     </td>
