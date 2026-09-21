@@ -244,24 +244,6 @@ export default function Dashboard() {
                 );
               })}
             </tbody>
-            <tfoot>
-              <tr className="bg-gray-50 font-bold">
-                <td className="px-4 py-3 text-gray-800">ИТОГО (показано 4 из {activeEmployees.length})</td>
-                <td className="px-4 py-3"></td>
-                <td className="px-4 py-3 text-right text-green-700">
-                  {employeeSummary.filter(row => row.emp.status === 'active').slice(0, 4).reduce((s, e) => s + e.income, 0).toLocaleString('ru')}
-                </td>
-                <td className="px-4 py-3 text-right text-orange-700">
-                  {employeeSummary.filter(row => row.emp.status === 'active').slice(0, 4).reduce((s, e) => s + e.expense, 0).toLocaleString('ru')}
-                </td>
-                <td className="px-4 py-3 text-right text-blue-700">
-                  {(() => {
-                    const total = employeeSummary.filter(row => row.emp.status === 'active').slice(0, 4).reduce((s, e) => s + (e.income - e.expense), 0);
-                    return (total >= 0 ? '+' : '') + total.toLocaleString('ru');
-                  })()}
-                </td>
-              </tr>
-            </tfoot>
           </table>
         </div>
       </div>
