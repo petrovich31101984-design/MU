@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { CATEGORY_LABELS, UNIT_LABELS, Category, Unit } from '../types';
+import { formatDate } from '../utils/dateFormat';
 
 export default function Nomenclature() {
   const nomenclature = useStore(s => s.nomenclature);
@@ -225,7 +226,7 @@ export default function Nomenclature() {
                 .sort((a, b) => b.changeDate.localeCompare(a.changeDate))
                 .map(p => (
                   <div key={p.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                    <span className="text-sm text-gray-500 w-24">{p.changeDate}</span>
+                    <span className="text-sm text-gray-500 w-24">{formatDate(p.changeDate)}</span>
                     <span className="font-medium text-gray-800">{p.price} ₽</span>
                     <span className="text-xs text-gray-400 ml-auto">изменил: {p.changedBy}</span>
                   </div>
