@@ -13,7 +13,7 @@ export default function Report() {
 
   const [period, setPeriod] = useState('2024-01');
 
-  const activeEmployees = employees.filter(e => e.status === 'active' || e.status === 'vacation');
+  const activeEmployees = employees.filter(e => e.status === 'active');
 
   const reportData = activeEmployees.map(emp => {
     const income = getEmployeeIncome(emp.id, period);

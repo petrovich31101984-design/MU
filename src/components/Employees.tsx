@@ -1,282 +1,89 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { EmployeeStatus, STATUS_LABELS, STATUS_COLORS, UNIT_LABELS, Employee } from '../types';
+import { EmployeeStatus, STATUS_LABELS, STATUS_COLORS, Employee } from '../types';
 import { formatDate } from '../utils/dateFormat';
 
 export default function Employees() {
   const employees = useStore(s => s.employees);
   const updateEmployeeStatus = useStore(s => s.updateEmployeeStatus);
   const addEmployee = useStore(s => s.addEmployee);
-  const addIncome = useStore(s => s.addIncome);
-  const addInitialStock = useStore(s => s.addInitialStock);
-  const nomenclature = useStore(s => s.nomenclature);
-  const getCurrentPrice = useStore(s => s.getCurrentPrice);
-  const getEmployeeStock = useStore(s => s.getEmployeeStock);
-  const getEmployeePatients = useStore(s => s.getEmployeePatients);
-  const getEmployeeIncome = useStore(s => s.getEmployeeIncome);
-  const getEmployeeExpenseTotal = useStore(s => s.getEmployeeExpenseTotal);
+  const archiveEmployee = useStore(s => s.archiveEmployee);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showIncomeModal, setShowIncomeModal] = useState(false);
-  const [showStockModal, setShowStockModal] = useState(false);
+  const [actionsMenuId, setActionsMenuId] = useState<string | null>(null);
+  const [showStatusModal, setShowStatusModal] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState<Employee | null>(null);
 
-  // Form states
+  // Form states for adding
   const [newEmpName, setNewEmpName] = useState('');
   const [newEmpNumber, setNewEmpNumber] = useState('');
-  const [incomeAmount, setIncomeAmount] = useState('');
-  const [incomeShifts, setIncomeShifts] = useState('');
+  const [newEmpPassword, setNewEmpPassword] = useState('');
+
+  // Edit form states
+  const [editName, setEditName] = useState('');
+  const [editNumber, setEditNumber] = useState('');
+
+  // Status change
+  const [newStatus, setNewStatus] = useState<EmployeeStatus>('active');
 
   const filtered = employees.filter(e => {
     const matchesSearch = e.fullName.toLowerCase().includes(search.toLowerCase()) ||
       e.personalNumber.includes(search);
     const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && !e.archived;
   });
 
   const handleAddEmployee = () => {
-    if (!newEmpName || !newEmpNumber) return;
+    if (!newEmpName || !newEmpNumber || !newEmpPassword) return;
     addEmployee({
       personalNumber: newEmpNumber,
       fullName: newEmpName,
+      password: newEmpPassword,
       status: 'active',
       hireDate: new Date().toISOString().slice(0, 10),
       lastActivityDate: new Date().toISOString().slice(0, 10),
     });
     setNewEmpName('');
     setNewEmpNumber('');
+    setNewEmpPassword('');
     setShowAddModal(false);
   };
 
-  const handleAddIncome = () => {
-    if (!selectedEmployee || !incomeAmount) return;
-    addIncome({
-      employeeId: selectedEmployee.id,
-      amount: Number(incomeAmount),
-      period: '2024-01',
-      shifts: Number(incomeShifts) || 0,
-      date: new Date().toISOString().slice(0, 10),
-      createdBy: 'admin',
-    });
-    setIncomeAmount('');
-    setIncomeShifts('');
-    setShowIncomeModal(false);
+  const handleStatusChange = (empId: string) => {
+    updateEmployeeStatus(empId, newStatus);
+    setShowStatusModal(null);
+    setActionsMenuId(null);
   };
 
-  if (selectedEmployee) {
-    const emp = selectedEmployee;
-    const patients = getEmployeePatients(emp.id);
-    const income = getEmployeeIncome(emp.id, '2024-01');
-    const expense = getEmployeeExpenseTotal(emp.id, '2024-01');
-    const balance = income - expense;
+  const handleBlock = (empId: string) => {
+    updateEmployeeStatus(empId, 'blocked');
+    setActionsMenuId(null);
+  };
 
-    return (
-      <div className="space-y-6">
-        <button
-          onClick={() => setSelectedEmployee(null)}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
-        >
-          ← Назад к списку
-        </button>
+  const handleFire = (empId: string) => {
+    updateEmployeeStatus(empId, 'fired');
+    setActionsMenuId(null);
+  };
 
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-gray-800">{emp.fullName}</h2>
-              <p className="text-sm text-gray-500 mt-1">Персональный номер: {emp.personalNumber}</p>
-              <div className="flex items-center gap-3 mt-3">
-                <span className={`text-xs px-2 py-1 rounded-full border ${STATUS_COLORS[emp.status]}`}>
-                  {STATUS_LABELS[emp.status]}
-                </span>
-                <span className="text-xs text-gray-500">Принят: {formatDate(emp.hireDate)}</span>
-                <span className="text-xs text-gray-500">Последняя активность: {formatDate(emp.lastActivityDate)}</span>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              {emp.status === 'active' && (
-                <>
-                  <button
-                    onClick={() => { updateEmployeeStatus(emp.id, 'vacation'); setSelectedEmployee({ ...emp, status: 'vacation' }); }}
-                    className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200"
-                  >
-                    Отпуск
-                  </button>
-                  <button
-                    onClick={() => { updateEmployeeStatus(emp.id, 'blocked'); setSelectedEmployee({ ...emp, status: 'blocked' }); }}
-                    className="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-sm hover:bg-orange-200"
-                  >
-                    Заблокировать
-                  </button>
-                  <button
-                    onClick={() => { updateEmployeeStatus(emp.id, 'fired'); setSelectedEmployee({ ...emp, status: 'fired' }); }}
-                    className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200"
-                  >
-                    Уволить
-                  </button>
-                </>
-              )}
-              {emp.status !== 'active' && emp.status !== 'fired' && (
-                <button
-                  onClick={() => { updateEmployeeStatus(emp.id, 'active'); setSelectedEmployee({ ...emp, status: 'active' }); }}
-                  className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200"
-                >
-                  Активировать
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+  const handleArchive = (empId: string) => {
+    archiveEmployee(empId);
+    setActionsMenuId(null);
+  };
 
-        {/* KPI */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-500">Приход</p>
-            <p className="text-xl font-bold text-green-700">{income.toLocaleString('ru')} ₽</p>
-            <button onClick={() => setShowIncomeModal(true)} className="text-xs text-blue-600 mt-1 hover:underline">+ Добавить</button>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-500">Расход</p>
-            <p className="text-xl font-bold text-orange-700">{expense.toLocaleString('ru')} ₽</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-500">Баланс</p>
-            <p className={`text-xl font-bold ${balance < 0 ? 'text-red-600' : 'text-blue-700'}`}>
-              {balance >= 0 ? '+' : ''}{balance.toLocaleString('ru')} ₽
-            </p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-500">Пациентов</p>
-            <p className="text-xl font-bold text-purple-700">{patients.length}</p>
-          </div>
-        </div>
+  const handleEdit = (emp: Employee) => {
+    setEditName(emp.fullName);
+    setEditNumber(emp.personalNumber);
+    setShowEditModal(emp);
+    setActionsMenuId(null);
+  };
 
-        {/* Stock */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 className="font-semibold text-gray-800">Остатки на руках (шт. и ₽)</h3>
-            <button
-              onClick={() => setShowStockModal(true)}
-              className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200"
-            >
-              Внести остатки
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 text-left">
-                  <th className="px-4 py-2 font-medium text-gray-600">Наименование</th>
-                  <th className="px-4 py-2 font-medium text-gray-600 text-center">Категория</th>
-                  <th className="px-4 py-2 font-medium text-gray-600 text-center">Остаток (шт.)</th>
-                  <th className="px-4 py-2 font-medium text-gray-600 text-right">Цена (₽)</th>
-                  <th className="px-4 py-2 font-medium text-gray-600 text-right">Сумма (₽)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {nomenclature.map(nom => {
-                  const stock = getEmployeeStock(emp.id, nom.id);
-                  const price = getCurrentPrice(nom.id);
-                  if (stock <= 0) return null;
-                  return (
-                    <tr key={nom.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2">{nom.name} <span className="text-xs text-gray-400">({UNIT_LABELS[nom.unit]})</span></td>
-                      <td className="px-4 py-2 text-center text-xs text-gray-500">
-                        {nom.category === 'medicine' ? '💊' : nom.category === 'equipment' ? '🔧' : '📦'}
-                      </td>
-                      <td className="px-4 py-2 text-center font-medium">{stock}</td>
-                      <td className="px-4 py-2 text-right text-gray-600">{price}</td>
-                      <td className="px-4 py-2 text-right font-medium text-blue-700">{(stock * price).toLocaleString('ru')}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Patients */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800">Пациенты ({patients.length})</h3>
-          </div>
-          <div className="overflow-x-auto max-h-96">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 text-left sticky top-0">
-                  <th className="px-4 py-2 font-medium text-gray-600">ФИО</th>
-                  <th className="px-4 py-2 font-medium text-gray-600">Дата рождения</th>
-                  <th className="px-4 py-2 font-medium text-gray-600">Дата вызова</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {patients.slice(0, 20).map(p => (
-                  <tr key={p.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2">{p.fullName}</td>
-                    <td className="px-4 py-2 text-gray-600">{formatDate(p.birthDate)}</td>
-                    <td className="px-4 py-2 text-gray-600">{formatDate(p.visitDate)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Income Modal */}
-        {showIncomeModal && (
-          <Modal onClose={() => setShowIncomeModal(false)} title="Добавить приход">
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-gray-600">Сумма прихода (₽)</label>
-                <input
-                  type="number"
-                  value={incomeAmount}
-                  onChange={e => setIncomeAmount(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="150000"
-                />
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Количество смен</label>
-                <input
-                  type="number"
-                  value={incomeShifts}
-                  onChange={e => setIncomeShifts(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="20"
-                />
-              </div>
-              <button
-                onClick={handleAddIncome}
-                className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Сохранить
-              </button>
-            </div>
-          </Modal>
-        )}
-
-        {/* Stock Modal */}
-        {showStockModal && (
-          <StockModal
-            onClose={() => setShowStockModal(false)}
-            employeeId={emp.id}
-            onSave={(nomenclatureId, quantity) => {
-              addInitialStock({
-                employeeId: emp.id,
-                nomenclatureId,
-                quantity,
-                date: new Date().toISOString().slice(0, 10),
-                createdBy: 'admin',
-              });
-            }}
-          />
-        )}
-      </div>
-    );
-  }
+  const handleEditSave = () => {
+    if (!showEditModal) return;
+    // В реальном приложении здесь была бы функция updateEmployee
+    setShowEditModal(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -287,7 +94,7 @@ export default function Employees() {
           placeholder="Поиск по ФИО или номеру..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
         />
         <select
           value={statusFilter}
@@ -297,7 +104,6 @@ export default function Employees() {
           <option value="all">Все статусы</option>
           <option value="active">Активен</option>
           <option value="inactive">Неактивен</option>
-          <option value="vacation">Отпуск</option>
           <option value="blocked">Заблокирован</option>
           <option value="fired">Уволен</option>
         </select>
@@ -318,167 +124,238 @@ export default function Employees() {
                 <th className="px-4 py-3 font-medium text-gray-600">№</th>
                 <th className="px-4 py-3 font-medium text-gray-600">ФИО</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Статус</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">Приход (₽)</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">Расход (₽)</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">Баланс (₽)</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-center">Пациенты</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Действия</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map(emp => {
-                const income = getEmployeeIncome(emp.id, '2024-01');
-                const expense = getEmployeeExpenseTotal(emp.id, '2024-01');
-                const patients = getEmployeePatients(emp.id).length;
-                const balance = income - expense;
-                return (
-                  <tr key={emp.id} className={`hover:bg-gray-50 ${balance < 0 ? 'bg-red-50' : ''}`}>
-                    <td className="px-4 py-3 text-gray-500">{emp.personalNumber}</td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => setSelectedEmployee(emp)}
-                        className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left"
-                      >
-                        {emp.fullName}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={`text-xs px-2 py-1 rounded-full border ${STATUS_COLORS[emp.status]}`}>
-                        {STATUS_LABELS[emp.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right text-green-700">{income.toLocaleString('ru')}</td>
-                    <td className="px-4 py-3 text-right text-orange-700">{expense.toLocaleString('ru')}</td>
-                    <td className={`px-4 py-3 text-right font-bold ${balance < 0 ? 'text-red-600' : 'text-blue-700'}`}>
-                      {balance >= 0 ? '+' : ''}{balance.toLocaleString('ru')}
-                    </td>
-                    <td className="px-4 py-3 text-center">{patients}</td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <button
-                          onClick={() => setSelectedEmployee(emp)}
-                          className="p-1 rounded hover:bg-gray-100 text-gray-500"
-                          title="Подробнее"
-                        >
-                          👁️
-                        </button>
-                        {emp.status === 'active' && (
+              {filtered.map(emp => (
+                <tr key={emp.id} className="hover:bg-gray-50 relative">
+                  <td className="px-4 py-3 text-gray-500">{emp.personalNumber}</td>
+                  <td className="px-4 py-3 font-medium text-gray-800">{emp.fullName}</td>
+                  <td className="px-4 py-3 text-center">
+                    <span className={`text-xs px-2 py-1 rounded-full border ${STATUS_COLORS[emp.status]}`}>
+                      {STATUS_LABELS[emp.status]}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center relative">
+                    <button
+                      onClick={() => setActionsMenuId(actionsMenuId === emp.id ? null : emp.id)}
+                      className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium"
+                    >
+                      ⋮ Действия
+                    </button>
+
+                    {/* Dropdown menu */}
+                    {actionsMenuId === emp.id && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => setActionsMenuId(null)}
+                        />
+                        <div className="absolute right-4 top-full mt-1 z-20 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
                           <button
-                            onClick={() => updateEmployeeStatus(emp.id, 'blocked')}
-                            className="p-1 rounded hover:bg-gray-100 text-gray-500"
-                            title="Заблокировать"
+                            onClick={() => handleEdit(emp)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2"
                           >
-                            🔒
+                            <span>✏️</span> Редактировать
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                          <button
+                            onClick={() => { setShowStatusModal(emp.id); setNewStatus(emp.status); setActionsMenuId(null); }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2"
+                          >
+                            <span>🔄</span> Изменить статус
+                          </button>
+                          <div className="border-t border-gray-100 my-1"></div>
+                          {emp.status !== 'blocked' && (
+                            <button
+                              onClick={() => handleBlock(emp.id)}
+                              className="w-full text-left px-4 py-2 text-sm text-orange-700 hover:bg-orange-50 flex items-center gap-2"
+                            >
+                              <span>🔒</span> Заблокировать
+                            </button>
+                          )}
+                          {emp.status !== 'fired' && (
+                            <button
+                              onClick={() => handleFire(emp.id)}
+                              className="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 flex items-center gap-2"
+                            >
+                              <span>🚫</span> Уволить
+                            </button>
+                          )}
+                          <div className="border-t border-gray-100 my-1"></div>
+                          <button
+                            onClick={() => handleArchive(emp.id)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <span>📁</span> Отправить в архив
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
+        {filtered.length === 0 && (
+          <div className="p-8 text-center text-gray-400">
+            <p>Сотрудники не найдены</p>
+          </div>
+        )}
       </div>
 
       {/* Add Employee Modal */}
       {showAddModal && (
-        <Modal onClose={() => setShowAddModal(false)} title="Добавить сотрудника">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm text-gray-600">ФИО</label>
-              <input
-                type="text"
-                value={newEmpName}
-                onChange={e => setNewEmpName(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Иванов Иван Иванович"
-              />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Добавить сотрудника</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
             </div>
-            <div>
-              <label className="text-sm text-gray-600">Персональный номер</label>
-              <input
-                type="text"
-                value={newEmpNumber}
-                onChange={e => setNewEmpNumber(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="1031"
-              />
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-600">ФИО</label>
+                <input
+                  type="text"
+                  value={newEmpName}
+                  onChange={e => setNewEmpName(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Иванов Иван Иванович"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Персональный номер</label>
+                <input
+                  type="text"
+                  value={newEmpNumber}
+                  onChange={e => setNewEmpNumber(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="1031"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Пароль</label>
+                <input
+                  type="text"
+                  value={newEmpPassword}
+                  onChange={e => setNewEmpPassword(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Введите пароль"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={handleAddEmployee}
+                  className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Добавить
+                </button>
+              </div>
             </div>
-            <button
-              onClick={handleAddEmployee}
-              className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Добавить
-            </button>
           </div>
-        </Modal>
+        </div>
       )}
-    </div>
-  );
-}
 
-function Modal({ children, onClose, title }: { children: React.ReactNode; onClose: () => void; title: string }) {
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function StockModal({ onClose, employeeId, onSave }: {
-  onClose: () => void;
-  employeeId: string;
-  onSave: (nomenclatureId: string, quantity: number) => void;
-}) {
-  const nomenclature = useStore(s => s.nomenclature);
-  const [quantities, setQuantities] = useState<Record<string, string>>({});
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-800">Внести начальные остатки</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
-        </div>
-        <div className="space-y-2 max-h-96 overflow-auto">
-          {nomenclature.map(nom => (
-            <div key={nom.id} className="flex items-center gap-3">
-              <span className="flex-1 text-sm text-gray-700">{nom.name} ({UNIT_LABELS[nom.unit]})</span>
-              <input
-                type="number"
-                min="0"
-                value={quantities[nom.id] || ''}
-                onChange={e => setQuantities({ ...quantities, [nom.id]: e.target.value })}
-                className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
-                placeholder="0"
-              />
+      {/* Status Change Modal */}
+      {showStatusModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Изменить статус</h3>
+              <button onClick={() => setShowStatusModal(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
             </div>
-          ))}
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-600 block mb-2">Выберите статус:</label>
+                <div className="space-y-2">
+                  {(['active', 'inactive', 'blocked', 'fired'] as EmployeeStatus[]).map(status => (
+                    <label key={status} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="status"
+                        value={status}
+                        checked={newStatus === status}
+                        onChange={() => setNewStatus(status)}
+                        className="w-4 h-4"
+                      />
+                      <span className={`text-xs px-2 py-1 rounded-full border ${STATUS_COLORS[status]}`}>
+                        {STATUS_LABELS[status]}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowStatusModal(null)}
+                  className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={() => handleStatusChange(showStatusModal)}
+                  className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Сохранить
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-3 mt-4">
-          <button onClick={onClose} className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-            Отмена
-          </button>
-          <button
-            onClick={() => {
-              Object.entries(quantities).forEach(([nomId, qty]) => {
-                if (Number(qty) > 0) onSave(nomId, Number(qty));
-              });
-              onClose();
-            }}
-            className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Сохранить
-          </button>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Редактировать сотрудника</h3>
+              <button onClick={() => setShowEditModal(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-600">ФИО</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Персональный номер</label>
+                <input
+                  type="text"
+                  value={editNumber}
+                  onChange={e => setEditNumber(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowEditModal(null)}
+                  className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={handleEditSave}
+                  className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Сохранить
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -27,6 +27,7 @@ interface AppState {
   addEmployee: (emp: Omit<Employee, 'id'>) => void;
   updateEmployeeStatus: (id: string, status: EmployeeStatus) => void;
   removeEmployee: (id: string) => void;
+  archiveEmployee: (id: string) => void;
 
   addNomenclature: (item: Omit<NomenclatureItem, 'id'>) => void;
   updatePrice: (nomenclatureId: string, newPrice: number, userId: string) => void;
@@ -117,6 +118,22 @@ export const useStore = create<AppState>((set, get) => ({
         field: 'Удаление',
         oldValue: state.employees.find(e => e.id === id)?.fullName || '',
         newValue: '',
+      }]
+    }));
+  },
+
+  archiveEmployee: (id) => {
+    set(state => ({
+      employees: state.employees.map(e => e.id === id ? { ...e, archived: true } : e),
+      journal: [...state.journal, {
+        id: `j_${Date.now()}`,
+        dateTime: new Date().toISOString().slice(0, 16),
+        userId: 'admin',
+        table: 'Сотрудники',
+        recordId: id,
+        field: 'Архив',
+        oldValue: 'Активен',
+        newValue: 'В архиве',
       }]
     }));
   },

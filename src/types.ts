@@ -1,4 +1,4 @@
-export type EmployeeStatus = 'active' | 'inactive' | 'vacation' | 'fired' | 'blocked';
+export type EmployeeStatus = 'active' | 'inactive' | 'fired' | 'blocked';
 
 export type Category = 'medicine' | 'equipment' | 'consumable';
 
@@ -8,7 +8,9 @@ export interface Employee {
   id: string;
   personalNumber: string;
   fullName: string;
+  password: string;
   status: EmployeeStatus;
+  archived?: boolean;
   hireDate: string;
   lastActivityDate: string;
   firstLoginDate?: string;
@@ -125,7 +127,6 @@ export const CATEGORY_LABELS: Record<Category, string> = {
 export const STATUS_LABELS: Record<EmployeeStatus, string> = {
   active: 'Активен',
   inactive: 'Неактивен',
-  vacation: 'Отпуск',
   fired: 'Уволен',
   blocked: 'Заблокирован',
 };
@@ -133,7 +134,6 @@ export const STATUS_LABELS: Record<EmployeeStatus, string> = {
 export const STATUS_COLORS: Record<EmployeeStatus, string> = {
   active: 'bg-green-100 text-green-700 border-green-200',
   inactive: 'bg-gray-100 text-gray-700 border-gray-200',
-  vacation: 'bg-blue-100 text-blue-700 border-blue-200',
   fired: 'bg-red-100 text-red-700 border-red-200',
   blocked: 'bg-orange-100 text-orange-700 border-orange-200',
 };
