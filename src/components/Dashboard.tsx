@@ -231,7 +231,7 @@ export default function Dashboard() {
                 <th className="px-4 py-3 font-medium text-gray-600 text-right">Приход (₽)</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-right">Расход (₽)</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-right">Баланс (₽)</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-center">Пациенты</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-center">Листов расхода</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
