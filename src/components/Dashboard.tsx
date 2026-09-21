@@ -1,6 +1,10 @@
 import { useStore } from '../store/useStore';
 
-export default function Dashboard() {
+interface DashboardProps {
+  onNavigate: (page: string, target?: string) => void;
+}
+
+export default function Dashboard({ onNavigate }: DashboardProps) {
   const employees = useStore(s => s.employees);
   const nomenclature = useStore(s => s.nomenclature);
   const notifications = useStore(s => s.notifications);
@@ -42,11 +46,29 @@ export default function Dashboard() {
   };
 
   const handleNotificationClick = (id: string) => {
+    const notification = notifications.find(n => n.id === id);
     markNotificationRead(id);
+    if (notification?.relatedId) {
+      // Для уведомлений о возвратах — переход в раздел возвратов
+      if (notification.type === 'return') {
+        onNavigate('returns');
+      } else if (notification.relatedId.startsWith('emp_')) {
+        // Для уведомлений о сотрудниках — переход в чат с этим сотрудником
+        onNavigate('chat', notification.relatedId);
+      }
+    } else if (notification?.type === 'message') {
+      // Переход в сообщения
+      onNavigate('chat');
+    }
   };
 
   const handleMessageClick = (id: string) => {
+    const message = messages.find(m => m.id === id);
     markMessageRead(id);
+    if (message) {
+      // Переход в чат с отправителем сообщения
+      onNavigate('chat', message.fromId);
+    }
   };
 
   return (
