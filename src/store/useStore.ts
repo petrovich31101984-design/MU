@@ -32,6 +32,7 @@ interface AppState {
 
   addNomenclature: (item: Omit<NomenclatureItem, 'id'>) => void;
   updatePrice: (nomenclatureId: string, newPrice: number, userId: string) => void;
+  updatePackagePrice: (nomenclatureId: string, newPackagePrice: number, userId: string) => void;
 
   addIncome: (income: Omit<Income, 'id'>) => void;
 
@@ -208,6 +209,50 @@ export const useStore = create<AppState>((set, get) => ({
           field: 'Цена',
           oldValue: String(currentPrice),
           newValue: String(newPrice),
+        }]
+      };
+    });
+  },
+
+  updatePackagePrice: (nomenclatureId, newPackagePrice, userId) => {
+    set(state => {
+      const nomenclatureItem = state.nomenclature.find(n => n.id === nomenclatureId);
+      if (!nomenclatureItem) return state;
+
+      const oldPackagePrice = nomenclatureItem.pricePerPackage || 0;
+      const packageQuantity = nomenclatureItem.packageQuantity || 1;
+      
+      // Обновляем цену за упаковку в номенклатуре
+      const updatedNomenclature = state.nomenclature.map(n => 
+        n.id === nomenclatureId 
+          ? { ...n, pricePerPackage: newPackagePrice }
+          : n
+      );
+
+      // Рассчитываем новую цену за единицу
+      const newUnitPrice = newPackagePrice / packageQuantity;
+
+      // Добавляем запись в историю цен
+      const newHistoryEntry: PriceHistory = {
+        id: `ph_${Date.now()}`,
+        nomenclatureId,
+        price: newUnitPrice,
+        changeDate: new Date().toISOString().slice(0, 10),
+        changedBy: userId,
+      };
+
+      return {
+        nomenclature: updatedNomenclature,
+        priceHistory: [...state.priceHistory, newHistoryEntry],
+        journal: [...state.journal, {
+          id: `j_${Date.now()}`,
+          dateTime: new Date().toISOString().slice(0, 16),
+          userId,
+          table: 'Номенклатура',
+          recordId: nomenclatureId,
+          field: 'Цена за упаковку',
+          oldValue: String(oldPackagePrice),
+          newValue: String(newPackagePrice),
         }]
       };
     });

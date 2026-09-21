@@ -6,6 +6,7 @@ export default function Nomenclature() {
   const nomenclature = useStore(s => s.nomenclature);
   const priceHistory = useStore(s => s.priceHistory);
   const updatePrice = useStore(s => s.updatePrice);
+  const updatePackagePrice = useStore(s => s.updatePackagePrice);
   const addNomenclature = useStore(s => s.addNomenclature);
   const getCurrentPrice = useStore(s => s.getCurrentPrice);
 
@@ -53,7 +54,7 @@ export default function Nomenclature() {
 
   const handleUpdatePrice = (nomenclatureId: string) => {
     if (!newPrice) return;
-    updatePrice(nomenclatureId, Number(newPrice), 'admin');
+    updatePackagePrice(nomenclatureId, Number(newPrice), 'admin');
     setNewPrice('');
     setEditingPrice(null);
   };
@@ -185,9 +186,9 @@ export default function Nomenclature() {
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          onClick={() => { setEditingPrice(nom.id); setNewPrice(String(price)); }}
+                          onClick={() => { setEditingPrice(nom.id); setNewPrice(String(nom.pricePerPackage || 0)); }}
                           className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition"
-                          title="Изменить цену"
+                          title="Изменить цену за упаковку"
                         >
                           💰 Изменить цену
                         </button>
