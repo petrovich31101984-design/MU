@@ -19,7 +19,7 @@ export default function Dashboard() {
   const today = new Date();
   const previousMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
   const previousMonth = `${previousMonthDate.getFullYear()}-${String(previousMonthDate.getMonth() + 1).padStart(2, '0')}`;
-  const previousMonthLabel = previousMonthDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+  const previousMonthLabel = `${previousMonthDate.toLocaleDateString('ru-RU', { month: 'long' })} ${previousMonthDate.getFullYear()}`;
 
   // Общий остаток на подразделение
   let totalStockValue = 0;
@@ -60,7 +60,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Текущий месяц */}
       <h2 className="text-lg font-semibold text-gray-800 capitalize">
-        {new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
+        {new Date().toLocaleDateString('ru-RU', { month: 'long' })} {new Date().getFullYear()}
       </h2>
 
       {/* KPI Cards */}
