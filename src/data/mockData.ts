@@ -90,6 +90,11 @@ export const mockNomenclature: NomenclatureItem[] = [
   { id: 'nom_48', name: 'Аминазин 2.5% 1мл', category: 'medicine', unit: 'ampoule', active: true },
   { id: 'nom_49', name: 'Реланиум 0.5% 2мл', category: 'medicine', unit: 'ampoule', active: true },
   { id: 'nom_50', name: 'Амброксол 7.5мг/мл', category: 'medicine', unit: 'ampoule', active: true },
+  // Лекарства ПКУ (предметно-количественный учёт)
+  { id: 'nom_51', name: 'Морфин 1% 1мл', category: 'medicine_pku', unit: 'ampoule', active: true, packageQuantity: 10, pricePerPackage: 1500 },
+  { id: 'nom_52', name: 'Промедол 2% 1мл', category: 'medicine_pku', unit: 'ampoule', active: true, packageQuantity: 10, pricePerPackage: 1200 },
+  { id: 'nom_53', name: 'Фентанил 0.005% 2мл', category: 'medicine_pku', unit: 'ampoule', active: true, packageQuantity: 5, pricePerPackage: 2500 },
+  { id: 'nom_54', name: 'Диазепам 0.5% 2мл (ПКУ)', category: 'medicine_pku', unit: 'ampoule', active: true, packageQuantity: 10, pricePerPackage: 850 },
 ];
 
 // История цен
@@ -148,6 +153,11 @@ export const mockPriceHistory: PriceHistory[] = [
   { id: 'ph_52', nomenclatureId: 'nom_48', price: 75, changeDate: '2023-06-01', changedBy: 'admin' },
   { id: 'ph_53', nomenclatureId: 'nom_49', price: 110, changeDate: '2023-06-01', changedBy: 'admin' },
   { id: 'ph_54', nomenclatureId: 'nom_50', price: 95, changeDate: '2023-06-01', changedBy: 'admin' },
+  // Цены для ПКУ (рассчитаны как цена за упаковку / количество в упаковке)
+  { id: 'ph_55', nomenclatureId: 'nom_51', price: 150, changeDate: '2023-06-01', changedBy: 'admin' }, // 1500 / 10 = 150
+  { id: 'ph_56', nomenclatureId: 'nom_52', price: 120, changeDate: '2023-06-01', changedBy: 'admin' }, // 1200 / 10 = 120
+  { id: 'ph_57', nomenclatureId: 'nom_53', price: 500, changeDate: '2023-06-01', changedBy: 'admin' }, // 2500 / 5 = 500
+  { id: 'ph_58', nomenclatureId: 'nom_54', price: 85, changeDate: '2023-06-01', changedBy: 'admin' }, // 850 / 10 = 85
 ];
 
 // Приход за январь 2024

@@ -21,6 +21,8 @@ export default function Nomenclature() {
   const [newCategory, setNewCategory] = useState<Category>('medicine');
   const [newUnit, setNewUnit] = useState<Unit>('ampoule');
   const [newItemPrice, setNewItemPrice] = useState('');
+  const [newPackageQuantity, setNewPackageQuantity] = useState('');
+  const [newPricePerPackage, setNewPricePerPackage] = useState('');
 
   const filtered = nomenclature.filter(n => {
     const matchesSearch = n.name.toLowerCase().includes(search.toLowerCase());
@@ -30,13 +32,26 @@ export default function Nomenclature() {
 
   const handleAddItem = () => {
     if (!newName) return;
-    addNomenclature({
+    
+    const newItem: any = {
       name: newName,
       category: newCategory,
       unit: newUnit,
       active: true,
-    });
+    };
+    
+    // Для ПКУ добавляем данные об упаковке
+    if (newCategory === 'medicine_pku') {
+      newItem.packageQuantity = Number(newPackageQuantity) || 0;
+      newItem.pricePerPackage = Number(newPricePerPackage) || 0;
+    }
+    
+    addNomenclature(newItem);
+    
+    // Сброс формы
     setNewName('');
+    setNewPackageQuantity('');
+    setNewPricePerPackage('');
     setShowAddModal(false);
   };
 
@@ -67,6 +82,7 @@ export default function Nomenclature() {
         >
           <option value="all">Все категории</option>
           <option value="medicine">💊 Лекарства</option>
+          <option value="medicine_pku">💊 Лекарства ПКУ</option>
           <option value="equipment">🔧 Оборудование</option>
           <option value="consumable">📦 Расходные материалы</option>
         </select>
@@ -118,6 +134,7 @@ export default function Nomenclature() {
                     <td className="px-4 py-3 text-center">
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         nom.category === 'medicine' ? 'bg-purple-100 text-purple-700' :
+                        nom.category === 'medicine_pku' ? 'bg-indigo-100 text-indigo-700' :
                         nom.category === 'equipment' ? 'bg-blue-100 text-blue-700' :
                         'bg-green-100 text-green-700'
                       }`}>
@@ -149,7 +166,14 @@ export default function Nomenclature() {
                           </button>
                         </div>
                       ) : (
-                        <span className="font-medium text-gray-800">{price.toLocaleString('ru')}</span>
+                        <div className="text-right">
+                          <span className="font-medium text-gray-800">{price.toLocaleString('ru')}</span>
+                          {nom.category === 'medicine_pku' && nom.packageQuantity && nom.pricePerPackage && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {nom.pricePerPackage} ₽ / {nom.packageQuantity} {UNIT_LABELS[nom.unit]}
+                            </div>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -229,6 +253,7 @@ export default function Nomenclature() {
                   className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="medicine">💊 Лекарство</option>
+                  <option value="medicine_pku">💊 Лекарство ПКУ</option>
                   <option value="equipment">🔧 Оборудование</option>
                   <option value="consumable">📦 Расходный материал</option>
                 </select>
@@ -246,6 +271,53 @@ export default function Nomenclature() {
                   <option value="piece">Штуки</option>
                 </select>
               </div>
+              
+              {/* Поля для ПКУ */}
+              {newCategory === 'medicine_pku' && (
+                <>
+                  <div className="border-t border-gray-200 pt-4 mt-4">
+                    <p className="text-sm font-medium text-gray-700 mb-3">Данные упаковки (ПКУ)</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600">Количество в упаковке</label>
+                    <input
+                      type="number"
+                      value={newPackageQuantity}
+                      onChange={e => setNewPackageQuantity(e.target.value)}
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Например: 10"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600">Цена за упаковку (₽)</label>
+                    <input
+                      type="number"
+                      value={newPricePerPackage}
+                      onChange={e => setNewPricePerPackage(e.target.value)}
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Например: 500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  {/* Автоматический расчёт цены за единицу */}
+                  {newPackageQuantity && newPricePerPackage && Number(newPackageQuantity) > 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-sm text-blue-700">
+                        <span className="font-medium">Цена за единицу:</span>{' '}
+                        <span className="font-bold">
+                          {(Number(newPricePerPackage) / Number(newPackageQuantity)).toFixed(2)} ₽
+                        </span>
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        {newPricePerPackage} ₽ ÷ {newPackageQuantity} = {(Number(newPricePerPackage) / Number(newPackageQuantity)).toFixed(2)} ₽
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+              
               <button
                 onClick={handleAddItem}
                 className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

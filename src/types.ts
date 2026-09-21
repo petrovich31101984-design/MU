@@ -1,6 +1,6 @@
 export type EmployeeStatus = 'active' | 'inactive' | 'fired' | 'blocked';
 
-export type Category = 'medicine' | 'equipment' | 'consumable';
+export type Category = 'medicine' | 'medicine_pku' | 'equipment' | 'consumable';
 
 export type Unit = 'ampoule' | 'tablet' | 'flacon' | 'piece';
 
@@ -22,6 +22,8 @@ export interface NomenclatureItem {
   category: Category;
   unit: Unit;
   active: boolean;
+  packageQuantity?: number; // количество в упаковке (для ПКУ)
+  pricePerPackage?: number; // цена за упаковку (для ПКУ)
 }
 
 export interface PriceHistory {
@@ -120,6 +122,7 @@ export const UNIT_LABELS: Record<Unit, string> = {
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   medicine: 'Лекарства',
+  medicine_pku: 'Лекарства ПКУ',
   equipment: 'Оборудование',
   consumable: 'Расходные материалы',
 };
