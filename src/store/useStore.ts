@@ -26,6 +26,7 @@ interface AppState {
   // Actions
   addEmployee: (emp: Omit<Employee, 'id'>) => void;
   updateEmployeeStatus: (id: string, status: EmployeeStatus) => void;
+  updateEmployee: (id: string, data: Partial<Employee>) => void;
   removeEmployee: (id: string) => void;
   archiveEmployee: (id: string) => void;
 
@@ -102,6 +103,37 @@ export const useStore = create<AppState>((set, get) => ({
           oldValue: emp?.status || '',
           newValue: status,
         }]
+      };
+    });
+  },
+
+  updateEmployee: (id, data) => {
+    set(state => {
+      const emp = state.employees.find(e => e.id === id);
+      const changes: string[] = [];
+      
+      if (data.fullName && data.fullName !== emp?.fullName) {
+        changes.push(`ФИО: ${emp?.fullName} → ${data.fullName}`);
+      }
+      if (data.personalNumber && data.personalNumber !== emp?.personalNumber) {
+        changes.push(`Номер: ${emp?.personalNumber} → ${data.personalNumber}`);
+      }
+      if (data.password && data.password !== emp?.password) {
+        changes.push('Пароль изменён');
+      }
+
+      return {
+        employees: state.employees.map(e => e.id === id ? { ...e, ...data } : e),
+        journal: changes.length > 0 ? [...state.journal, {
+          id: `j_${Date.now()}`,
+          dateTime: new Date().toISOString().slice(0, 16),
+          userId: 'admin',
+          table: 'Сотрудники',
+          recordId: id,
+          field: 'Редактирование',
+          oldValue: '',
+          newValue: changes.join('; '),
+        }] : state.journal
       };
     });
   },

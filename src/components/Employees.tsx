@@ -6,6 +6,7 @@ import { formatDate } from '../utils/dateFormat';
 export default function Employees() {
   const employees = useStore(s => s.employees);
   const updateEmployeeStatus = useStore(s => s.updateEmployeeStatus);
+  const updateEmployee = useStore(s => s.updateEmployee);
   const addEmployee = useStore(s => s.addEmployee);
   const archiveEmployee = useStore(s => s.archiveEmployee);
 
@@ -24,6 +25,7 @@ export default function Employees() {
   // Edit form states
   const [editName, setEditName] = useState('');
   const [editNumber, setEditNumber] = useState('');
+  const [editPassword, setEditPassword] = useState('');
 
   // Status change
   const [newStatus, setNewStatus] = useState<EmployeeStatus>('active');
@@ -75,13 +77,18 @@ export default function Employees() {
   const handleEdit = (emp: Employee) => {
     setEditName(emp.fullName);
     setEditNumber(emp.personalNumber);
+    setEditPassword(emp.password || '');
     setShowEditModal(emp);
     setActionsMenuId(null);
   };
 
   const handleEditSave = () => {
     if (!showEditModal) return;
-    // В реальном приложении здесь была бы функция updateEmployee
+    updateEmployee(showEditModal.id, {
+      fullName: editName,
+      personalNumber: editNumber,
+      password: editPassword,
+    });
     setShowEditModal(null);
   };
 
@@ -336,6 +343,16 @@ export default function Employees() {
                   value={editNumber}
                   onChange={e => setEditNumber(e.target.value)}
                   className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Пароль</label>
+                <input
+                  type="text"
+                  value={editPassword}
+                  onChange={e => setEditPassword(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Введите новый пароль"
                 />
               </div>
               <div className="flex gap-3 pt-2">
