@@ -3,6 +3,29 @@ export default function Expenses() {
   const totalExpenseAmount = 385000; // Общая сумма расхода за месяц
   const totalExpenseSheets = 127; // Листов расхода за месяц
 
+  // Тестовые данные листа расхода
+  const expenseSheet = {
+    date: '15.08.26',
+    employee: 'Иванов Иван Иванович',
+    patient: 'Петров Петр Петрович',
+    birthDate: '12.05.1985',
+    visitCategory: 'Экстренный вызов',
+    therapyName: 'Обезболивающая терапия',
+    therapyCost: 2500,
+    items: [
+      { name: 'Анальгин 50% 2мл', type: 'Лекарство', quantity: 2, unitPrice: 45, sum: 90 },
+      { name: 'Дексаметазон 4мг/мл', type: 'Лекарство', quantity: 1, unitPrice: 85, sum: 85 },
+      { name: 'Шприц 5мл', type: 'Расходник', quantity: 3, unitPrice: 12, sum: 36 },
+      { name: 'Салфетки спиртовые', type: 'Расходник', quantity: 5, unitPrice: 5, sum: 25 },
+    ]
+  };
+
+  const totalSum = expenseSheet.items.reduce((sum, item) => sum + item.sum, 0);
+
+  const handleExportExcel = () => {
+    alert('Экспорт в Excel (демо-функция)\nВ реальном приложении здесь будет генерация XLSX через SheetJS');
+  };
+
   return (
     <div className="space-y-6">
       {/* Карточки KPI */}
@@ -28,9 +51,98 @@ export default function Expenses() {
         </div>
       </div>
 
-      {/* Раздел в разработке */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-        <p className="text-gray-500">Раздел в разработке</p>
+      {/* Лист расхода */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* Шапка листа расхода */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-gray-800">Лист расхода</h3>
+            <button
+              onClick={handleExportExcel}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
+            >
+              📊 Скачать в Excel
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Дата создания</p>
+              <p className="text-sm font-medium text-gray-800">{expenseSheet.date}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Сотрудник</p>
+              <p className="text-sm font-medium text-gray-800">{expenseSheet.employee}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Пациент</p>
+              <p className="text-sm font-medium text-gray-800">{expenseSheet.patient}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Дата рождения</p>
+              <p className="text-sm font-medium text-gray-800">{expenseSheet.birthDate}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Категория выезда</p>
+              <p className="text-sm font-medium text-gray-800">{expenseSheet.visitCategory}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Название терапии</p>
+              <p className="text-sm font-medium text-gray-800">{expenseSheet.therapyName}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Стоимость терапии</p>
+              <p className="text-sm font-bold text-blue-700">{expenseSheet.therapyCost.toLocaleString('ru')} ₽</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Итого по препаратам</p>
+              <p className="text-sm font-bold text-red-700">{totalSum.toLocaleString('ru')} ₽</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Содержимое листа расхода */}
+        <div className="p-6">
+          <h4 className="text-lg font-semibold text-gray-800 mb-4">Препараты и материалы</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 text-left">
+                  <th className="px-4 py-3 font-medium text-gray-600">Название</th>
+                  <th className="px-4 py-3 font-medium text-gray-600 text-center">Тип</th>
+                  <th className="px-4 py-3 font-medium text-gray-600 text-center">Кол-во</th>
+                  <th className="px-4 py-3 font-medium text-gray-600 text-right">Цена за единицу (₽)</th>
+                  <th className="px-4 py-3 font-medium text-gray-600 text-right">Сумма (₽)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {expenseSheet.items.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
+                    <td className="px-4 py-3 text-center">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        item.type === 'Лекарство' 
+                          ? 'bg-purple-100 text-purple-700' 
+                          : 'bg-green-100 text-green-700'
+                      }`}>
+                        {item.type}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center text-gray-700">{item.quantity}</td>
+                    <td className="px-4 py-3 text-right text-gray-600">{item.unitPrice}</td>
+                    <td className="px-4 py-3 text-right font-medium text-orange-700">{item.sum}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-gray-50 font-bold">
+                  <td className="px-4 py-3" colSpan={4}>ИТОГО</td>
+                  <td className="px-4 py-3 text-right text-red-700">{totalSum.toLocaleString('ru')} ₽</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
