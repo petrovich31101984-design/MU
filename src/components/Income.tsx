@@ -30,8 +30,11 @@ export default function Income() {
 
       {/* Таблица приходов */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="font-semibold text-gray-800">Приходы за период: Август 2026</h3>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+            + Добавить приход
+          </button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
