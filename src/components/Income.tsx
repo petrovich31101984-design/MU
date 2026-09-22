@@ -14,6 +14,7 @@ export default function Income() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [amount, setAmount] = useState('');
+  const [modalPeriod, setModalPeriod] = useState('2026-08');
   const [selectedPeriod, setSelectedPeriod] = useState('2026-08');
 
   // Прошедший месяц - август 2026
@@ -68,10 +69,12 @@ export default function Income() {
       setEditingId(incomeData.id);
       setSelectedEmployee(incomeData.employeeId);
       setAmount(String(incomeData.amount));
+      setModalPeriod(incomeData.period);
     } else {
       setEditingId(null);
       setSelectedEmployee('');
       setAmount('');
+      setModalPeriod(selectedPeriod === 'all' || selectedPeriod === 'year' || selectedPeriod === 'half-year' || selectedPeriod === 'quarter' ? '2026-08' : selectedPeriod);
     }
     setShowModal(true);
   };
@@ -81,6 +84,7 @@ export default function Income() {
     setEditingId(null);
     setSelectedEmployee('');
     setAmount('');
+    setModalPeriod('2026-08');
   };
 
   const handleSave = () => {
@@ -90,12 +94,13 @@ export default function Income() {
       updateIncome(editingId, {
         employeeId: selectedEmployee,
         amount: Number(amount),
+        period: modalPeriod,
       });
     } else {
       addIncome({
         employeeId: selectedEmployee,
         amount: Number(amount),
-        period,
+        period: modalPeriod,
         shifts: 0,
         date: new Date().toISOString().slice(0, 10),
         createdBy: 'admin',
@@ -229,6 +234,30 @@ export default function Income() {
             </h3>
             
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Период
+                </label>
+                <select
+                  value={modalPeriod}
+                  onChange={(e) => setModalPeriod(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="2026-08">Август 2026</option>
+                  <option value="2026-07">Июль 2026</option>
+                  <option value="2026-06">Июнь 2026</option>
+                  <option value="2026-05">Май 2026</option>
+                  <option value="2026-04">Апрель 2026</option>
+                  <option value="2026-03">Март 2026</option>
+                  <option value="2026-02">Февраль 2026</option>
+                  <option value="2026-01">Январь 2026</option>
+                  <option value="2025-12">Декабрь 2025</option>
+                  <option value="2025-11">Ноябрь 2025</option>
+                  <option value="2025-10">Октябрь 2025</option>
+                  <option value="2025-09">Сентябрь 2025</option>
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Сотрудник
