@@ -76,7 +76,7 @@ export default function Expenses() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500">Пациент:</span>
-              <span className="text-sm font-medium text-gray-800">{expenseSheet.patient}</span>
+              <span className="text-sm font-medium text-gray-800">Петров П.П.</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500">Дата рождения:</span>
@@ -92,11 +92,16 @@ export default function Expenses() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500">Стоимость терапии:</span>
-              <span className="text-sm font-bold text-blue-700">{expenseSheet.therapyCost.toLocaleString('ru')} ₽</span>
+              <span className="text-sm font-bold text-green-600">
+                {expenseSheet.therapyCost.toLocaleString('ru')} ₽ 
+                <span className="text-xs font-normal text-gray-500 ml-1">
+                  ({(expenseSheet.therapyCost * 0.06).toLocaleString('ru')} ₽)
+                </span>
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500">Итого по препаратам:</span>
-              <span className="text-sm font-bold text-red-700">{totalSum.toLocaleString('ru')} ₽</span>
+              <span className="text-sm font-bold text-blue-600">{totalSum.toLocaleString('ru')} ₽</span>
             </div>
           </div>
         </div>
