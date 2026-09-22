@@ -65,38 +65,38 @@ export default function Expenses() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Дата создания</p>
-              <p className="text-sm font-medium text-gray-800">{expenseSheet.date}</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-gray-500 min-w-[120px]">Дата создания:</span>
+              <span className="text-sm font-medium text-gray-800">{expenseSheet.date}</span>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Сотрудник</p>
-              <p className="text-sm font-medium text-gray-800">{expenseSheet.employee}</p>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-gray-500 min-w-[120px]">Сотрудник:</span>
+              <span className="text-sm font-medium text-gray-800">{expenseSheet.employee}</span>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Пациент</p>
-              <p className="text-sm font-medium text-gray-800">{expenseSheet.patient}</p>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-gray-500 min-w-[120px]">Пациент:</span>
+              <span className="text-sm font-medium text-gray-800">{expenseSheet.patient}</span>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Дата рождения</p>
-              <p className="text-sm font-medium text-gray-800">{expenseSheet.birthDate}</p>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-gray-500 min-w-[120px]">Дата рождения:</span>
+              <span className="text-sm font-medium text-gray-800">{expenseSheet.birthDate}</span>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Категория выезда</p>
-              <p className="text-sm font-medium text-gray-800">{expenseSheet.visitCategory}</p>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-gray-500 min-w-[120px]">Категория выезда:</span>
+              <span className="text-sm font-medium text-gray-800">{expenseSheet.visitCategory}</span>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Название терапии</p>
-              <p className="text-sm font-medium text-gray-800">{expenseSheet.therapyName}</p>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-gray-500 min-w-[120px]">Название терапии:</span>
+              <span className="text-sm font-medium text-gray-800">{expenseSheet.therapyName}</span>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Стоимость терапии</p>
-              <p className="text-sm font-bold text-blue-700">{expenseSheet.therapyCost.toLocaleString('ru')} ₽</p>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-gray-500 min-w-[120px]">Стоимость терапии:</span>
+              <span className="text-sm font-bold text-blue-700">{expenseSheet.therapyCost.toLocaleString('ru')} ₽</span>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Итого по препаратам</p>
-              <p className="text-sm font-bold text-red-700">{totalSum.toLocaleString('ru')} ₽</p>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-gray-500 min-w-[120px]">Итого по препаратам:</span>
+              <span className="text-sm font-bold text-red-700">{totalSum.toLocaleString('ru')} ₽</span>
             </div>
           </div>
         </div>
