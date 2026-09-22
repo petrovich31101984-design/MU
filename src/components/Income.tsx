@@ -214,15 +214,6 @@ export default function Income() {
                 );
               })}
             </tbody>
-            <tfoot>
-              <tr className="bg-gray-50 font-bold">
-                <td className="px-4 py-3" colSpan={2}>ИТОГО</td>
-                <td className="px-4 py-3 text-right text-green-700">
-                  {totalIncome.toLocaleString('ru')}
-                </td>
-                <td></td>
-              </tr>
-            </tfoot>
           </table>
         </div>
       </div>
