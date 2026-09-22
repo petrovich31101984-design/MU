@@ -93,6 +93,17 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
               {menuItems.find(m => m.id === currentPage)?.label}
             </h2>
           </div>
+          {currentPage === 'dashboard' && (
+            <div className="flex-1 mx-6 overflow-hidden">
+              <div className="marquee-container">
+                <div className="marquee-content">
+                  <p className="text-base italic whitespace-nowrap" style={{ color: '#90EE90' }}>
+                    Здравствуйте, руководитель! Программа "МедУчёт" желает Вам продуктивного рабочего дня! Не забудьте отчитаться за прошлый месяц до 5-го числа. Спасибо!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">👨‍💼</div>
