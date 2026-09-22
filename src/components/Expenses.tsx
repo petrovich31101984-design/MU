@@ -3,7 +3,6 @@ import { useState } from 'react';
 export default function Expenses() {
   // Тестовые данные для демонстрации
   const totalExpenseAmount = 385000; // Общая сумма расхода за месяц
-  const totalExpenseSheets = 127; // Листов расхода за месяц
 
   // Состояние для редактирования
   const [editingSheet, setEditingSheet] = useState<any>(null);
@@ -236,7 +235,7 @@ export default function Expenses() {
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
           <div className="pl-2">
             <p className="text-sm text-gray-500">Листов расхода за месяц</p>
-            <p className="text-2xl font-bold text-blue-700 mt-1">{totalExpenseSheets}</p>
+            <p className="text-2xl font-bold text-blue-700 mt-1">{expenseSheets.length}</p>
             <p className="text-xs text-gray-400 mt-1">за август 2026</p>
           </div>
         </div>
