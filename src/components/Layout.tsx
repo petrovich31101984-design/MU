@@ -97,8 +97,8 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
             <div className="flex-1 mx-6 overflow-hidden">
               <div className="marquee-container">
                 <div className="marquee-content">
-                  <p className="text-base whitespace-nowrap italic font-bold" style={{ color: '#0000FF' }}>
-                    🖐Здравствуйте, руководитель! 🤖Программа "МедУчёт" желает Вам продуктивного рабочего дня! Не забудьте отчитаться за прошлый месяц до 5-го числа. Спасибо! 🙏
+                  <p className="text-base whitespace-nowrap font-bold" style={{ color: '#0000FF' }}>
+                    <span style={{ fontStyle: 'normal' }}>🖐</span><span className="italic">Здравствуйте, руководитель! </span><span style={{ fontStyle: 'normal' }}>🤖</span><span className="italic">Программа "МедУчёт" желает Вам продуктивного рабочего дня! Не забудьте отчитаться за прошлый месяц до 5-го числа. Спасибо! </span><span style={{ fontStyle: 'normal' }}>🙏</span>
                   </p>
                 </div>
               </div>
