@@ -174,7 +174,11 @@ export default function Nomenclature() {
                             ✓
                           </button>
                           <button
-                            onClick={() => { setEditingPrice(null); setNewPrice(''); }}
+                            onClick={() => { 
+                              updatePackagePrice(nom.id, 0, 'admin');
+                              setEditingPrice(null); 
+                              setNewPrice('0'); 
+                            }}
                             className="p-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
                           >
                             ✕
