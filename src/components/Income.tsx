@@ -105,9 +105,7 @@ export default function Income() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Удалить запись о приходе?')) {
-      removeIncome(id);
-    }
+    removeIncome(id);
   };
 
   return (
