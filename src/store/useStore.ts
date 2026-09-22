@@ -36,9 +36,10 @@ interface AppState {
   removeNomenclature: (nomenclatureId: string) => void;
 
   addIncome: (income: Omit<Income, 'id'>) => void;
-
+  updateIncome: (id: string, data: Partial<Income>) => void;
+  removeIncome: (id: string) => void;
+  
   addJournalEntry: (entry: Omit<JournalEntry, 'id' | 'dateTime'>) => void;
-
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
 
@@ -313,6 +314,44 @@ export const useStore = create<AppState>((set, get) => ({
         newValue: `${income.amount} ₽`,
       }]
     }));
+  },
+
+  updateIncome: (id, data) => {
+    set(state => {
+      const oldIncome = state.income.find(i => i.id === id);
+      return {
+        income: state.income.map(i => i.id === id ? { ...i, ...data } : i),
+        journal: [...state.journal, {
+          id: `j_${Date.now()}`,
+          dateTime: new Date().toISOString().slice(0, 16),
+          userId: 'admin',
+          table: 'Приход',
+          recordId: id,
+          field: 'Редактирование',
+          oldValue: oldIncome ? `${oldIncome.amount} ₽` : '',
+          newValue: data.amount ? `${data.amount} ₽` : '',
+        }]
+      };
+    });
+  },
+
+  removeIncome: (id) => {
+    set(state => {
+      const income = state.income.find(i => i.id === id);
+      return {
+        income: state.income.filter(i => i.id !== id),
+        journal: [...state.journal, {
+          id: `j_${Date.now()}`,
+          dateTime: new Date().toISOString().slice(0, 16),
+          userId: 'admin',
+          table: 'Приход',
+          recordId: id,
+          field: 'Удаление',
+          oldValue: income ? `${income.amount} ₽` : '',
+          newValue: '',
+        }]
+      };
+    });
   },
 
   addJournalEntry: (entry) => {

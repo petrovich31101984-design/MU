@@ -1,15 +1,71 @@
+import { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { STATUS_LABELS, STATUS_COLORS } from '../types';
+import { Income as IncomeType } from '../types';
 import { formatDate } from '../utils/dateFormat';
 
 export default function Income() {
   const employees = useStore(s => s.employees);
   const income = useStore(s => s.income);
+  const addIncome = useStore(s => s.addIncome);
+  const updateIncome = useStore(s => s.updateIncome);
+  const removeIncome = useStore(s => s.removeIncome);
+
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState('');
+  const [amount, setAmount] = useState('');
 
   // Прошедший месяц - август 2026
   const period = '2026-08';
   const periodIncome = income.filter(i => i.period === period);
   const totalIncome = periodIncome.reduce((s, i) => s + i.amount, 0);
+
+  const handleOpenModal = (incomeData?: IncomeType) => {
+    if (incomeData) {
+      setEditingId(incomeData.id);
+      setSelectedEmployee(incomeData.employeeId);
+      setAmount(String(incomeData.amount));
+    } else {
+      setEditingId(null);
+      setSelectedEmployee('');
+      setAmount('');
+    }
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingId(null);
+    setSelectedEmployee('');
+    setAmount('');
+  };
+
+  const handleSave = () => {
+    if (!selectedEmployee || !amount) return;
+
+    if (editingId) {
+      updateIncome(editingId, {
+        employeeId: selectedEmployee,
+        amount: Number(amount),
+      });
+    } else {
+      addIncome({
+        employeeId: selectedEmployee,
+        amount: Number(amount),
+        period,
+        shifts: 0,
+        date: new Date().toISOString().slice(0, 10),
+        createdBy: 'admin',
+      });
+    }
+    handleCloseModal();
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Удалить запись о приходе?')) {
+      removeIncome(id);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -32,7 +88,10 @@ export default function Income() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="font-semibold text-gray-800">Приходы за период: Август 2026</h3>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+          <button 
+            onClick={() => handleOpenModal()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+          >
             + Добавить приход
           </button>
         </div>
@@ -40,10 +99,10 @@ export default function Income() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 text-left">
-                <th className="px-4 py-3 font-medium text-gray-600">Сотрудник</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-center">Статус</th>
+                <th className="px-4 py-3 font-medium text-gray-600">ФИО</th>
+                <th className="px-4 py-3 font-medium text-gray-600">Дата внесения</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-right">Сумма (₽)</th>
-                <th className="px-4 py-3 font-medium text-gray-600">Дата</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-center">Действия</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -53,15 +112,28 @@ export default function Income() {
                 return (
                   <tr key={inc.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-800">{emp.fullName}</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={`text-xs px-2 py-1 rounded-full border ${STATUS_COLORS[emp.status]}`}>
-                        {STATUS_LABELS[emp.status]}
-                      </span>
-                    </td>
+                    <td className="px-4 py-3 text-gray-600">{formatDate(inc.date)}</td>
                     <td className="px-4 py-3 text-right text-green-700 font-medium">
                       {inc.amount.toLocaleString('ru')}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{formatDate(inc.date)}</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleOpenModal(inc)}
+                          className="p-1 text-gray-600 hover:text-blue-600 transition"
+                          title="Редактировать"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDelete(inc.id)}
+                          className="p-1 text-gray-600 hover:text-red-600 transition"
+                          title="Удалить"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -78,6 +150,65 @@ export default function Income() {
           </table>
         </div>
       </div>
+
+      {/* Модальное окно */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              {editingId ? 'Редактировать приход' : 'Добавить приход'}
+            </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Сотрудник
+                </label>
+                <select
+                  value={selectedEmployee}
+                  onChange={(e) => setSelectedEmployee(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Выберите сотрудника</option>
+                  {employees.filter(e => e.status === 'active').map(emp => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Сумма прихода (₽)
+                </label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Введите сумму"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleCloseModal}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Сохранить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
