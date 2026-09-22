@@ -200,7 +200,10 @@ export default function Nomenclature() {
                         </span>
                       ) : (
                         <span className="font-medium text-gray-800">
-                          {price.toLocaleString('ru')}
+                          {nom.packageQuantity && nom.pricePerPackage ? 
+                            (nom.pricePerPackage / nom.packageQuantity).toFixed(2) :
+                            price.toLocaleString('ru')
+                          }
                         </span>
                       )}
                     </td>
