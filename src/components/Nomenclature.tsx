@@ -54,8 +54,7 @@ export default function Nomenclature() {
   };
 
   const handleUpdatePrice = (nomenclatureId: string) => {
-    if (!newPrice) return;
-    updatePackagePrice(nomenclatureId, Number(newPrice), 'admin');
+    updatePackagePrice(nomenclatureId, Number(newPrice) || 0, 'admin');
     setNewPrice('');
     setEditingPrice(null);
   };
