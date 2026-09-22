@@ -11,7 +11,7 @@ export default function Income() {
   const [selectedEmployee, setSelectedEmployee] = useState<string>('');
   const [amount, setAmount] = useState('');
   const [shifts, setShifts] = useState('');
-  const [period, setPeriod] = useState('2024-01');
+  const [period, setPeriod] = useState('2026-09');
 
   const activeEmployees = employees.filter(e => e.status !== 'fired');
 
@@ -58,9 +58,8 @@ export default function Income() {
               onChange={e => setPeriod(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
-              <option value="2024-01">Январь 2024</option>
-              <option value="2023-12">Декабрь 2023</option>
-              <option value="2023-11">Ноябрь 2023</option>
+              <option value="2026-09">Сентябрь 2026</option>
+              <option value="2026-08">Август 2026</option>
             </select>
           </div>
           <div>
@@ -95,7 +94,7 @@ export default function Income() {
       {/* Таблица приходов */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-800">Приходы за период: {period === '2024-01' ? 'Январь 2024' : period}</h3>
+          <h3 className="font-semibold text-gray-800">Приходы за период: {period === '2026-09' ? 'Сентябрь 2026' : period === '2026-08' ? 'Август 2026' : period}</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
