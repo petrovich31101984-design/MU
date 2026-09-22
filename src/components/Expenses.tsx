@@ -210,10 +210,7 @@ export default function Expenses() {
 
   // Функция для архивирования листа
   const handleArchive = (sheetId: number) => {
-    if (confirm('Отправить лист расхода в архив?')) {
-      setArchivedSheets([...archivedSheets, sheetId]);
-      alert('Лист расхода отправлен в архив');
-    }
+    setArchivedSheets([...archivedSheets, sheetId]);
   };
 
   return (
