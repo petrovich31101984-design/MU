@@ -175,7 +175,7 @@ export default function Nomenclature() {
                             ✓
                           </button>
                           <button
-                            onClick={() => { setEditingPrice(null); setNewPrice(''); }}
+                            onClick={() => { setEditingPrice(null); setNewPrice(String(nom.pricePerPackage || 0)); }}
                             className="p-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
                           >
                             ✕
