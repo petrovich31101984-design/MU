@@ -212,14 +212,14 @@ export default function Nomenclature() {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => { setEditingPrice(nom.id); setNewPrice(String(nom.pricePerPackage || 0)); }}
-                          className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition"
+                          className="px-3 py-1 text-xs text-gray-600 hover:text-gray-900 transition"
                           title="Изменить цену за упаковку"
                         >
                           💰 Изменить цену
                         </button>
                         <button
                           onClick={() => setShowHistory(showHistory === nom.id ? null : nom.id)}
-                          className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition"
+                          className="px-3 py-1 text-xs text-gray-600 hover:text-gray-900 transition"
                           title="История цен"
                         >
                           📊 История цены
@@ -230,7 +230,7 @@ export default function Nomenclature() {
                               removeNomenclature(nom.id);
                             }
                           }}
-                          className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition"
+                          className="px-3 py-1 text-xs text-gray-600 hover:text-gray-900 transition"
                           title="Удалить позицию"
                         >
                           🗑️ Удалить
