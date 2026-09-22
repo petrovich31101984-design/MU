@@ -72,16 +72,6 @@ export default function Income() {
               placeholder="150000"
             />
           </div>
-          <div>
-            <label className="text-sm text-gray-600 block mb-1">Кол-во смен</label>
-            <input
-              type="number"
-              value={shifts}
-              onChange={e => setShifts(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              placeholder="20"
-            />
-          </div>
         </div>
         <button
           onClick={handleAdd}
@@ -103,7 +93,6 @@ export default function Income() {
                 <th className="px-4 py-3 font-medium text-gray-600">Сотрудник</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Статус</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-right">Сумма (₽)</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-center">Смены</th>
                 <th className="px-4 py-3 font-medium text-gray-600">Дата</th>
               </tr>
             </thead>
@@ -122,7 +111,6 @@ export default function Income() {
                     <td className="px-4 py-3 text-right text-green-700 font-medium">
                       {inc.amount.toLocaleString('ru')}
                     </td>
-                    <td className="px-4 py-3 text-center text-gray-700">{inc.shifts}</td>
                     <td className="px-4 py-3 text-gray-600">{formatDate(inc.date)}</td>
                   </tr>
                 );
@@ -133,9 +121,6 @@ export default function Income() {
                 <td className="px-4 py-3" colSpan={2}>ИТОГО</td>
                 <td className="px-4 py-3 text-right text-green-700">
                   {periodIncome.reduce((s, i) => s + i.amount, 0).toLocaleString('ru')}
-                </td>
-                <td className="px-4 py-3 text-center text-gray-700">
-                  {periodIncome.reduce((s, i) => s + i.shifts, 0)}
                 </td>
                 <td></td>
               </tr>
