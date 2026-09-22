@@ -191,9 +191,18 @@ export default function Nomenclature() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className="font-medium text-gray-800">
-                        {price.toLocaleString('ru')}
-                      </span>
+                      {editingPrice === nom.id ? (
+                        <span className="font-medium text-blue-700">
+                          {newPrice && nom.packageQuantity ? 
+                            (Number(newPrice) / nom.packageQuantity).toFixed(2) : 
+                            price.toLocaleString('ru')
+                          }
+                        </span>
+                      ) : (
+                        <span className="font-medium text-gray-800">
+                          {price.toLocaleString('ru')}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
