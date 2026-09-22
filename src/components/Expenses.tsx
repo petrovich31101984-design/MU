@@ -243,40 +243,30 @@ export default function Expenses() {
       </div>
 
       {/* Листы расхода - показываем все по очереди */}
-      {expenseSheets.map((sheet) => {
+      {expenseSheets
+        .filter(sheet => !archivedSheets.includes(sheet.id))
+        .map((sheet) => {
         const totalSum = sheet.items.reduce((sum, item) => sum + item.sum, 0);
-        const isArchived = archivedSheets.includes(sheet.id);
         
         return (
-          <div key={sheet.id} className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ${isArchived ? 'opacity-60' : ''}`}>
+          <div key={sheet.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Шапка листа расхода */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-bold text-gray-800">Лист расхода #{sheet.id}</h3>
-                  {isArchived && (
-                    <span className="px-3 py-1 bg-gray-200 text-gray-600 rounded-full text-xs font-medium">
-                      В архиве
-                    </span>
-                  )}
-                </div>
+                <h3 className="text-xl font-bold text-gray-800">Лист расхода</h3>
                 <div className="flex gap-2">
-                  {!isArchived && (
-                    <>
-                      <button
-                        onClick={() => handleEdit(sheet)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
-                      >
-                        ✏️ Редактировать
-                      </button>
-                      <button
-                        onClick={() => handleArchive(sheet.id)}
-                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium flex items-center gap-2"
-                      >
-                        📦 В архив
-                      </button>
-                    </>
-                  )}
+                  <button
+                    onClick={() => handleEdit(sheet)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
+                  >
+                    ✏️ Редактировать
+                  </button>
+                  <button
+                    onClick={() => handleArchive(sheet.id)}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium flex items-center gap-2"
+                  >
+                    📦 В архив
+                  </button>
                   <button
                     onClick={handleExportExcel}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
@@ -379,7 +369,7 @@ export default function Expenses() {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Редактирование листа расхода #{editingSheet.id}</h2>
+                <h2 className="text-2xl font-bold text-gray-800">Редактирование листа расхода</h2>
                 <button
                   onClick={handleCancelEdit}
                   className="text-gray-400 hover:text-gray-600 text-2xl"
