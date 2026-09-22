@@ -9,6 +9,7 @@ export default function Nomenclature() {
   const updatePrice = useStore(s => s.updatePrice);
   const updatePackagePrice = useStore(s => s.updatePackagePrice);
   const addNomenclature = useStore(s => s.addNomenclature);
+  const removeNomenclature = useStore(s => s.removeNomenclature);
   const getCurrentPrice = useStore(s => s.getCurrentPrice);
 
   const [search, setSearch] = useState('');
@@ -222,6 +223,17 @@ export default function Nomenclature() {
                           title="История цен"
                         >
                           📊 История цены
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`Удалить позицию "${nom.name}"?`)) {
+                              removeNomenclature(nom.id);
+                            }
+                          }}
+                          className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition"
+                          title="Удалить позицию"
+                        >
+                          🗑️ Удалить
                         </button>
                       </div>
                     </td>
