@@ -14,11 +14,54 @@ export default function Income() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [amount, setAmount] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState('2026-08');
 
   // Прошедший месяц - август 2026
   const period = '2026-08';
-  const periodIncome = income.filter(i => i.period === period);
+  
+  // Функция для получения данных по выбранному периоду
+  const getFilteredIncome = () => {
+    if (selectedPeriod === 'all') {
+      return income;
+    } else if (selectedPeriod === 'year') {
+      return income.filter(i => i.period.startsWith('2026'));
+    } else if (selectedPeriod === 'half-year') {
+      return income.filter(i => {
+        const month = parseInt(i.period.split('-')[1]);
+        return month >= 1 && month <= 6 && i.period.startsWith('2026');
+      });
+    } else if (selectedPeriod === 'quarter') {
+      return income.filter(i => {
+        const month = parseInt(i.period.split('-')[1]);
+        return month >= 7 && month <= 9 && i.period.startsWith('2026');
+      });
+    } else {
+      return income.filter(i => i.period === selectedPeriod);
+    }
+  };
+
+  const periodIncome = getFilteredIncome();
   const totalIncome = periodIncome.reduce((s, i) => s + i.amount, 0);
+
+  const getPeriodLabel = () => {
+    switch (selectedPeriod) {
+      case 'all': return 'Все время';
+      case 'year': return '2026 год';
+      case 'half-year': return '1-е полугодие 2026';
+      case 'quarter': return '3-й квартал 2026';
+      case '2026-08': return 'Август 2026';
+      case '2026-07': return 'Июль 2026';
+      case '2026-06': return 'Июнь 2026';
+      case '2026-05': return 'Май 2026';
+      default: return selectedPeriod;
+    }
+  };
+
+  const handleArchive = () => {
+    if (confirm('Отправить данные за прошедший месяц в архив?')) {
+      alert('Данные успешно отправлены в архив');
+    }
+  };
 
   const handleOpenModal = (incomeData?: IncomeType) => {
     if (incomeData) {
@@ -71,11 +114,39 @@ export default function Income() {
     <div className="space-y-6">
       {/* Приход на подразделение за прошедший месяц */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="font-semibold text-gray-800 mb-4">Приход на подразделение за прошедший месяц</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-800">Приход на подразделение</h3>
+          <button 
+            onClick={handleArchive}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium flex items-center gap-2"
+          >
+            📦 Отправить в архив
+          </button>
+        </div>
+        
+        {/* Фильтр периода */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Выбрать период:</label>
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="2026-08">Август 2026</option>
+            <option value="2026-07">Июль 2026</option>
+            <option value="2026-06">Июнь 2026</option>
+            <option value="2026-05">Май 2026</option>
+            <option value="quarter">3-й квартал 2026</option>
+            <option value="half-year">1-е полугодие 2026</option>
+            <option value="year">2026 год</option>
+            <option value="all">Все время</option>
+          </select>
+        </div>
+
         <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-green-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Август 2026</p>
+              <p className="text-sm text-gray-600 mb-1">{getPeriodLabel()}</p>
               <p className="text-3xl font-bold text-green-700">{totalIncome.toLocaleString('ru')} ₽</p>
               <p className="text-sm text-gray-500 mt-2">Общая сумма приходов всех сотрудников</p>
             </div>
@@ -87,7 +158,7 @@ export default function Income() {
       {/* Таблица приходов */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h3 className="font-semibold text-gray-800">Приходы за период: Август 2026</h3>
+          <h3 className="font-semibold text-gray-800">Приходы за период: {getPeriodLabel()}</h3>
           <button 
             onClick={() => handleOpenModal()}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
