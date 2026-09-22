@@ -38,11 +38,47 @@ export const mockEmployees: Employee[] = [
   { id: 'emp_30', personalNumber: '1030', fullName: 'Титов Глеб Максимович', password: 'pass1030', status: 'active', hireDate: '2022-01-27', lastActivityDate: '2024-01-15' },
 ];
 
-// Номенклатура (пустая - все позиции удалены)
-export const mockNomenclature: NomenclatureItem[] = [];
+// Номенклатура (тестовые данные для генерации расходов)
+export const mockNomenclature: NomenclatureItem[] = [
+  { id: 'nom_1', name: 'Анальгин 50% 2мл', category: 'medicine', unit: 'ampoule', active: true, packageQuantity: 10, pricePerPackage: 450 },
+  { id: 'nom_2', name: 'Дексаметазон 4мг/мл', category: 'medicine', unit: 'ampoule', active: true, packageQuantity: 10, pricePerPackage: 850 },
+  { id: 'nom_3', name: 'Преднизолон 30мг/мл', category: 'medicine', unit: 'ampoule', active: true, packageQuantity: 10, pricePerPackage: 1200 },
+  { id: 'nom_4', name: 'Адреналин 0.1% 1мл', category: 'medicine', unit: 'ampoule', active: true, packageQuantity: 10, pricePerPackage: 1800 },
+  { id: 'nom_5', name: 'Фуросемид 10мг/мл', category: 'medicine', unit: 'ampoule', active: true, packageQuantity: 10, pricePerPackage: 350 },
+  { id: 'nom_6', name: 'Димедрол 1% 1мл', category: 'medicine', unit: 'ampoule', active: true, packageQuantity: 10, pricePerPackage: 550 },
+  { id: 'nom_7', name: 'Натрия хлорид 0.9% 400мл', category: 'medicine', unit: 'flacon', active: true, packageQuantity: 1, pricePerPackage: 65 },
+  { id: 'nom_8', name: 'Реополиглюкин 400мл', category: 'medicine', unit: 'flacon', active: true, packageQuantity: 1, pricePerPackage: 320 },
+  { id: 'nom_9', name: 'Нитроглицерин 0.5мг', category: 'medicine', unit: 'tablet', active: true, packageQuantity: 20, pricePerPackage: 500 },
+  { id: 'nom_10', name: 'Каптоприл 25мг', category: 'medicine', unit: 'tablet', active: true, packageQuantity: 20, pricePerPackage: 900 },
+  { id: 'nom_21', name: 'Шприц 5мл', category: 'consumable', unit: 'piece', active: true, packageQuantity: 100, pricePerPackage: 1200 },
+  { id: 'nom_22', name: 'Шприц 10мл', category: 'consumable', unit: 'piece', active: true, packageQuantity: 100, pricePerPackage: 1500 },
+  { id: 'nom_23', name: 'Шприц 20мл', category: 'consumable', unit: 'piece', active: true, packageQuantity: 100, pricePerPackage: 1800 },
+  { id: 'nom_24', name: 'Система для в/в вливания', category: 'consumable', unit: 'piece', active: true, packageQuantity: 50, pricePerPackage: 2250 },
+  { id: 'nom_25', name: 'Катетер венозный 18G', category: 'consumable', unit: 'piece', active: true, packageQuantity: 50, pricePerPackage: 4250 },
+  { id: 'nom_28', name: 'Салфетки спиртовые', category: 'consumable', unit: 'piece', active: true, packageQuantity: 100, pricePerPackage: 500 },
+  { id: 'nom_29', name: 'Перчатки нитриловые M', category: 'consumable', unit: 'piece', active: true, packageQuantity: 100, pricePerPackage: 1500 },
+];
 
-// История цен (пустая - все позиции удалены)
-export const mockPriceHistory: PriceHistory[] = [];
+// История цен (тестовые данные)
+export const mockPriceHistory: PriceHistory[] = [
+  { id: 'ph_1', nomenclatureId: 'nom_1', price: 45, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_2', nomenclatureId: 'nom_2', price: 85, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_3', nomenclatureId: 'nom_3', price: 120, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_4', nomenclatureId: 'nom_4', price: 180, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_5', nomenclatureId: 'nom_5', price: 35, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_6', nomenclatureId: 'nom_6', price: 55, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_7', nomenclatureId: 'nom_7', price: 65, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_8', nomenclatureId: 'nom_8', price: 320, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_9', nomenclatureId: 'nom_9', price: 25, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_10', nomenclatureId: 'nom_10', price: 45, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_21', nomenclatureId: 'nom_21', price: 12, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_22', nomenclatureId: 'nom_22', price: 15, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_23', nomenclatureId: 'nom_23', price: 18, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_24', nomenclatureId: 'nom_24', price: 45, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_25', nomenclatureId: 'nom_25', price: 85, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_28', nomenclatureId: 'nom_28', price: 5, changeDate: '2023-06-01', changedBy: 'admin' },
+  { id: 'ph_29', nomenclatureId: 'nom_29', price: 15, changeDate: '2023-06-01', changedBy: 'admin' },
+];
 
 // Приход за август 2026 (прошедший месяц) - 5 сотрудников
 export const mockIncome: Income[] = [
@@ -112,13 +148,13 @@ mockEmployees.filter(e => e.status === 'active').forEach(emp => {
   const visitsCount = 10 + Math.floor(Math.random() * 15);
   for (let i = 0; i < visitsCount; i++) {
     patientId++;
-    const day = 1 + Math.floor(Math.random() * 15);
+    const day = 1 + Math.floor(Math.random() * 28);
     mockPatients.push({
       id: `pat_${patientId}`,
       fullName: patientNames[Math.floor(Math.random() * patientNames.length)],
       birthDate: `19${40 + Math.floor(Math.random() * 60)}-${String(1 + Math.floor(Math.random() * 12)).padStart(2, '0')}-${String(1 + Math.floor(Math.random() * 28)).padStart(2, '0')}`,
       employeeId: emp.id,
-      visitDate: `2024-01-${String(day).padStart(2, '0')}`,
+      visitDate: `2026-08-${String(day).padStart(2, '0')}`,
     });
   }
 });
