@@ -226,9 +226,7 @@ export default function Nomenclature() {
                         </button>
                         <button
                           onClick={() => {
-                            if (confirm(`Удалить позицию "${nom.name}"?`)) {
-                              removeNomenclature(nom.id);
-                            }
+                            removeNomenclature(nom.id);
                           }}
                           className="px-3 py-1 text-xs text-gray-600 hover:text-gray-900 transition"
                           title="Удалить позицию"
