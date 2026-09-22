@@ -1,7 +1,16 @@
+import { useState } from 'react';
+
 export default function Expenses() {
   // Тестовые данные для демонстрации
   const totalExpenseAmount = 385000; // Общая сумма расхода за месяц
   const totalExpenseSheets = 127; // Листов расхода за месяц
+
+  // Состояние для редактирования
+  const [editingSheet, setEditingSheet] = useState<any>(null);
+  const [editData, setEditData] = useState<any>(null);
+
+  // Состояние для архивированных листов
+  const [archivedSheets, setArchivedSheets] = useState<number[]>([]);
 
   // Тестовые данные листов расхода (10 пациентов)
   const expenseSheets = [
@@ -180,6 +189,34 @@ export default function Expenses() {
     return fullName;
   };
 
+  // Функция для открытия модального окна редактирования
+  const handleEdit = (sheet: any) => {
+    setEditingSheet(sheet);
+    setEditData({ ...sheet });
+  };
+
+  // Функция для сохранения изменений
+  const handleSaveEdit = () => {
+    // В реальном приложении здесь будет отправка данных на сервер
+    console.log('Сохранение изменений:', editData);
+    setEditingSheet(null);
+    setEditData(null);
+  };
+
+  // Функция для отмены редактирования
+  const handleCancelEdit = () => {
+    setEditingSheet(null);
+    setEditData(null);
+  };
+
+  // Функция для архивирования листа
+  const handleArchive = (sheetId: number) => {
+    if (confirm('Отправить лист расхода в архив?')) {
+      setArchivedSheets([...archivedSheets, sheetId]);
+      alert('Лист расхода отправлен в архив');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Карточки KPI */}
@@ -208,19 +245,45 @@ export default function Expenses() {
       {/* Листы расхода - показываем все по очереди */}
       {expenseSheets.map((sheet) => {
         const totalSum = sheet.items.reduce((sum, item) => sum + item.sum, 0);
+        const isArchived = archivedSheets.includes(sheet.id);
         
         return (
-          <div key={sheet.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div key={sheet.id} className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ${isArchived ? 'opacity-60' : ''}`}>
             {/* Шапка листа расхода */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-800">Лист расхода #{sheet.id}</h3>
-                <button
-                  onClick={handleExportExcel}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
-                >
-                  📊 Скачать в Excel
-                </button>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-bold text-gray-800">Лист расхода #{sheet.id}</h3>
+                  {isArchived && (
+                    <span className="px-3 py-1 bg-gray-200 text-gray-600 rounded-full text-xs font-medium">
+                      В архиве
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {!isArchived && (
+                    <>
+                      <button
+                        onClick={() => handleEdit(sheet)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
+                      >
+                        ✏️ Редактировать
+                      </button>
+                      <button
+                        onClick={() => handleArchive(sheet.id)}
+                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium flex items-center gap-2"
+                      >
+                        📦 В архив
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={handleExportExcel}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
+                  >
+                    📊 Скачать в Excel
+                  </button>
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-x-6 gap-y-2">
@@ -309,6 +372,112 @@ export default function Expenses() {
           </div>
         );
       })}
+
+      {/* Модальное окно редактирования */}
+      {editingSheet && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Редактирование листа расхода #{editingSheet.id}</h2>
+                <button
+                  onClick={handleCancelEdit}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Дата создания:</label>
+                  <input
+                    type="text"
+                    value={editData.date}
+                    onChange={(e) => setEditData({ ...editData, date: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Сотрудник:</label>
+                  <input
+                    type="text"
+                    value={editData.employee}
+                    onChange={(e) => setEditData({ ...editData, employee: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Пациент:</label>
+                  <input
+                    type="text"
+                    value={editData.patient}
+                    onChange={(e) => setEditData({ ...editData, patient: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Дата рождения:</label>
+                  <input
+                    type="text"
+                    value={editData.birthDate}
+                    onChange={(e) => setEditData({ ...editData, birthDate: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Категория выезда:</label>
+                  <input
+                    type="text"
+                    value={editData.visitCategory}
+                    onChange={(e) => setEditData({ ...editData, visitCategory: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Название терапии:</label>
+                  <input
+                    type="text"
+                    value={editData.therapyName}
+                    onChange={(e) => setEditData({ ...editData, therapyName: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Стоимость терапии (₽):</label>
+                  <input
+                    type="number"
+                    value={editData.therapyCost}
+                    onChange={(e) => setEditData({ ...editData, therapyCost: Number(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleCancelEdit}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                >
+                  Сохранить
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
