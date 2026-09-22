@@ -62,6 +62,17 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Бегущая строка */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 overflow-hidden">
+        <div className="marquee-container">
+          <div className="marquee-content">
+            <p className="text-lg italic" style={{ color: '#90EE90' }}>
+              Здравствуйте, руководитель! Программа "МедУчёт" желает Вам продуктивного рабочего дня! Не забудьте отчитаться за прошлый месяц до 5-го числа. Спасибо!
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Текущий месяц */}
       <h2 className="text-lg font-semibold text-gray-800 capitalize">
         {new Date().toLocaleDateString('ru-RU', { month: 'long' })} {new Date().getFullYear()}
