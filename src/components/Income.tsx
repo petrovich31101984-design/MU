@@ -105,6 +105,8 @@ export default function Income() {
         date: new Date().toISOString().slice(0, 10),
         createdBy: 'admin',
       });
+      // Автоматически переключаем фильтр на период добавленной записи
+      setSelectedPeriod(modalPeriod);
     }
     handleCloseModal();
   };
