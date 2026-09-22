@@ -44,18 +44,54 @@ export const mockNomenclature: NomenclatureItem[] = [];
 // История цен (пустая - все позиции удалены)
 export const mockPriceHistory: PriceHistory[] = [];
 
-// Приход за январь 2024
-export const mockIncome: Income[] = mockEmployees
-  .filter(e => e.status === 'active')
-  .map((emp, i) => ({
-    id: `inc_${i}`,
-    employeeId: emp.id,
-    amount: 120000 + Math.floor(Math.random() * 60000),
-    period: '2024-01',
-    shifts: 15 + Math.floor(Math.random() * 8),
-    date: '2024-01-01',
+// Приход за август 2026 (прошедший месяц) - 5 сотрудников
+export const mockIncome: Income[] = [
+  {
+    id: 'inc_1',
+    employeeId: 'emp_1',
+    amount: 150000,
+    period: '2026-08',
+    shifts: 20,
+    date: '2026-08-01',
     createdBy: 'admin',
-  }));
+  },
+  {
+    id: 'inc_2',
+    employeeId: 'emp_2',
+    amount: 145000,
+    period: '2026-08',
+    shifts: 19,
+    date: '2026-08-01',
+    createdBy: 'admin',
+  },
+  {
+    id: 'inc_3',
+    employeeId: 'emp_3',
+    amount: 160000,
+    period: '2026-08',
+    shifts: 21,
+    date: '2026-08-01',
+    createdBy: 'admin',
+  },
+  {
+    id: 'inc_4',
+    employeeId: 'emp_4',
+    amount: 135000,
+    period: '2026-08',
+    shifts: 18,
+    date: '2026-08-01',
+    createdBy: 'admin',
+  },
+  {
+    id: 'inc_5',
+    employeeId: 'emp_5',
+    amount: 155000,
+    period: '2026-08',
+    shifts: 20,
+    date: '2026-08-01',
+    createdBy: 'admin',
+  },
+];
 
 // Пациенты
 const patientNames = [
