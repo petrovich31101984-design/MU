@@ -5,22 +5,172 @@ export default function Expenses() {
   const totalExpenseAmount = 385000; // Общая сумма расхода за месяц
   const totalExpenseSheets = 127; // Листов расхода за месяц
 
-  // Тестовые данные листа расхода
-  const [expenseSheet, setExpenseSheet] = useState({
-    date: '15.08.26',
-    employee: 'Иванов Иван Иванович',
-    patient: 'Петров Петр Петрович',
-    birthDate: '12.05.1985',
-    visitCategory: 'Экстренный вызов',
-    therapyName: 'Обезболивающая терапия',
-    therapyCost: 2500,
-    items: [
-      { name: 'Анальгин 50% 2мл', type: 'Лекарство', quantity: 2, unitPrice: 45, sum: 90 },
-      { name: 'Дексаметазон 4мг/мл', type: 'Лекарство', quantity: 1, unitPrice: 85, sum: 85 },
-      { name: 'Шприц 5мл', type: 'Расходник', quantity: 3, unitPrice: 12, sum: 36 },
-      { name: 'Салфетки спиртовые', type: 'Расходник', quantity: 5, unitPrice: 5, sum: 25 },
-    ]
-  });
+  // Тестовые данные листов расхода (10 пациентов)
+  const [expenseSheets, setExpenseSheets] = useState([
+    {
+      id: 1,
+      date: '15.08.26',
+      employee: 'Иванов Иван Иванович',
+      patient: 'Петров Петр Петрович',
+      birthDate: '12.05.1985',
+      visitCategory: 'Экстренный вызов',
+      therapyName: 'Обезболивающая терапия',
+      therapyCost: 6300,
+      items: [
+        { name: 'Анальгин 50% 2мл', type: 'Лекарство', quantity: 2, unitPrice: 45, sum: 90 },
+        { name: 'Дексаметазон 4мг/мл', type: 'Лекарство', quantity: 1, unitPrice: 85, sum: 85 },
+        { name: 'Шприц 5мл', type: 'Расходник', quantity: 3, unitPrice: 12, sum: 36 },
+        { name: 'Салфетки спиртовые', type: 'Расходник', quantity: 5, unitPrice: 5, sum: 25 },
+      ]
+    },
+    {
+      id: 2,
+      date: '14.08.26',
+      employee: 'Сидорова Анна Михайловна',
+      patient: 'Козлов Алексей Сергеевич',
+      birthDate: '23.09.1978',
+      visitCategory: 'Плановый вызов',
+      therapyName: 'Сердечно-сосудистая терапия',
+      therapyCost: 8500,
+      items: [
+        { name: 'Нитроглицерин 0.5мг', type: 'Лекарство', quantity: 3, unitPrice: 25, sum: 75 },
+        { name: 'Магния сульфат 25% 5мл', type: 'Лекарство', quantity: 2, unitPrice: 55, sum: 110 },
+        { name: 'Шприц 10мл', type: 'Расходник', quantity: 4, unitPrice: 15, sum: 60 },
+      ]
+    },
+    {
+      id: 3,
+      date: '13.08.26',
+      employee: 'Морозова Елена Владимировна',
+      patient: 'Смирнова Ольга Ивановна',
+      birthDate: '05.03.1992',
+      visitCategory: 'Экстренный вызов',
+      therapyName: 'Противовоспалительная терапия',
+      therapyCost: 12400,
+      items: [
+        { name: 'Преднизолон 30мг/мл', type: 'Лекарство', quantity: 2, unitPrice: 120, sum: 240 },
+        { name: 'Кеторол 30мг/мл', type: 'Лекарство', quantity: 3, unitPrice: 120, sum: 360 },
+        { name: 'Натрия хлорид 0.9% 400мл', type: 'Лекарство', quantity: 1, unitPrice: 65, sum: 65 },
+        { name: 'Система для в/в вливания', type: 'Расходник', quantity: 1, unitPrice: 45, sum: 45 },
+      ]
+    },
+    {
+      id: 4,
+      date: '12.08.26',
+      employee: 'Иванов Иван Иванович',
+      patient: 'Волков Дмитрий Андреевич',
+      birthDate: '17.11.1965',
+      visitCategory: 'Повторный вызов',
+      therapyName: 'Дыхательная терапия',
+      therapyCost: 15800,
+      items: [
+        { name: 'Эуфиллин 2.4% 5мл', type: 'Лекарство', quantity: 2, unitPrice: 75, sum: 150 },
+        { name: 'Сальбутамол 100мкг', type: 'Лекарство', quantity: 1, unitPrice: 250, sum: 250 },
+        { name: 'Преднизолон 30мг/мл', type: 'Лекарство', quantity: 1, unitPrice: 120, sum: 120 },
+        { name: 'Маска кислородная', type: 'Расходник', quantity: 1, unitPrice: 35, sum: 35 },
+      ]
+    },
+    {
+      id: 5,
+      date: '11.08.26',
+      employee: 'Сидорова Анна Михайловна',
+      patient: 'Новикова Мария Петровна',
+      birthDate: '28.07.1988',
+      visitCategory: 'Экстренный вызов',
+      therapyName: 'Неотложная помощь',
+      therapyCost: 18200,
+      items: [
+        { name: 'Адреналин 0.1% 1мл', type: 'Лекарство', quantity: 2, unitPrice: 180, sum: 360 },
+        { name: 'Дексаметазон 4мг/мл', type: 'Лекарство', quantity: 2, unitPrice: 85, sum: 170 },
+        { name: 'Фуросемид 10мг/мл', type: 'Лекарство', quantity: 1, unitPrice: 35, sum: 35 },
+        { name: 'Катетер венозный 18G', type: 'Расходник', quantity: 1, unitPrice: 85, sum: 85 },
+      ]
+    },
+    {
+      id: 6,
+      date: '10.08.26',
+      employee: 'Морозова Елена Владимировна',
+      patient: 'Федоров Сергей Николаевич',
+      birthDate: '09.02.1975',
+      visitCategory: 'Плановый вызов',
+      therapyName: 'Неврологическая терапия',
+      therapyCost: 9800,
+      items: [
+        { name: 'Диазепам 0.5% 2мл', type: 'Лекарство', quantity: 1, unitPrice: 85, sum: 85 },
+        { name: 'Магния сульфат 25% 5мл', type: 'Лекарство', quantity: 2, unitPrice: 55, sum: 110 },
+        { name: 'Шприц 5мл', type: 'Расходник', quantity: 4, unitPrice: 12, sum: 48 },
+      ]
+    },
+    {
+      id: 7,
+      date: '09.08.26',
+      employee: 'Иванов Иван Иванович',
+      patient: 'Кузнецова Татьяна Викторовна',
+      birthDate: '14.12.1982',
+      visitCategory: 'Экстренный вызов',
+      therapyName: 'Антигистаминная терапия',
+      therapyCost: 7600,
+      items: [
+        { name: 'Димедрол 1% 1мл', type: 'Лекарство', quantity: 2, unitPrice: 55, sum: 110 },
+        { name: 'Преднизолон 30мг/мл', type: 'Лекарство', quantity: 1, unitPrice: 120, sum: 120 },
+        { name: 'Натрия хлорид 0.9% 400мл', type: 'Лекарство', quantity: 1, unitPrice: 65, sum: 65 },
+      ]
+    },
+    {
+      id: 8,
+      date: '08.08.26',
+      employee: 'Сидорова Анна Михайловна',
+      patient: 'Попов Андрей Михайлович',
+      birthDate: '30.06.1970',
+      visitCategory: 'Повторный вызов',
+      therapyName: 'Кардиологическая терапия',
+      therapyCost: 22100,
+      items: [
+        { name: 'Нитроглицерин 0.5мг', type: 'Лекарство', quantity: 5, unitPrice: 25, sum: 125 },
+        { name: 'Адреналин 0.1% 1мл', type: 'Лекарство', quantity: 1, unitPrice: 180, sum: 180 },
+        { name: 'Магния сульфат 25% 5мл', type: 'Лекарство', quantity: 3, unitPrice: 55, sum: 165 },
+        { name: 'Катетер венозный 20G', type: 'Расходник', quantity: 2, unitPrice: 85, sum: 170 },
+        { name: 'Система для в/в вливания', type: 'Расходник', quantity: 2, unitPrice: 45, sum: 90 },
+      ]
+    },
+    {
+      id: 9,
+      date: '07.08.26',
+      employee: 'Морозова Елена Владимировна',
+      patient: 'Соколова Ирина Дмитриевна',
+      birthDate: '21.04.1995',
+      visitCategory: 'Плановый вызов',
+      therapyName: 'Жаропонижающая терапия',
+      therapyCost: 6800,
+      items: [
+        { name: 'Анальгин 50% 2мл', type: 'Лекарство', quantity: 3, unitPrice: 45, sum: 135 },
+        { name: 'Димедрол 1% 1мл', type: 'Лекарство', quantity: 1, unitPrice: 55, sum: 55 },
+        { name: 'Шприц 5мл', type: 'Расходник', quantity: 4, unitPrice: 12, sum: 48 },
+      ]
+    },
+    {
+      id: 10,
+      date: '06.08.26',
+      employee: 'Иванов Иван Иванович',
+      patient: 'Лебедев Виктор Петрович',
+      birthDate: '08.10.1968',
+      visitCategory: 'Экстренный вызов',
+      therapyName: 'Реанимационная терапия',
+      therapyCost: 25550,
+      items: [
+        { name: 'Адреналин 0.1% 1мл', type: 'Лекарство', quantity: 3, unitPrice: 180, sum: 540 },
+        { name: 'Дексаметазон 4мг/мл', type: 'Лекарство', quantity: 2, unitPrice: 85, sum: 170 },
+        { name: 'Преднизолон 30мг/мл', type: 'Лекарство', quantity: 2, unitPrice: 120, sum: 240 },
+        { name: 'Фуросемид 10мг/мл', type: 'Лекарство', quantity: 2, unitPrice: 35, sum: 70 },
+        { name: 'Натрия хлорид 0.9% 400мл', type: 'Лекарство', quantity: 2, unitPrice: 65, sum: 130 },
+        { name: 'Катетер венозный 18G', type: 'Расходник', quantity: 2, unitPrice: 85, sum: 170 },
+        { name: 'Система для в/в вливания', type: 'Расходник', quantity: 2, unitPrice: 45, sum: 90 },
+      ]
+    }
+  ]);
+
+  const [selectedSheetId, setSelectedSheetId] = useState(1);
+  const expenseSheet = expenseSheets.find(s => s.id === selectedSheetId) || expenseSheets[0];
 
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(expenseSheet);
@@ -37,12 +187,23 @@ export default function Expenses() {
   };
 
   const handleSave = () => {
-    setExpenseSheet(editData);
+    setExpenseSheets(expenseSheets.map(sheet => 
+      sheet.id === selectedSheetId ? { ...editData, id: selectedSheetId } : sheet
+    ));
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
+  };
+
+  // Функция для форматирования ФИО в инициалы
+  const formatPatientName = (fullName: string) => {
+    const parts = fullName.split(' ');
+    if (parts.length >= 3) {
+      return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
+    }
+    return fullName;
   };
   return (
     <div className="space-y-6">
@@ -67,6 +228,22 @@ export default function Expenses() {
             <p className="text-xs text-gray-400 mt-1">за август 2026</p>
           </div>
         </div>
+      </div>
+
+      {/* Селектор листов расхода */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Выберите лист расхода:</label>
+        <select
+          value={selectedSheetId}
+          onChange={(e) => setSelectedSheetId(Number(e.target.value))}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          {expenseSheets.map(sheet => (
+            <option key={sheet.id} value={sheet.id}>
+              {sheet.date} - {sheet.patient} ({sheet.therapyName})
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Лист расхода */}
@@ -121,7 +298,7 @@ export default function Expenses() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-500">Пациент:</span>
-                <span className="text-sm font-medium text-gray-800">Петров П.П.</span>
+                <span className="text-sm font-medium text-gray-800">{formatPatientName(expenseSheet.patient)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-500">Дата рождения:</span>
