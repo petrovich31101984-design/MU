@@ -106,7 +106,7 @@ export default function Returns() {
         return (
           <div key={sheet.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Sheet Header */}
-            <div className={`px-6 py-4 border-b border-gray-200 ${hasUncorrected ? 'bg-amber-50' : 'bg-green-50'}`}>
+            <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div>
@@ -119,10 +119,10 @@ export default function Returns() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${
+                  <span className={`text-sm font-medium ${
                     hasUncorrected
-                      ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                      : 'bg-green-100 text-green-700 border border-green-200'
+                      ? 'text-amber-700'
+                      : 'text-green-700'
                   }`}>
                     {hasUncorrected ? '⏳ Ожидает обработки' : '✅ Обработан'}
                   </span>
@@ -143,7 +143,7 @@ export default function Returns() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50 text-left">
+                  <tr className="text-left border-b border-gray-200">
                     <th className="px-4 py-3 font-medium text-gray-600">Номенклатура</th>
                     <th className="px-4 py-3 font-medium text-gray-600">Кол-во</th>
                     <th className="px-4 py-3 font-medium text-gray-600">Причина возврата</th>
@@ -156,7 +156,7 @@ export default function Returns() {
                   {sheet.items.map(ret => {
                     const unit = getNomenclatureUnit(ret.nomenclatureId);
                     return (
-                      <tr key={ret.id} className={`hover:bg-gray-50 ${!ret.corrected ? 'bg-amber-50' : ''}`}>
+                      <tr key={ret.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 text-gray-700">
                           {getNomenclatureName(ret.nomenclatureId)}
                           {unit && <span className="text-xs text-gray-400 ml-1">({UNIT_LABELS[unit]})</span>}
@@ -197,20 +197,20 @@ export default function Returns() {
                           )}
                         </td>
                         <td className="px-4 py-3 text-gray-700">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            ret.reason === 'Вышел срок годности' ? 'bg-red-100 text-red-700' :
-                            ret.reason === 'Поломка оборудования' ? 'bg-orange-100 text-orange-700' :
-                            ret.reason === 'Нарушение упаковки' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
+                          <span className={`text-sm ${
+                            ret.reason === 'Вышел срок годности' ? 'text-red-700' :
+                            ret.reason === 'Поломка оборудования' ? 'text-orange-700' :
+                            ret.reason === 'Нарушение упаковки' ? 'text-yellow-700' :
+                            'text-gray-700'
                           }`}>
                             {ret.reason || '—'}
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
+                          <span className={`text-sm ${
                             ret.corrected
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-amber-100 text-amber-700'
+                              ? 'text-green-700'
+                              : 'text-amber-700'
                           }`}>
                             {ret.corrected ? 'Обработан' : 'Ожидает'}
                           </span>
@@ -223,7 +223,7 @@ export default function Returns() {
                           {!ret.corrected && correctingId !== ret.id && (
                             <button
                               onClick={() => { setCorrectingId(ret.id); setNewQuantity(String(ret.quantity)); }}
-                              className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs hover:bg-blue-200"
+                              className="text-blue-700 text-sm hover:underline"
                             >
                               Корректировать
                             </button>
