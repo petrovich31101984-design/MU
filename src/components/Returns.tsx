@@ -267,18 +267,18 @@ export default function Returns() {
                             {!ret.confirmed && (
                               <button
                                 onClick={() => handleConfirm(ret.id)}
-                                className="text-green-700 text-sm hover:underline"
+                                className="text-green-700 hover:text-green-900 text-lg"
                                 title="Подтвердить позицию"
                               >
-                                ✓ Подтвердить
+                                ✓
                               </button>
                             )}
                             <button
                               onClick={() => handleEdit(ret)}
-                              className="text-blue-700 text-sm hover:underline"
+                              className="text-blue-700 hover:text-blue-900 text-lg"
                               title="Изменить количество и причину"
                             >
-                              ✏️ Изменить
+                              ✏️
                             </button>
                           </div>
                         </td>
