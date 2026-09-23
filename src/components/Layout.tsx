@@ -10,15 +10,15 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const menuItems = [
-    { id: 'dashboard', label: 'Панель руководителя', icon: '📊' },
+    { id: 'dashboard', label: 'Панель руководителя', icon: '🏠' },
     { id: 'employees', label: 'Сотрудники', icon: '👥' },
     { id: 'nomenclature', label: 'Номенклатура', icon: '💊' },
     { id: 'income', label: 'Приход к сотруднику', icon: '📥' },
     { id: 'expenses', label: 'Расход у сотрудника', icon: '📤' },
     { id: 'returns', label: 'Возвраты', icon: '↩️' },
     { id: 'chat', label: 'Сообщения', icon: '💬' },
-    { id: 'report', label: 'Отчеты', icon: '📄' },
-    { id: 'journal', label: 'Журнал', icon: '📜' },
+    { id: 'report', label: 'Отчёты', icon: '📊' },
+    { id: 'journal', label: 'Журнал', icon: '📝' },
   ];
 
   return (
