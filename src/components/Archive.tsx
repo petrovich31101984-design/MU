@@ -1,25 +1,35 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { formatDateTime } from '../utils/dateFormat';
 
 export default function Archive() {
   const employees = useStore(s => s.employees);
-  const [filter, setFilter] = useState('all');
+  const archivedExpenseSheets = useStore(s => s.archivedExpenseSheets);
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'sheets' | 'employees'>('sheets');
 
   // Архивные сотрудники
   const archivedEmployees = employees.filter(e => e.archived);
 
-  // Фильтрация
-  const filteredEmployees = archivedEmployees.filter(emp => {
-    const matchesSearch = emp.fullName.toLowerCase().includes(search.toLowerCase()) ||
-                         emp.personalNumber.includes(search);
-    return matchesSearch;
+  // Фильтрация по листам расхода
+  const filteredSheets = archivedExpenseSheets.filter(sheet => {
+    return sheet.patient.toLowerCase().includes(search.toLowerCase()) ||
+           sheet.employee.toLowerCase().includes(search.toLowerCase()) ||
+           sheet.therapyName.toLowerCase().includes(search.toLowerCase());
   });
 
-  const getEmployeeName = (id: string) => {
-    const emp = employees.find(e => e.id === id);
-    return emp?.fullName || id;
+  // Фильтрация по сотрудникам
+  const filteredEmployees = archivedEmployees.filter(emp => {
+    return emp.fullName.toLowerCase().includes(search.toLowerCase()) ||
+           emp.personalNumber.includes(search);
+  });
+
+  // Форматирование ФИО в инициалы
+  const formatPatientName = (fullName: string) => {
+    const parts = fullName.split(' ');
+    if (parts.length >= 3) {
+      return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
+    }
+    return fullName;
   };
 
   return (
@@ -36,7 +46,7 @@ export default function Archive() {
           <div className="flex items-center gap-3">
             <input
               type="text"
-              placeholder="Поиск по ФИО или номеру..."
+              placeholder="Поиск..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
@@ -48,14 +58,14 @@ export default function Archive() {
       {/* Статистика */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
-          <p className="text-sm text-gray-700 font-medium">Всего в архиве</p>
-          <p className="text-2xl font-bold text-gray-800 mt-1">{archivedEmployees.length}</p>
-          <p className="text-xs text-gray-500 mt-1">сотрудников</p>
+          <p className="text-sm text-gray-700 font-medium">Листов расхода в архиве</p>
+          <p className="text-2xl font-bold text-gray-800 mt-1">{archivedExpenseSheets.length}</p>
+          <p className="text-xs text-gray-500 mt-1">проверено руководителем</p>
         </div>
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
-          <p className="text-sm text-blue-700 font-medium">Активных сотрудников</p>
-          <p className="text-2xl font-bold text-blue-800 mt-1">{employees.filter(e => e.status === 'active' && !e.archived).length}</p>
-          <p className="text-xs text-blue-600 mt-1">не в архиве</p>
+          <p className="text-sm text-blue-700 font-medium">Сотрудников в архиве</p>
+          <p className="text-2xl font-bold text-blue-800 mt-1">{archivedEmployees.length}</p>
+          <p className="text-xs text-blue-600 mt-1">неактивных</p>
         </div>
         <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-5 border border-amber-200">
           <p className="text-sm text-amber-700 font-medium">Всего сотрудников</p>
@@ -64,57 +74,189 @@ export default function Archive() {
         </div>
       </div>
 
-      {/* Таблица архивных сотрудников */}
+      {/* Переключатель вкладок */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-800">Архивные сотрудники</h3>
+        <div className="flex border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab('sheets')}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'sheets'
+                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            📋 Листы расхода ({archivedExpenseSheets.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('employees')}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'employees'
+                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            👥 Сотрудники ({archivedEmployees.length})
+          </button>
         </div>
-        <div className="overflow-x-auto">
-          {filteredEmployees.length === 0 ? (
-            <div className="p-12 text-center text-gray-400">
-              <div className="text-4xl mb-3">📭</div>
-              <p className="text-sm">Архив пуст</p>
-              <p className="text-xs mt-1">Сотрудники, отправленные в архив, будут отображаться здесь</p>
-            </div>
-          ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 text-left">
-                  <th className="px-4 py-3 font-medium text-gray-600">№</th>
-                  <th className="px-4 py-3 font-medium text-gray-600">ФИО</th>
-                  <th className="px-4 py-3 font-medium text-gray-600 text-center">Статус</th>
-                  <th className="px-4 py-3 font-medium text-gray-600">Дата найма</th>
-                  <th className="px-4 py-3 font-medium text-gray-600">Последняя активность</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredEmployees.map(emp => (
-                  <tr key={emp.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-500">{emp.personalNumber}</td>
-                    <td className="px-4 py-3 font-medium text-gray-800">{emp.fullName}</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
-                        В архиве
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{emp.hireDate}</td>
-                    <td className="px-4 py-3 text-gray-600">{emp.lastActivityDate}</td>
+
+        {/* Контент вкладок */}
+        {activeTab === 'sheets' && (
+          <div className="p-4">
+            {filteredSheets.length === 0 ? (
+              <div className="p-12 text-center text-gray-400">
+                <div className="text-4xl mb-3">📭</div>
+                <p className="text-sm">Архив листов расхода пуст</p>
+                <p className="text-xs mt-1">Листы расхода, проверенные руководителем, будут отображаться здесь</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredSheets.map(sheet => {
+                  const totalSum = sheet.items.reduce((sum: number, item: any) => sum + item.sum, 0);
+                  const limit = sheet.therapyCost * 0.06;
+                  const isOverLimit = totalSum >= limit;
+
+                  return (
+                    <div key={sheet.id} className={`border rounded-xl overflow-hidden ${isOverLimit ? 'border-red-200' : 'border-gray-200'}`}>
+                      {/* Шапка листа */}
+                      <div className={`p-4 ${isOverLimit ? 'bg-red-50' : 'bg-gray-50'} border-b border-gray-200`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-gray-800">Лист расхода #{sheet.id}</h4>
+                            {isOverLimit && (
+                              <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded-full border border-red-200">
+                                ⚠️ ЛИМИТ ПРЕВЫШЕН
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            Архивирован: {new Date(sheet.archivedDate).toLocaleDateString('ru-RU')}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                          <div>
+                            <span className="text-gray-500">Дата:</span>
+                            <span className="ml-1 font-medium">{sheet.date}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Сотрудник:</span>
+                            <span className="ml-1 font-medium">{sheet.employee}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Пациент:</span>
+                            <span className="ml-1 font-medium">{formatPatientName(sheet.patient)}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Терапия:</span>
+                            <span className="ml-1 font-medium">{sheet.therapyName}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Таблица препаратов */}
+                      <div className="p-4">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-gray-50 text-left">
+                              <th className="px-3 py-2 font-medium text-gray-600">Название</th>
+                              <th className="px-3 py-2 font-medium text-gray-600 text-center">Тип</th>
+                              <th className="px-3 py-2 font-medium text-gray-600 text-center">Кол-во</th>
+                              <th className="px-3 py-2 font-medium text-gray-600 text-right">Цена</th>
+                              <th className="px-3 py-2 font-medium text-gray-600 text-right">Сумма</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            {sheet.items.map((item: any, index: number) => (
+                              <tr key={index} className="hover:bg-gray-50">
+                                <td className="px-3 py-2 font-medium text-gray-800">{item.name}</td>
+                                <td className="px-3 py-2 text-center">
+                                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                    item.type === 'Лекарство' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
+                                  }`}>
+                                    {item.type}
+                                  </span>
+                                </td>
+                                <td className="px-3 py-2 text-center text-gray-700">{item.quantity}</td>
+                                <td className="px-3 py-2 text-right text-gray-600">{item.unitPrice}</td>
+                                <td className="px-3 py-2 text-right font-medium text-orange-700">{item.sum}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr className="bg-gray-50 font-bold">
+                              <td className="px-3 py-2" colSpan={4}>ИТОГО</td>
+                              <td className="px-3 py-2 text-right text-red-700">{totalSum.toLocaleString('ru')} ₽</td>
+                            </tr>
+                          </tfoot>
+                        </table>
+
+                        {/* Информация о лимите */}
+                        <div className="mt-3 flex items-center justify-between text-sm">
+                          <div>
+                            <span className="text-gray-500">Стоимость терапии:</span>
+                            <span className="ml-1 font-bold text-green-600">{sheet.therapyCost.toLocaleString('ru')} ₽</span>
+                            <span className="text-xs text-gray-500 ml-1">(лимит 6%: {limit.toLocaleString('ru')} ₽)</span>
+                          </div>
+                          <div className={isOverLimit ? 'text-red-600 font-bold' : 'text-blue-600 font-bold'}>
+                            Итого: {totalSum.toLocaleString('ru')} ₽
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'employees' && (
+          <div className="p-4">
+            {filteredEmployees.length === 0 ? (
+              <div className="p-12 text-center text-gray-400">
+                <div className="text-4xl mb-3">📭</div>
+                <p className="text-sm">Архив сотрудников пуст</p>
+                <p className="text-xs mt-1">Сотрудники, отправленные в архив, будут отображаться здесь</p>
+              </div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 text-left">
+                    <th className="px-4 py-3 font-medium text-gray-600">№</th>
+                    <th className="px-4 py-3 font-medium text-gray-600">ФИО</th>
+                    <th className="px-4 py-3 font-medium text-gray-600 text-center">Статус</th>
+                    <th className="px-4 py-3 font-medium text-gray-600">Дата найма</th>
+                    <th className="px-4 py-3 font-medium text-gray-600">Последняя активность</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredEmployees.map(emp => (
+                    <tr key={emp.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-gray-500">{emp.personalNumber}</td>
+                      <td className="px-4 py-3 font-medium text-gray-800">{emp.fullName}</td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                          В архиве
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">{emp.hireDate}</td>
+                      <td className="px-4 py-3 text-gray-600">{emp.lastActivityDate}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Информация */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <h4 className="font-semibold text-blue-800 text-sm mb-2">ℹ️ О разделе "Архив"</h4>
         <ul className="text-sm text-blue-700 space-y-1">
-          <li>• В архив попадают сотрудники, которые больше не работают в подразделении</li>
+          <li>• Листы расхода попадают в архив после проверки руководителем</li>
+          <li>• В архиве хранится полная информация о препаратах и стоимости</li>
           <li>• Архивные сотрудники не отображаются в активных списках</li>
-          <li>• Информация об архивных сотрудниках сохраняется для истории</li>
-          <li>• Поиск работает по ФИО и персональному номеру</li>
+          <li>• Поиск работает по ФИО, номеру, названию терапии</li>
         </ul>
       </div>
     </div>

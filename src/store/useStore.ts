@@ -58,6 +58,8 @@ interface AppState {
   // UI state
   openExpenseSheetId: number | null;
   setOpenExpenseSheetId: (id: number | null) => void;
+  archivedExpenseSheets: any[];
+  addArchivedExpenseSheet: (sheet: any) => void;
 
   // Computed helpers
   getCurrentPrice: (nomenclatureId: string) => number;
@@ -72,6 +74,10 @@ interface AppState {
 export const useStore = create<AppState>((set, get) => ({
   openExpenseSheetId: null,
   setOpenExpenseSheetId: (id) => set({ openExpenseSheetId: id }),
+  archivedExpenseSheets: [],
+  addArchivedExpenseSheet: (sheet) => set(state => ({
+    archivedExpenseSheets: [...state.archivedExpenseSheets, { ...sheet, archivedDate: new Date().toISOString() }]
+  })),
 
   employees: mockEmployees,
   nomenclature: mockNomenclature,

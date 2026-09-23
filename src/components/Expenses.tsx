@@ -287,8 +287,14 @@ export default function Expenses() {
     setEditData(null);
   };
 
+  const addArchivedExpenseSheet = useStore(s => s.addArchivedExpenseSheet);
+
   // Функция для архивирования листа
   const handleArchive = (sheetId: number) => {
+    const sheet = expenseSheets.find(s => s.id === sheetId);
+    if (sheet) {
+      addArchivedExpenseSheet(sheet);
+    }
     setArchivedSheets([...archivedSheets, sheetId]);
   };
 
