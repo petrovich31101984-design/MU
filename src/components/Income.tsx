@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { STATUS_LABELS, STATUS_COLORS } from '../types';
+import { Income as IncomeType } from '../types';
 import { formatDate } from '../utils/dateFormat';
 
 export default function Income() {
@@ -17,10 +17,54 @@ export default function Income() {
   const [modalPeriod, setModalPeriod] = useState('2026-08');
   const [selectedPeriod, setSelectedPeriod] = useState('2026-08');
 
-  const periodIncome = income.filter(i => i.period === selectedPeriod);
+  // Прошедший месяц - август 2026
+  const period = '2026-08';
+  
+  // Функция для получения данных по выбранному периоду
+  const getFilteredIncome = () => {
+    if (selectedPeriod === 'all') {
+      return income;
+    } else if (selectedPeriod === 'year') {
+      return income.filter(i => i.period.startsWith('2026'));
+    } else if (selectedPeriod === 'half-year') {
+      return income.filter(i => {
+        const month = parseInt(i.period.split('-')[1]);
+        return month >= 1 && month <= 6 && i.period.startsWith('2026');
+      });
+    } else if (selectedPeriod === 'quarter') {
+      return income.filter(i => {
+        const month = parseInt(i.period.split('-')[1]);
+        return month >= 7 && month <= 9 && i.period.startsWith('2026');
+      });
+    } else {
+      return income.filter(i => i.period === selectedPeriod);
+    }
+  };
+
+  const periodIncome = getFilteredIncome();
   const totalIncome = periodIncome.reduce((s, i) => s + i.amount, 0);
 
-  const handleOpenModal = (incomeData?: any) => {
+  const getPeriodLabel = () => {
+    switch (selectedPeriod) {
+      case 'all': return 'Все время';
+      case 'year': return '2026 год';
+      case 'half-year': return '1-е полугодие 2026';
+      case 'quarter': return '3-й квартал 2026';
+      case '2026-08': return 'Август 2026';
+      case '2026-07': return 'Июль 2026';
+      case '2026-06': return 'Июнь 2026';
+      case '2026-05': return 'Май 2026';
+      default: return selectedPeriod;
+    }
+  };
+
+  const handleArchive = () => {
+    if (confirm('Отправить данные за прошедший месяц в архив?')) {
+      alert('Данные успешно отправлены в архив');
+    }
+  };
+
+  const handleOpenModal = (incomeData?: IncomeType) => {
     if (incomeData) {
       setEditingId(incomeData.id);
       setSelectedEmployee(incomeData.employeeId);
@@ -57,9 +101,11 @@ export default function Income() {
         employeeId: selectedEmployee,
         amount: Number(amount),
         period: modalPeriod,
+        shifts: 0,
         date: new Date().toISOString().slice(0, 10),
         createdBy: 'admin',
       });
+      // Автоматически переключаем фильтр на период добавленной записи
       setSelectedPeriod(modalPeriod);
     }
     handleCloseModal();
@@ -69,26 +115,9 @@ export default function Income() {
     removeIncome(id);
   };
 
-  const handleArchive = () => {
-    alert('Данные успешно отправлены в архив');
-  };
-
-  const getPeriodLabel = () => {
-    switch (selectedPeriod) {
-      case 'all': return 'Все время';
-      case 'year': return '2026 год';
-      case 'half-year': return '1-е полугодие 2026';
-      case 'quarter': return '3-й квартал 2026';
-      case '2026-08': return 'Август 2026';
-      case '2026-07': return 'Июль 2026';
-      case '2026-06': return 'Июнь 2026';
-      case '2026-05': return 'Май 2026';
-      default: return selectedPeriod;
-    }
-  };
-
   return (
     <div className="space-y-6">
+      {/* Приход на подразделение за прошедший месяц */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-gray-800">Приход на подразделение</h3>
@@ -100,6 +129,7 @@ export default function Income() {
           </button>
         </div>
         
+        {/* Фильтр периода */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">Выбрать период:</label>
           <select
@@ -130,6 +160,7 @@ export default function Income() {
         </div>
       </div>
 
+      {/* Таблица приходов */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="font-semibold text-gray-800">Приходы за период: {getPeriodLabel()}</h3>
@@ -187,6 +218,7 @@ export default function Income() {
         </div>
       </div>
 
+      {/* Модальное окно */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
