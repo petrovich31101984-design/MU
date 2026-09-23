@@ -308,29 +308,41 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
         <h3 className="font-semibold text-gray-800 mb-4">Быстрые действия</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all group">
+          <button 
+            onClick={() => onNavigate?.('nomenclature')}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all group cursor-pointer"
+          >
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-purple-200 transition">
               💊
             </div>
             <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">Номенклатура</span>
           </button>
-          <button className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all group">
+          <button 
+            onClick={() => onNavigate?.('employees')}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all group cursor-pointer"
+          >
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-blue-200 transition">
               👥
             </div>
             <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">Сотрудники</span>
           </button>
-          <button className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all group">
+          <button 
+            onClick={() => onNavigate?.('report')}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all group cursor-pointer"
+          >
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-green-200 transition">
-              📄
+              📊
             </div>
-            <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">Отчеты</span>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">Отчёты</span>
           </button>
-          <button className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all group">
-            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-amber-200 transition">
-              📁
+          <button 
+            onClick={() => onNavigate?.('expenses')}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all group cursor-pointer"
+          >
+            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-orange-200 transition">
+              📤
             </div>
-            <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">Архив</span>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">Расход</span>
           </button>
         </div>
       </div>
