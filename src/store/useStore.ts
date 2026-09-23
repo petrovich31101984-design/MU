@@ -440,7 +440,7 @@ export const useStore = create<AppState>((set, get) => ({
     set(state => {
       return {
         returns: state.returns.map(r => r.id === id ? {
-          ...r, confirmed: true
+          ...r, confirmed: true, confirmedBy: userId
         } : r),
         journal: [...state.journal, {
           id: `j_${Date.now()}`,
@@ -450,7 +450,7 @@ export const useStore = create<AppState>((set, get) => ({
           recordId: id,
           field: 'Подтверждение',
           oldValue: 'Не подтверждено',
-          newValue: 'Подтверждено',
+          newValue: `Подтверждено (${userId === 'admin' ? 'Руководитель' : 'Кладовщик'})`,
         }]
       };
     });

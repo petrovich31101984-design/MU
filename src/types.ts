@@ -83,6 +83,7 @@ export interface ReturnOperation {
   newQuantity?: number;
   reason?: string;
   confirmed?: boolean;
+  confirmedBy?: string;
 }
 
 export interface Message {

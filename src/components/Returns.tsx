@@ -23,6 +23,7 @@ export default function Returns() {
   const [editingReturn, setEditingReturn] = useState<ReturnOperation | null>(null);
   const [editQuantity, setEditQuantity] = useState('');
   const [editReason, setEditReason] = useState('');
+  const [confirmingReturn, setConfirmingReturn] = useState<ReturnOperation | null>(null);
   
   const confirmReturn = useStore(s => s.confirmReturn);
   const updateReturn = useStore(s => s.updateReturn);
@@ -79,8 +80,15 @@ export default function Returns() {
     setArchivedSheets(prev => new Set(prev).add(sheetId));
   };
 
-  const handleConfirm = (id: string) => {
-    confirmReturn(id, 'admin');
+  const handleConfirm = (ret: ReturnOperation) => {
+    setConfirmingReturn(ret);
+  };
+
+  const confirmAsRole = (role: 'admin' | 'storekeeper') => {
+    if (confirmingReturn) {
+      confirmReturn(confirmingReturn.id, role);
+      setConfirmingReturn(null);
+    }
   };
 
   const handleEdit = (ret: ReturnOperation) => {
@@ -259,14 +267,16 @@ export default function Returns() {
                               ? 'text-green-700'
                               : 'text-amber-700'
                           }`}>
-                            {ret.confirmed ? '✓ Подтверждено' : '⏳ Ожидает'}
+                            {ret.confirmed 
+                              ? `✓ Подтверждено${ret.confirmedBy ? ` (${ret.confirmedBy === 'admin' ? 'Руководитель' : 'Кладовщик'})` : ''}` 
+                              : '⏳ Ожидает'}
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             {!ret.confirmed && (
                               <button
-                                onClick={() => handleConfirm(ret.id)}
+                                onClick={() => handleConfirm(ret)}
                                 className="text-green-700 hover:text-green-900 text-lg"
                                 title="Подтвердить позицию"
                               >
@@ -354,6 +364,61 @@ export default function Returns() {
         </div>
       )}
 
+      {/* Confirm Role Modal */}
+      {confirmingReturn && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Подтверждение возврата</h3>
+            
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 mb-2">
+                Подтвердить возврат позиции:
+              </p>
+              <p className="text-sm font-medium text-gray-800">
+                {getNomenclatureName(confirmingReturn.nomenclatureId)} — {confirmingReturn.quantity} {UNIT_LABELS[getNomenclatureUnit(confirmingReturn.nomenclatureId)!]}
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm font-medium text-gray-700 mb-3">Кто подтверждает:</p>
+              <div className="space-y-2">
+                <button
+                  onClick={() => confirmAsRole('admin')}
+                  className="w-full px-4 py-3 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-left transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">👨‍💼</span>
+                    <div>
+                      <p className="font-medium text-gray-800">Руководитель</p>
+                      <p className="text-xs text-gray-600">Подтвердить как руководитель подразделения</p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => confirmAsRole('storekeeper')}
+                  className="w-full px-4 py-3 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg text-left transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">📦</span>
+                    <div>
+                      <p className="font-medium text-gray-800">Кладовщик</p>
+                      <p className="text-xs text-gray-600">Подтвердить как кладовщик</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setConfirmingReturn(null)}
+              className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Info */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <h4 className="font-semibold text-blue-800 text-sm mb-2">ℹ️ О возвратах</h4>
@@ -361,7 +426,8 @@ export default function Returns() {
           <li>• Возвраты создаются сотрудниками при возврате лекарств на склад</li>
           <li>• Возвраты одного сотрудника за один день объединяются в один лист</li>
           <li>• После возврата остаток сотрудника увеличивается</li>
-          <li>• Каждая позиция должна быть подтверждена перед архивацией</li>
+          <li>• Каждая позиция должна быть подтверждена руководителем или кладовщиком</li>
+          <li>• Лист можно отправить в архив только после подтверждения всех позиций</li>
           <li>• Можно изменить количество и причину возврата</li>
           <li>• Все изменения записываются в журнал</li>
         </ul>
