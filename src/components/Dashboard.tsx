@@ -10,16 +10,11 @@ export default function Dashboard() {
   const getEmployeeStock = useStore(s => s.getEmployeeStock);
   const getEmployeeStockAtDate = useStore(s => s.getEmployeeStockAtDate);
   const markNotificationRead = useStore(s => s.markNotificationRead);
-  const markAllNotificationsRead = useStore(s => s.markAllNotificationsRead);
   const markMessageRead = useStore(s => s.markMessageRead);
 
   const activeEmployees = employees.filter(e => e.status === 'active');
   const unreadNotifications = notifications.filter(n => !n.read && n.type !== 'message');
   const unreadMessages = messages.filter(m => m.toId === 'admin' && !m.read);
-  
-  // Уведомления о превышении лимита расхода
-  const expenseLimitNotifications = notifications.filter(n => n.type === 'expense_limit');
-  const unreadExpenseLimitNotifications = expenseLimitNotifications.filter(n => !n.read);
 
   // Вычисляем предыдущий месяц
   const today = new Date();
@@ -115,61 +110,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ⚠️ Блок уведомлений о превышении лимита расхода */}
-      {expenseLimitNotifications.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-red-200 overflow-hidden">
-          <div className="p-4 border-b border-red-100 bg-gradient-to-r from-red-50 to-orange-50 flex items-center justify-between">
-            <h3 className="font-semibold text-red-800 flex items-center gap-2">
-              ⚠️ Уведомления о превышении лимита расхода (6%)
-              <span className="bg-red-500 text-white text-xs rounded-full px-2.5 py-0.5 font-bold">
-                {unreadExpenseLimitNotifications.length}
-              </span>
-            </h3>
-            {unreadExpenseLimitNotifications.length > 0 && (
-              <button
-                onClick={markAllNotificationsRead}
-                className="text-xs text-red-600 hover:text-red-800 underline"
-              >
-                Прочитать все
-              </button>
-            )}
-          </div>
-          <div className="divide-y divide-red-50">
-            {expenseLimitNotifications.map(notification => (
-              <div
-                key={notification.id}
-                onClick={() => handleNotificationClick(notification.id)}
-                className={`p-4 cursor-pointer transition-colors ${
-                  notification.read ? 'bg-white hover:bg-gray-50' : 'bg-red-50 hover:bg-red-100'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-xl flex-shrink-0">
-                    {notification.read ? '✅' : '🚨'}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className={`font-medium text-sm ${notification.read ? 'text-gray-600' : 'text-red-800'}`}>
-                        {notification.title}
-                      </p>
-                      {!notification.read && (
-                        <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
-                      )}
-                    </div>
-                    <p className={`text-sm mt-1 ${notification.read ? 'text-gray-500' : 'text-red-700'}`}>
-                      {notification.description}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {formatDateTime(notification.date)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Блоки сообщений и уведомлений */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Сообщения */}
@@ -221,27 +161,27 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Прочие уведомления */}
+        {/* Уведомления */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-4 border-b border-gray-200 flex items-center justify-between">
             <h3 className="font-semibold text-gray-800 flex items-center gap-2">
               🔔 Уведомления
-              {unreadNotifications.filter(n => n.type !== 'expense_limit').length > 0 && (
-                <span className="bg-amber-500 text-white text-xs rounded-full px-2 py-0.5">
-                  {unreadNotifications.filter(n => n.type !== 'expense_limit').length}
+              {unreadNotifications.length > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                  {unreadNotifications.length}
                 </span>
               )}
             </h3>
           </div>
           <div className="max-h-96 overflow-auto">
-            {unreadNotifications.filter(n => n.type !== 'expense_limit').length === 0 ? (
+            {unreadNotifications.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
-                <div className="text-3xl mb-2">🔔</div>
-                <p className="text-sm">Нет других непрочитанных уведомлений</p>
+                <div className="text-3xl mb-2">🔕</div>
+                <p className="text-sm">Нет непрочитанных уведомлений</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
-                {unreadNotifications.filter(n => n.type !== 'expense_limit').slice(0, 5).map(notification => (
+                {unreadNotifications.slice(0, 5).map(notification => (
                   <div
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification.id)}
@@ -249,6 +189,7 @@ export default function Dashboard() {
                       notification.type === 'overexpense' ? 'hover:bg-red-50' :
                       notification.type === 'inactivity' ? 'hover:bg-amber-50' :
                       notification.type === 'return' ? 'hover:bg-blue-50' :
+                      notification.type === 'expense_limit' ? 'hover:bg-red-50' :
                       'hover:bg-gray-50'
                     }`}
                   >
@@ -258,7 +199,8 @@ export default function Dashboard() {
                          notification.type === 'inactivity' ? '⏰' :
                          notification.type === 'return' ? '↩️' :
                          notification.type === 'message' ? '💬' :
-                         notification.type === 'price_change' ? '💰' : 'ℹ️'}
+                         notification.type === 'price_change' ? '💰' : 
+                         notification.type === 'expense_limit' ? '⚠️' : 'ℹ️'}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-gray-800">{notification.title}</p>
