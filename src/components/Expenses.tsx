@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-
 import { useStore } from '../store/useStore';
 
 export default function Expenses() {
@@ -17,7 +16,22 @@ export default function Expenses() {
   
   // Состояние для отслеживания отправленных уведомлений
   const [notifiedSheets, setNotifiedSheets] = useState<Set<number>>(new Set());
-  
+
+  // Состояние для создания нового листа расхода
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newSheet, setNewSheet] = useState({
+    date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }),
+    employee: 'Иванов Иван Иванович',
+    patient: '',
+    birthDate: '',
+    visitCategory: 'Экстренный вызов',
+    therapyName: '',
+    therapyCost: 0,
+    items: [] as { name: string; type: string; quantity: number; unitPrice: number; sum: number }[],
+  });
+  const [newItem, setNewItem] = useState({ name: '', type: 'Лекарство', quantity: 1, unitPrice: 0 });
+  const [limitExceededMessage, setLimitExceededMessage] = useState('');
+
   // Функция для форматирования ФИО в инициалы
   const formatPatientName = (fullName: string) => {
     const parts = fullName.split(' ');
@@ -27,25 +41,8 @@ export default function Expenses() {
     return fullName;
   };
   
-  // Функция для проверки превышения лимита и создания уведомления
-  const checkExpenseLimit = (sheet: any) => {
-    const totalSum = sheet.items.reduce((sum: number, item: any) => sum + item.sum, 0);
-    const limit = sheet.therapyCost * 0.06;
-    
-    if (totalSum >= limit && !notifiedSheets.has(sheet.id)) {
-      addNotification({
-        type: 'expense_limit',
-        title: 'Превышение лимита расхода препаратов',
-        description: `Лист расхода от ${sheet.date}: ${sheet.employee} - ${formatPatientName(sheet.patient)}. Итого по препаратам: ${totalSum.toLocaleString('ru')} ₽ (лимит: ${limit.toLocaleString('ru')} ₽)`,
-        date: new Date().toISOString(),
-        read: false,
-      });
-      setNotifiedSheets(prev => new Set(prev).add(sheet.id));
-    }
-  };
-
   // Тестовые данные листов расхода (10 пациентов)
-  const expenseSheets = [
+  const [expenseSheets, setExpenseSheets] = useState([
     {
       id: 1,
       date: '15.08.26',
@@ -239,7 +236,37 @@ export default function Expenses() {
       ]
       // Итого: 690 ₽ > 480 ₽ (превышение)
     }
-  ];
+  ]);
+
+  // Функция для проверки превышения лимита и создания уведомления
+  const checkExpenseLimit = (sheet: any) => {
+    const totalSum = sheet.items.reduce((sum: number, item: any) => sum + item.sum, 0);
+    const limit = sheet.therapyCost * 0.06;
+    
+    if (totalSum >= limit && !notifiedSheets.has(sheet.id)) {
+      addNotification({
+        type: 'expense_limit',
+        title: 'Превышение лимита расхода препаратов',
+        description: `Лист расхода от ${sheet.date}: ${sheet.employee} — ${formatPatientName(sheet.patient)}. Итого по препаратам: ${totalSum.toLocaleString('ru')} ₽ (лимит 6%: ${limit.toLocaleString('ru')} ₽)`,
+        date: new Date().toISOString(),
+        read: false,
+      });
+      setNotifiedSheets(prev => new Set(prev).add(sheet.id));
+    }
+  };
+
+  // Проверяем лимит при монтировании и при изменении листов
+  useEffect(() => {
+    expenseSheets.forEach(sheet => {
+      if (!archivedSheets.includes(sheet.id)) {
+        const totalSum = sheet.items.reduce((sum: number, item: any) => sum + item.sum, 0);
+        const limit = sheet.therapyCost * 0.06;
+        if (totalSum >= limit) {
+          checkExpenseLimit(sheet);
+        }
+      }
+    });
+  }, []);
 
   const handleExportExcel = () => {
     alert('Экспорт в Excel (демо-функция)\nВ реальном приложении здесь будет генерация XLSX через SheetJS');
@@ -253,7 +280,6 @@ export default function Expenses() {
 
   // Функция для сохранения изменений
   const handleSaveEdit = () => {
-    // В реальном приложении здесь будет отправка данных на сервер
     console.log('Сохранение изменений:', editData);
     setEditingSheet(null);
     setEditData(null);
@@ -270,10 +296,75 @@ export default function Expenses() {
     setArchivedSheets([...archivedSheets, sheetId]);
   };
 
+  // Добавление препарата в новый лист
+  const handleAddItem = () => {
+    if (!newItem.name || newItem.unitPrice <= 0 || newItem.quantity <= 0) return;
+    const sum = newItem.quantity * newItem.unitPrice;
+    setNewSheet({
+      ...newSheet,
+      items: [...newSheet.items, { ...newItem, sum }],
+    });
+    setNewItem({ name: '', type: 'Лекарство', quantity: 1, unitPrice: 0 });
+  };
+
+  // Удаление препарата из нового листа
+  const handleRemoveItem = (index: number) => {
+    setNewSheet({
+      ...newSheet,
+      items: newSheet.items.filter((_, i) => i !== index),
+    });
+  };
+
+  // Создание нового листа расхода
+  const handleCreateSheet = () => {
+    if (!newSheet.patient || !newSheet.therapyName || newSheet.therapyCost <= 0 || newSheet.items.length === 0) {
+      alert('Заполните все обязательные поля и добавьте хотя бы один препарат');
+      return;
+    }
+
+    const totalSum = newSheet.items.reduce((sum, item) => sum + item.sum, 0);
+    const limit = newSheet.therapyCost * 0.06;
+    const isOverLimit = totalSum >= limit;
+
+    const newId = Math.max(...expenseSheets.map(s => s.id)) + 1;
+    const createdSheet = { ...newSheet, id: newId };
+    setExpenseSheets([createdSheet, ...expenseSheets]);
+
+    if (isOverLimit) {
+      setLimitExceededMessage(
+        `⚠️ Лист расхода создан! Превышение лимита 6%: сумма препаратов ${totalSum.toLocaleString('ru')} ₽ ≥ лимит ${limit.toLocaleString('ru')} ₽. Уведомление отправлено руководителю.`
+      );
+      addNotification({
+        type: 'expense_limit',
+        title: 'Превышение лимита расхода препаратов',
+        description: `Лист расхода от ${newSheet.date}: ${newSheet.employee} — ${formatPatientName(newSheet.patient)}. Итого по препаратам: ${totalSum.toLocaleString('ru')} ₽ (лимит 6%: ${limit.toLocaleString('ru')} ₽)`,
+        date: new Date().toISOString(),
+        read: false,
+      });
+    } else {
+      setLimitExceededMessage(
+        `✅ Лист расхода создан! Лимит не превышен: сумма препаратов ${totalSum.toLocaleString('ru')} ₽ < лимит ${limit.toLocaleString('ru')} ₽.`
+      );
+    }
+
+    // Сброс формы
+    setNewSheet({
+      date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }),
+      employee: 'Иванов Иван Иванович',
+      patient: '',
+      birthDate: '',
+      visitCategory: 'Экстренный вызов',
+      therapyName: '',
+      therapyCost: 0,
+      items: [],
+    });
+    setShowCreateForm(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Карточки KPI */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Общая сумма расхода за месяц */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
@@ -293,27 +384,300 @@ export default function Expenses() {
             <p className="text-xs text-gray-400 mt-1">за август 2026</p>
           </div>
         </div>
+
+        {/* Превышений лимита */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
+          <div className="pl-2">
+            <p className="text-sm text-gray-500">Превышений лимита 6%</p>
+            <p className="text-2xl font-bold text-amber-700 mt-1">
+              {expenseSheets.filter(s => {
+                const total = s.items.reduce((sum: number, item: any) => sum + item.sum, 0);
+                return total >= s.therapyCost * 0.06;
+              }).length}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">уведомления отправлены</p>
+          </div>
+        </div>
       </div>
+
+      {/* Кнопка создания нового листа расхода */}
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold text-gray-800">Листы расхода</h3>
+        <button
+          onClick={() => { setShowCreateForm(true); setLimitExceededMessage(''); }}
+          className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2 shadow-sm"
+        >
+          ➕ Создать лист расхода
+        </button>
+      </div>
+
+      {/* Сообщение о результате создания */}
+      {limitExceededMessage && (
+        <div className={`p-4 rounded-xl border ${
+          limitExceededMessage.startsWith('⚠️') 
+            ? 'bg-red-50 border-red-200 text-red-800' 
+            : 'bg-green-50 border-green-200 text-green-800'
+        }`}>
+          <p className="font-medium">{limitExceededMessage}</p>
+          <button 
+            onClick={() => setLimitExceededMessage('')}
+            className="text-sm underline mt-1 opacity-70 hover:opacity-100"
+          >
+            Скрыть
+          </button>
+        </div>
+      )}
+
+      {/* Форма создания нового листа расхода */}
+      {showCreateForm && (
+        <div className="bg-white rounded-xl shadow-sm border border-blue-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 border-b border-gray-200">
+            <h3 className="text-lg font-bold text-gray-800">Новый лист расхода</h3>
+            <p className="text-sm text-gray-500 mt-1">Заполните данные и добавьте препараты. При превышении лимита 6% от стоимости терапии — руководителю придёт уведомление.</p>
+          </div>
+          <div className="p-5 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
+                <input
+                  type="text"
+                  value={newSheet.date}
+                  onChange={(e) => setNewSheet({ ...newSheet, date: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Сотрудник</label>
+                <select
+                  value={newSheet.employee}
+                  onChange={(e) => setNewSheet({ ...newSheet, employee: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                >
+                  <option>Иванов Иван Иванович</option>
+                  <option>Сидорова Анна Михайловна</option>
+                  <option>Морозова Елена Владимировна</option>
+                  <option>Петров Петр Сергеевич</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Пациент (ФИО) *</label>
+                <input
+                  type="text"
+                  value={newSheet.patient}
+                  onChange={(e) => setNewSheet({ ...newSheet, patient: e.target.value })}
+                  placeholder="Иванов Иван Иванович"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Дата рождения</label>
+                <input
+                  type="text"
+                  value={newSheet.birthDate}
+                  onChange={(e) => setNewSheet({ ...newSheet, birthDate: e.target.value })}
+                  placeholder="01.01.1990"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Категория выезда</label>
+                <select
+                  value={newSheet.visitCategory}
+                  onChange={(e) => setNewSheet({ ...newSheet, visitCategory: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                >
+                  <option>Экстренный вызов</option>
+                  <option>Плановый вызов</option>
+                  <option>Повторный вызов</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Название терапии *</label>
+                <input
+                  type="text"
+                  value={newSheet.therapyName}
+                  onChange={(e) => setNewSheet({ ...newSheet, therapyName: e.target.value })}
+                  placeholder="Обезболивающая терапия"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Стоимость терапии (₽) * — <span className="text-xs text-gray-500">лимит 6% = {(newSheet.therapyCost * 0.06).toLocaleString('ru')} ₽</span>
+              </label>
+              <input
+                type="number"
+                value={newSheet.therapyCost || ''}
+                onChange={(e) => setNewSheet({ ...newSheet, therapyCost: Number(e.target.value) })}
+                placeholder="10000"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              />
+            </div>
+
+            {/* Добавление препаратов */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h4 className="font-medium text-gray-800 mb-3">Добавить препарат / расходник</h4>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+                <div className="md:col-span-2">
+                  <label className="block text-xs text-gray-500 mb-1">Название</label>
+                  <input
+                    type="text"
+                    value={newItem.name}
+                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                    placeholder="Анальгин 50% 2мл"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Тип</label>
+                  <select
+                    value={newItem.type}
+                    onChange={(e) => setNewItem({ ...newItem, type: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  >
+                    <option>Лекарство</option>
+                    <option>Расходник</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Кол-во</label>
+                  <input
+                    type="number"
+                    value={newItem.quantity}
+                    onChange={(e) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
+                    min={1}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-500 mb-1">Цена (₽)</label>
+                    <input
+                      type="number"
+                      value={newItem.unitPrice || ''}
+                      onChange={(e) => setNewItem({ ...newItem, unitPrice: Number(e.target.value) })}
+                      placeholder="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAddItem}
+                    className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium self-end"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Список добавленных препаратов */}
+              {newSheet.items.length > 0 && (
+                <div className="mt-4">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 text-left">
+                        <th className="px-3 py-2 font-medium text-gray-600">Название</th>
+                        <th className="px-3 py-2 font-medium text-gray-600 text-center">Тип</th>
+                        <th className="px-3 py-2 font-medium text-gray-600 text-center">Кол-во</th>
+                        <th className="px-3 py-2 font-medium text-gray-600 text-right">Цена</th>
+                        <th className="px-3 py-2 font-medium text-gray-600 text-right">Сумма</th>
+                        <th className="px-3 py-2 font-medium text-gray-600 text-center">Действие</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {newSheet.items.map((item, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-3 py-2 font-medium text-gray-800">{item.name}</td>
+                          <td className="px-3 py-2 text-center">
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              item.type === 'Лекарство' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
+                            }`}>{item.type}</span>
+                          </td>
+                          <td className="px-3 py-2 text-center text-gray-700">{item.quantity}</td>
+                          <td className="px-3 py-2 text-right text-gray-600">{item.unitPrice}</td>
+                          <td className="px-3 py-2 text-right font-medium text-orange-700">{item.sum}</td>
+                          <td className="px-3 py-2 text-center">
+                            <button onClick={() => handleRemoveItem(index)} className="text-red-500 hover:text-red-700">✕</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-gray-50 font-bold">
+                        <td className="px-3 py-2" colSpan={4}>ИТОГО</td>
+                        <td className="px-3 py-2 text-right text-red-700">
+                          {newSheet.items.reduce((s, i) => s + i.sum, 0).toLocaleString('ru')} ₽
+                        </td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+
+                  {/* Индикатор лимита */}
+                  {newSheet.therapyCost > 0 && (
+                    <div className={`mt-3 p-3 rounded-lg border ${
+                      newSheet.items.reduce((s, i) => s + i.sum, 0) >= newSheet.therapyCost * 0.06
+                        ? 'bg-red-50 border-red-200'
+                        : 'bg-green-50 border-green-200'
+                    }`}>
+                      <p className="text-sm font-medium">
+                        {newSheet.items.reduce((s, i) => s + i.sum, 0) >= newSheet.therapyCost * 0.06 ? (
+                          <span className="text-red-700">
+                            ⚠️ Превышение лимита! Сумма препаратов ({newSheet.items.reduce((s, i) => s + i.sum, 0).toLocaleString('ru')} ₽) ≥ лимита 6% ({(newSheet.therapyCost * 0.06).toLocaleString('ru')} ₽). Руководителю будет отправлено уведомление.
+                          </span>
+                        ) : (
+                          <span className="text-green-700">
+                            ✅ Лимит не превышен. Сумма препаратов ({newSheet.items.reduce((s, i) => s + i.sum, 0).toLocaleString('ru')} ₽) &lt; лимита 6% ({(newSheet.therapyCost * 0.06).toLocaleString('ru')} ₽).
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => { setShowCreateForm(false); setLimitExceededMessage(''); }}
+                className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={handleCreateSheet}
+                className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                Создать лист расхода
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Листы расхода - показываем все по очереди */}
       {expenseSheets
         .filter(sheet => !archivedSheets.includes(sheet.id))
         .map((sheet) => {
-        const totalSum = sheet.items.reduce((sum, item) => sum + item.sum, 0);
+        const totalSum = sheet.items.reduce((sum: number, item: any) => sum + item.sum, 0);
         const limit = sheet.therapyCost * 0.06;
         const isOverLimit = totalSum >= limit;
         
-        // Проверяем превышение лимита при первом рендере
-        if (isOverLimit) {
-          checkExpenseLimit(sheet);
-        }
-        
         return (
-          <div key={sheet.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div key={sheet.id} className={`bg-white rounded-xl shadow-sm border overflow-hidden ${isOverLimit ? 'border-red-200' : 'border-gray-200'}`}>
             {/* Шапка листа расхода */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
+            <div className={`p-6 border-b border-gray-200 ${isOverLimit ? 'bg-gradient-to-r from-red-50 to-orange-50' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-800">Лист расхода</h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-bold text-gray-800">Лист расхода</h3>
+                  {isOverLimit && (
+                    <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full border border-red-200 animate-pulse">
+                      ⚠️ ЛИМИТ ПРЕВЫШЕН
+                    </span>
+                  )}
+                </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(sheet)}
@@ -331,7 +695,7 @@ export default function Expenses() {
                     onClick={handleExportExcel}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
                   >
-                    📊 Скачать в Excel
+                    📊 Excel
                   </button>
                 </div>
               </div>
@@ -366,7 +730,7 @@ export default function Expenses() {
                   <span className="text-sm font-bold text-green-600">
                     {sheet.therapyCost.toLocaleString('ru')} ₽ 
                     <span className="text-xs font-normal text-gray-500 ml-1">
-                      ({(sheet.therapyCost * 0.06).toLocaleString('ru')} ₽)
+                      (лимит 6%: {(sheet.therapyCost * 0.06).toLocaleString('ru')} ₽)
                     </span>
                   </span>
                 </div>
@@ -374,10 +738,26 @@ export default function Expenses() {
                   <span className="text-xs text-gray-500">Итого по препаратам:</span>
                   <span className={`text-sm font-bold ${isOverLimit ? 'text-red-600' : 'text-blue-600'}`}>
                     {totalSum.toLocaleString('ru')} ₽
-                    {isOverLimit && <span className="text-xs ml-2">⚠️ Превышен лимит 6%</span>}
+                    {isOverLimit && <span className="text-xs ml-2 text-red-500">⚠️ Превышен лимит 6%</span>}
                   </span>
                 </div>
               </div>
+
+              {/* Прогресс-бар лимита */}
+              {sheet.therapyCost > 0 && (
+                <div className="mt-3">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Использование лимита</span>
+                    <span>{Math.round((totalSum / limit) * 100)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all ${isOverLimit ? 'bg-red-500' : 'bg-blue-500'}`}
+                      style={{ width: `${Math.min((totalSum / limit) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Содержимое листа расхода */}
@@ -395,7 +775,7 @@ export default function Expenses() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {sheet.items.map((item, index) => (
+                    {sheet.items.map((item: any, index: number) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
                         <td className="px-4 py-3 text-center">

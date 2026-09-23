@@ -11,15 +11,16 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const notifications = useStore(s => s.notifications);
   const unreadCount = notifications.filter(n => !n.read).length;
+  const expenseLimitUnreadCount = notifications.filter(n => !n.read && n.type === 'expense_limit').length;
 
   const menuItems = [
-    { id: 'dashboard', label: 'Панель руководителя', icon: '📊' },
+    { id: 'dashboard', label: 'Панель руководителя', icon: '📊', badge: expenseLimitUnreadCount },
     { id: 'employees', label: 'Сотрудники', icon: '👥' },
     { id: 'nomenclature', label: 'Номенклатура', icon: '💊' },
     { id: 'income', label: 'Приход к сотруднику', icon: '📥' },
     { id: 'expenses', label: 'Расход у сотрудника', icon: '📤' },
     { id: 'returns', label: 'Возвраты', icon: '↩️' },
-    { id: 'chat', label: 'Сообщения', icon: '💬', badge: unreadCount },
+    { id: 'chat', label: 'Сообщения', icon: '💬', badge: notifications.filter(n => !n.read && n.type === 'message').length },
     { id: 'report', label: 'Отчеты', icon: '📄' },
     { id: 'journal', label: 'Журнал', icon: '📜' },
   ];
@@ -68,12 +69,19 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
-              <span className="text-lg flex-shrink-0">{item.icon}</span>
+              <span className="text-lg flex-shrink-0 relative">
+                {item.icon}
+                {item.id === 'dashboard' && expenseLimitUnreadCount > 0 && (
+                  <span className="absolute -top-1 -right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                )}
+              </span>
               {sidebarOpen && (
                 <>
                   <span className="text-sm flex-1">{item.label}</span>
                   {item.badge && item.badge > 0 && (
-                    <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className={`text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center ${
+                      item.id === 'dashboard' ? 'bg-red-500' : 'bg-blue-500'
+                    }`}>
                       {item.badge}
                     </span>
                   )}
@@ -82,6 +90,22 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
             </button>
           ))}
         </nav>
+        
+        {/* Индикатор уведомлений внизу сайдбара */}
+        {sidebarOpen && unreadCount > 0 && (
+          <div className="p-3 border-t border-gray-200">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-xs font-medium text-red-700">
+                🔔 Непрочитанных: {unreadCount}
+              </p>
+              {expenseLimitUnreadCount > 0 && (
+                <p className="text-xs text-red-600 mt-1">
+                  ⚠️ Превышений лимита: {expenseLimitUnreadCount}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </aside>
 
       {/* Main Content */}
@@ -105,6 +129,19 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
             </div>
           )}
           <div className="flex items-center gap-4">
+            {/* Кнопка уведомлений в шапке */}
+            <button 
+              onClick={() => onNavigate('dashboard')}
+              className="relative p-2 rounded-lg hover:bg-gray-100 transition"
+              title="Уведомления"
+            >
+              <span className="text-xl">🔔</span>
+              {expenseLimitUnreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
+                  {expenseLimitUnreadCount > 9 ? '9+' : expenseLimitUnreadCount}
+                </span>
+              )}
+            </button>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">👨‍💼</div>
               <div className="text-sm font-medium text-gray-800">Руководитель</div>
