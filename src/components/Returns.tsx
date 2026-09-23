@@ -22,6 +22,14 @@ export default function Returns() {
   const [archivedSheets, setArchivedSheets] = useState<Set<string>>(new Set());
 
   const getEmployeeName = (id: string) => employees.find(e => e.id === id)?.fullName || id;
+  
+  const formatEmployeeName = (fullName: string) => {
+    const parts = fullName.split(' ');
+    if (parts.length >= 3) {
+      return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
+    }
+    return fullName;
+  };
   const getNomenclatureName = (id: string) => nomenclature.find(n => n.id === id)?.name || id;
   const getNomenclatureUnit = (id: string) => nomenclature.find(n => n.id === id)?.unit;
 
@@ -114,7 +122,7 @@ export default function Returns() {
                       Лист возврата от {formatDate(sheet.date)}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">
-                      Сотрудник: <span className="font-medium">{getEmployeeName(sheet.employeeId)}</span>
+                      Сотрудник: <span className="font-medium">{formatEmployeeName(getEmployeeName(sheet.employeeId))}</span>
                     </p>
                   </div>
                 </div>
