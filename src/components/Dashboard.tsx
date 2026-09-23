@@ -75,9 +75,14 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   return (
     <div className="space-y-6">
       {/* Текущий месяц */}
-      <h2 className="text-lg font-semibold text-gray-800 capitalize">
-        {new Date().toLocaleDateString('ru-RU', { month: 'long' })} {new Date().getFullYear()}
-      </h2>
+      <div>
+        <h2 className="text-lg font-semibold text-gray-800 capitalize">
+          {new Date().toLocaleDateString('ru-RU', { month: 'long' })} {new Date().getFullYear()}
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Данные о приходе и расходе указаны за предыдущий месяц ({previousMonthLabel}), остаток — на начало текущего месяца
+        </p>
+      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -86,8 +91,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-green-500"></div>
           <div className="pl-2">
             <p className="text-sm text-gray-500">Приход</p>
+            <p className="text-xs text-gray-400">(за предыдущий месяц)</p>
             <p className="text-2xl font-bold text-green-700 mt-1">{totalIncome.toLocaleString('ru')} ₽</p>
-            <p className="text-xs text-gray-400 mt-1">за {previousMonthLabel}</p>
+            <p className="text-xs text-gray-400 mt-1">{previousMonthLabel}</p>
           </div>
         </div>
 
@@ -96,8 +102,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
           <div className="pl-2">
             <p className="text-sm text-gray-500">Расход</p>
+            <p className="text-xs text-gray-400">(за предыдущий месяц)</p>
             <p className="text-2xl font-bold text-red-700 mt-1">{totalExpense.toLocaleString('ru')} ₽</p>
-            <p className="text-xs text-gray-400 mt-1">за {previousMonthLabel}</p>
+            <p className="text-xs text-gray-400 mt-1">{previousMonthLabel}</p>
           </div>
         </div>
 
@@ -106,6 +113,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
           <div className="pl-2">
             <p className="text-sm text-gray-500">Остаток</p>
+            <p className="text-xs text-gray-400">(на начало текущего месяца)</p>
             <p className="text-2xl font-bold text-blue-700 mt-1">{totalStockValue.toLocaleString('ru')} ₽</p>
             <p className="text-xs text-gray-400 mt-1">на подразделение</p>
           </div>
@@ -247,9 +255,18 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               <tr className="bg-gray-50 text-left">
                 <th className="px-4 py-3 font-medium text-gray-600">Сотрудник</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Статус</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">Приход (₽)</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">Расход (₽)</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">Баланс (₽)</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-right">
+                  <div>Приход (₽)</div>
+                  <div className="text-xs font-normal text-gray-400">за {previousMonthLabel}</div>
+                </th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-right">
+                  <div>Расход (₽)</div>
+                  <div className="text-xs font-normal text-gray-400">за {previousMonthLabel}</div>
+                </th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-right">
+                  <div>Баланс (₽)</div>
+                  <div className="text-xs font-normal text-gray-400">приход − расход</div>
+                </th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Листов расхода</th>
               </tr>
             </thead>
