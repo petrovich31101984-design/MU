@@ -535,7 +535,7 @@ export const useStore = create<AppState>((set, get) => ({
     const returned = state.returns
       .filter(r => r.employeeId === employeeId && r.nomenclatureId === nomenclatureId)
       .reduce((sum, r) => sum + (r.corrected && r.newQuantity !== undefined ? r.newQuantity : r.quantity), 0);
-    return initial - consumed + returned;
+    return initial - consumed - returned;
   },
 
   getEmployeeStockAtDate: (employeeId, nomenclatureId, date) => {
@@ -549,6 +549,6 @@ export const useStore = create<AppState>((set, get) => ({
     const returned = state.returns
       .filter(r => r.employeeId === employeeId && r.nomenclatureId === nomenclatureId && r.date < date)
       .reduce((sum, r) => sum + (r.corrected && r.newQuantity !== undefined ? r.newQuantity : r.quantity), 0);
-    return initial - consumed + returned;
+    return initial - consumed - returned;
   },
 }));
