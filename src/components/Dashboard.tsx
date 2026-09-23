@@ -1,30 +1,56 @@
 import { useStore } from '../store/useStore';
+import { formatDateTime } from '../utils/dateFormat';
 
 export default function Dashboard() {
   const employees = useStore(s => s.employees);
+  const nomenclature = useStore(s => s.nomenclature);
   const notifications = useStore(s => s.notifications);
   const messages = useStore(s => s.messages);
+  const getCurrentPrice = useStore(s => s.getCurrentPrice);
+  const getEmployeeStock = useStore(s => s.getEmployeeStock);
+  const getEmployeeStockAtDate = useStore(s => s.getEmployeeStockAtDate);
   const markNotificationRead = useStore(s => s.markNotificationRead);
   const markMessageRead = useStore(s => s.markMessageRead);
 
   const activeEmployees = employees.filter(e => e.status === 'active');
-  const unreadNotifications = notifications.filter(n => !n.read);
+  const unreadNotifications = notifications.filter(n => !n.read && n.type !== 'message');
   const unreadMessages = messages.filter(m => m.toId === 'admin' && !m.read);
 
-  const currentMonth = new Date().toLocaleDateString('ru-RU', { month: 'long' });
-  const currentYear = new Date().getFullYear();
+  // Вычисляем предыдущий месяц
+  const today = new Date();
+  const previousMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const previousMonth = `${previousMonthDate.getFullYear()}-${String(previousMonthDate.getMonth() + 1).padStart(2, '0')}`;
+  const previousMonthLabel = `${previousMonthDate.toLocaleDateString('ru-RU', { month: 'long' })} ${previousMonthDate.getFullYear()}`;
 
-  // Получаем данные за предыдущий месяц
-  const previousMonth = new Date();
-  previousMonth.setMonth(previousMonth.getMonth() - 1);
-  const previousMonthStr = `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, '0')}`;
+  // 1-е число текущего месяца для расчёта остатка
+  const currentMonthStart = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
 
-  const totalIncome = employees.reduce((sum, emp) => {
-    return sum + useStore.getState().getEmployeeIncome(emp.id, previousMonthStr);
-  }, 0);
+  // Общий остаток на подразделение на 1-е число текущего месяца
+  let totalStockValue = 0;
+  activeEmployees.forEach(emp => {
+    nomenclature.forEach(nom => {
+      const stock = getEmployeeStockAtDate(emp.id, nom.id, currentMonthStart);
+      if (stock > 0) {
+        totalStockValue += stock * getCurrentPrice(nom.id);
+      }
+    });
+  });
 
-  const totalExpense = 0; // Пока заглушка
-  const totalStock = 0; // Пока заглушка
+  // Сводка по сотрудникам за предыдущий месяц
+  const employeeSummary = activeEmployees.map(emp => {
+    const income = useStore.getState().getEmployeeIncome(emp.id, previousMonth);
+    const expense = useStore.getState().getEmployeeExpenseTotal(emp.id, previousMonth);
+    return { emp, income, expense };
+  });
+
+  const totalIncome = employeeSummary.reduce((s, e) => s + e.income, 0);
+  const totalExpense = employeeSummary.reduce((s, e) => s + e.expense, 0);
+
+  const getEmployeeName = (id: string) => {
+    if (id === 'storekeeper') return 'Кладовщик';
+    const emp = employees.find(e => e.id === id);
+    return emp?.fullName || id;
+  };
 
   const handleNotificationClick = (id: string) => {
     markNotificationRead(id);
@@ -36,39 +62,44 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Текущий месяц */}
       <h2 className="text-lg font-semibold text-gray-800 capitalize">
-        {currentMonth} {currentYear}
+        {new Date().toLocaleDateString('ru-RU', { month: 'long' })} {new Date().getFullYear()}
       </h2>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Приход */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-green-500"></div>
           <div className="pl-2">
             <p className="text-sm text-gray-500">Приход</p>
             <p className="text-2xl font-bold text-green-700 mt-1">{totalIncome.toLocaleString('ru')} ₽</p>
-            <p className="text-xs text-gray-400 mt-1">за предыдущий месяц</p>
+            <p className="text-xs text-gray-400 mt-1">за {previousMonthLabel}</p>
           </div>
         </div>
 
+        {/* Расход */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
           <div className="pl-2">
             <p className="text-sm text-gray-500">Расход</p>
             <p className="text-2xl font-bold text-red-700 mt-1">{totalExpense.toLocaleString('ru')} ₽</p>
-            <p className="text-xs text-gray-400 mt-1">за предыдущий месяц</p>
+            <p className="text-xs text-gray-400 mt-1">за {previousMonthLabel}</p>
           </div>
         </div>
 
+        {/* Остаток */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
           <div className="pl-2">
             <p className="text-sm text-gray-500">Остаток</p>
-            <p className="text-2xl font-bold text-blue-700 mt-1">{totalStock.toLocaleString('ru')} ₽</p>
+            <p className="text-2xl font-bold text-blue-700 mt-1">{totalStockValue.toLocaleString('ru')} ₽</p>
             <p className="text-xs text-gray-400 mt-1">на подразделение</p>
           </div>
         </div>
 
+        {/* Сотрудников активно */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-700"></div>
           <div className="pl-2">
@@ -79,8 +110,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Messages and Notifications */}
+      {/* Блоки сообщений и уведомлений */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Сообщения */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-4 border-b border-gray-200 flex items-center justify-between">
             <h3 className="font-semibold text-gray-800 flex items-center gap-2">
@@ -108,15 +140,15 @@ export default function Dashboard() {
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-sm flex-shrink-0">
-                        👨‍⚕️
+                        {msg.fromId === 'storekeeper' ? '📦' : '👨‍⚕️'}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <p className="font-medium text-sm text-gray-800 truncate">
-                            {employees.find(e => e.id === msg.fromId)?.fullName || 'Сотрудник'}
+                            {getEmployeeName(msg.fromId)}
                           </p>
                           <span className="text-xs text-gray-400 flex-shrink-0">
-                            {msg.date.split('T')[1] || msg.date}
+                            {formatDateTime(msg.date).split(' ')[1]}
                           </span>
                         </div>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-2">{msg.text}</p>
@@ -129,6 +161,7 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Уведомления */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-4 border-b border-gray-200 flex items-center justify-between">
             <h3 className="font-semibold text-gray-800 flex items-center gap-2">
@@ -155,6 +188,7 @@ export default function Dashboard() {
                     className={`p-4 cursor-pointer transition-colors ${
                       notification.type === 'overexpense' ? 'hover:bg-red-50' :
                       notification.type === 'inactivity' ? 'hover:bg-amber-50' :
+                      notification.type === 'return' ? 'hover:bg-blue-50' :
                       'hover:bg-gray-50'
                     }`}
                   >
@@ -170,7 +204,7 @@ export default function Dashboard() {
                         <p className="font-medium text-sm text-gray-800">{notification.title}</p>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-2">{notification.description}</p>
                         <p className="text-xs text-gray-400 mt-1">
-                          {notification.date.replace('T', ' ')}
+                          {formatDateTime(notification.date)}
                         </p>
                       </div>
                     </div>
@@ -182,7 +216,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Employee Summary */}
+      {/* Сотрудники - общая сводка */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="font-semibold text-gray-800">Сотрудники — общая сводка</h3>
@@ -201,15 +235,13 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {activeEmployees.slice(0, 4).map(emp => {
-                const income = useStore.getState().getEmployeeIncome(emp.id, previousMonthStr);
-                const expense = 0; // Пока заглушка
-                const balance = income - expense;
+              {employeeSummary.filter(row => row.emp.status === 'active').slice(0, 4).map(row => {
+                const balance = row.income - row.expense;
                 return (
-                  <tr key={emp.id} className={`hover:bg-gray-50 ${balance < 0 ? 'bg-red-50' : ''}`}>
+                  <tr key={row.emp.id} className={`hover:bg-gray-50 ${balance < 0 ? 'bg-red-50' : ''}`}>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-gray-800">{emp.fullName}</div>
-                      <div className="text-xs text-gray-500">№{emp.personalNumber}</div>
+                      <div className="font-medium text-gray-800">{row.emp.fullName}</div>
+                      <div className="text-xs text-gray-500">№{row.emp.personalNumber}</div>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 border border-green-200">
@@ -217,16 +249,16 @@ export default function Dashboard() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right text-green-700 font-medium">
-                      {income.toLocaleString('ru')}
+                      {row.income.toLocaleString('ru')}
                     </td>
                     <td className="px-4 py-3 text-right text-orange-700 font-medium">
-                      {expense.toLocaleString('ru')}
+                      {row.expense.toLocaleString('ru')}
                     </td>
                     <td className={`px-4 py-3 text-right font-bold ${balance < 0 ? 'text-red-600' : 'text-blue-700'}`}>
                       {balance >= 0 ? '+' : ''}{balance.toLocaleString('ru')}
                     </td>
                     <td className="px-4 py-3 text-center font-medium text-purple-700">
-                      0
+                      {useStore.getState().getEmployeePatients(row.emp.id).length}
                     </td>
                   </tr>
                 );
@@ -236,7 +268,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Быстрые действия */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
         <h3 className="font-semibold text-gray-800 mb-4">Быстрые действия</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
