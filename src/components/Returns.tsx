@@ -145,11 +145,11 @@ export default function Returns() {
                 <thead>
                   <tr className="bg-gray-50 text-left">
                     <th className="px-4 py-3 font-medium text-gray-600">Номенклатура</th>
-                    <th className="px-4 py-3 font-medium text-gray-600 text-center">Кол-во</th>
+                    <th className="px-4 py-3 font-medium text-gray-600">Кол-во</th>
                     <th className="px-4 py-3 font-medium text-gray-600">Причина возврата</th>
-                    <th className="px-4 py-3 font-medium text-gray-600 text-center">Статус</th>
+                    <th className="px-4 py-3 font-medium text-gray-600">Статус</th>
                     <th className="px-4 py-3 font-medium text-gray-600">Кем скорр.</th>
-                    <th className="px-4 py-3 font-medium text-gray-600 text-center">Действия</th>
+                    <th className="px-4 py-3 font-medium text-gray-600">Действия</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -161,9 +161,9 @@ export default function Returns() {
                           {getNomenclatureName(ret.nomenclatureId)}
                           {unit && <span className="text-xs text-gray-400 ml-1">({UNIT_LABELS[unit]})</span>}
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="px-4 py-3">
                           {correctingId === ret.id ? (
-                            <div className="flex items-center gap-1 justify-center">
+                            <div className="flex items-center gap-1">
                               <input
                                 type="number"
                                 value={newQuantity}
@@ -206,7 +206,7 @@ export default function Returns() {
                             {ret.reason || '—'}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-1 rounded-full ${
                             ret.corrected
                               ? 'bg-green-100 text-green-700'
@@ -219,7 +219,7 @@ export default function Returns() {
                           {ret.correctedBy === 'admin' ? 'Руководитель' :
                            ret.correctedBy === 'storekeeper' ? 'Кладовщик' : '—'}
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="px-4 py-3">
                           {!ret.corrected && correctingId !== ret.id && (
                             <button
                               onClick={() => { setCorrectingId(ret.id); setNewQuantity(String(ret.quantity)); }}
