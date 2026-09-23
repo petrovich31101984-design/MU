@@ -139,7 +139,7 @@ export default function Archive() {
                           </div>
                           <div>
                             <span className="text-gray-500">Сотрудник:</span>
-                            <span className="ml-1 font-medium">{sheet.employee}</span>
+                            <span className="ml-1 font-medium">{formatPatientName(sheet.employee)}</span>
                           </div>
                           <div>
                             <span className="text-gray-500">Пациент:</span>

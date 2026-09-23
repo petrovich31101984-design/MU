@@ -339,7 +339,7 @@ export default function Expenses() {
       addNotification({
         type: 'expense_limit',
         title: 'Превышение лимита расхода препаратов',
-        description: `Лист расхода от ${newSheet.date}: ${newSheet.employee} — ${formatPatientName(newSheet.patient)}. Итого по препаратам: ${totalSum.toLocaleString('ru')} ₽ (лимит 6%: ${limit.toLocaleString('ru')} ₽)`,
+        description: `Лист расхода от ${newSheet.date}: ${formatPatientName(newSheet.employee)} — ${formatPatientName(newSheet.patient)}. Итого по препаратам: ${totalSum.toLocaleString('ru')} ₽ (лимит 6%: ${limit.toLocaleString('ru')} ₽)`,
         date: new Date().toISOString(),
         read: false,
         relatedId: String(newId),
@@ -731,7 +731,7 @@ export default function Expenses() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">Сотрудник:</span>
-                  <span className="text-sm font-medium text-gray-800">{sheet.employee}</span>
+                  <span className="text-sm font-medium text-gray-800">{formatPatientName(sheet.employee)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">Пациент:</span>
