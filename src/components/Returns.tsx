@@ -146,6 +146,7 @@ export default function Returns() {
                   <tr className="bg-gray-50 text-left">
                     <th className="px-4 py-3 font-medium text-gray-600">Номенклатура</th>
                     <th className="px-4 py-3 font-medium text-gray-600 text-center">Кол-во</th>
+                    <th className="px-4 py-3 font-medium text-gray-600">Причина возврата</th>
                     <th className="px-4 py-3 font-medium text-gray-600 text-center">Статус</th>
                     <th className="px-4 py-3 font-medium text-gray-600">Кем скорр.</th>
                     <th className="px-4 py-3 font-medium text-gray-600 text-center">Действия</th>
@@ -194,6 +195,16 @@ export default function Returns() {
                               ) : ret.quantity}
                             </span>
                           )}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            ret.reason === 'Вышел срок годности' ? 'bg-red-100 text-red-700' :
+                            ret.reason === 'Поломка оборудования' ? 'bg-orange-100 text-orange-700' :
+                            ret.reason === 'Нарушение упаковки' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {ret.reason || '—'}
+                          </span>
                         </td>
                         <td className="px-4 py-3 text-center">
                           <span className={`text-xs px-2 py-1 rounded-full ${

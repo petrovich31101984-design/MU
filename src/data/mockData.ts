@@ -203,98 +203,108 @@ mockEmployees.filter(e => e.status === 'active').forEach(emp => {
 
 // Возвраты от сотрудников (несколько препаратов в один день)
 export const mockReturns: ReturnOperation[] = [
-  // Иванов Иван Иванович (emp_1) — 3 возврата в один день (10.01.2024)
+  // Иванов Иван Иванович (emp_1) — 3 возврата в один день (10.01.2026)
   {
     id: 'ret_1',
     employeeId: 'emp_1',
     nomenclatureId: 'nom_1',
     quantity: 5,
-    date: '2024-01-10',
+    date: '2026-01-10',
     corrected: false,
+    reason: 'Вышел срок годности',
   },
   {
     id: 'ret_2',
     employeeId: 'emp_1',
     nomenclatureId: 'nom_24',
     quantity: 2,
-    date: '2024-01-10',
+    date: '2026-01-10',
     corrected: true,
     correctedBy: 'admin',
     newQuantity: 1,
+    reason: 'Нарушение упаковки',
   },
   {
     id: 'ret_3',
     employeeId: 'emp_1',
     nomenclatureId: 'nom_21',
     quantity: 8,
-    date: '2024-01-10',
+    date: '2026-01-10',
     corrected: false,
+    reason: 'Другая причина',
   },
 
-  // Сидорова Анна Михайловна (emp_3) — 2 возврата в один день (12.01.2024)
+  // Сидорова Анна Михайловна (emp_3) — 2 возврата в один день (12.01.2026)
   {
     id: 'ret_4',
     employeeId: 'emp_3',
     nomenclatureId: 'nom_2',
     quantity: 3,
-    date: '2024-01-12',
+    date: '2026-01-12',
     corrected: true,
     correctedBy: 'storekeeper',
     newQuantity: 2,
+    reason: 'Вышел срок годности',
   },
   {
     id: 'ret_5',
     employeeId: 'emp_3',
     nomenclatureId: 'nom_29',
     quantity: 15,
-    date: '2024-01-12',
+    date: '2026-01-12',
     corrected: false,
+    reason: 'Нарушение упаковки',
   },
 
-  // Морозова Елена Владимировна (emp_5) — 3 возврата в один день (14.01.2024)
+  // Морозова Елена Владимировна (emp_5) — 3 возврата в один день (14.01.2026)
   {
     id: 'ret_6',
     employeeId: 'emp_5',
     nomenclatureId: 'nom_21',
     quantity: 10,
-    date: '2024-01-14',
+    date: '2026-01-14',
     corrected: false,
+    reason: 'Другая причина',
   },
   {
     id: 'ret_7',
     employeeId: 'emp_5',
     nomenclatureId: 'nom_7',
     quantity: 4,
-    date: '2024-01-14',
+    date: '2026-01-14',
     corrected: true,
     correctedBy: 'admin',
     newQuantity: 3,
+    reason: 'Вышел срок годности',
   },
   {
     id: 'ret_8',
     employeeId: 'emp_5',
     nomenclatureId: 'nom_25',
     quantity: 6,
-    date: '2024-01-14',
+    date: '2026-01-14',
     corrected: false,
+    reason: 'Поломка оборудования',
   },
 
-  // Козлов Дмитрий Алексеевич (emp_4) — 2 возврата в один день (16.01.2024)
+  // Козлов Дмитрий Алексеевич (emp_4) — 2 возврата в один день (16.01.2026)
   {
     id: 'ret_9',
     employeeId: 'emp_4',
     nomenclatureId: 'nom_25',
     quantity: 4,
-    date: '2024-01-16',
+    date: '2026-01-16',
     corrected: false,
+    reason: 'Поломка оборудования',
   },
   {
     id: 'ret_10',
     employeeId: 'emp_4',
     nomenclatureId: 'nom_28',
     quantity: 20,
-    date: '2024-01-16',
+    date: '2026-01-16',
     corrected: false,
+    reason: 'Вышел срок годности',
   },
 ];
 
