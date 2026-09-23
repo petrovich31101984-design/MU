@@ -20,6 +20,12 @@ export default function Returns() {
   const [correctingId, setCorrectingId] = useState<string | null>(null);
   const [newQuantity, setNewQuantity] = useState('');
   const [archivedSheets, setArchivedSheets] = useState<Set<string>>(new Set());
+  const [editingReturn, setEditingReturn] = useState<ReturnOperation | null>(null);
+  const [editQuantity, setEditQuantity] = useState('');
+  const [editReason, setEditReason] = useState('');
+  
+  const confirmReturn = useStore(s => s.confirmReturn);
+  const updateReturn = useStore(s => s.updateReturn);
 
   const getEmployeeName = (id: string) => employees.find(e => e.id === id)?.fullName || id;
   
@@ -73,6 +79,33 @@ export default function Returns() {
     setArchivedSheets(prev => new Set(prev).add(sheetId));
   };
 
+  const handleConfirm = (id: string) => {
+    confirmReturn(id, 'admin');
+  };
+
+  const handleEdit = (ret: ReturnOperation) => {
+    setEditingReturn(ret);
+    setEditQuantity(String(ret.quantity));
+    setEditReason(ret.reason || '');
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingReturn) return;
+    updateReturn(editingReturn.id, {
+      quantity: Number(editQuantity),
+      reason: editReason,
+    }, 'admin');
+    setEditingReturn(null);
+    setEditQuantity('');
+    setEditReason('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingReturn(null);
+    setEditQuantity('');
+    setEditReason('');
+  };
+
   const pendingCount = returns.filter(r => !r.corrected).length;
 
   return (
@@ -110,6 +143,7 @@ export default function Returns() {
       {/* Return Sheets */}
       {sheets.map(sheet => {
         const hasUncorrected = sheet.items.some(item => !item.corrected);
+        const hasUnconfirmed = sheet.items.some(item => !item.confirmed);
         
         return (
           <div key={sheet.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -128,24 +162,24 @@ export default function Returns() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-sm font-medium ${
-                    hasUncorrected
+                    hasUnconfirmed
                       ? 'text-amber-700'
                       : 'text-green-700'
                   }`}>
-                    {hasUncorrected ? '⏳ Ожидает обработки' : '✅ Обработан'}
+                    {hasUnconfirmed ? '⏳ Ожидает подтверждения' : '✅ Подтверждён'}
                   </span>
                   <span className="text-sm text-gray-500">
                     {sheet.items.length} {sheet.items.length === 1 ? 'позиция' : 'позиций'}
                   </span>
                   <button
                     onClick={() => handleArchiveSheet(sheet.id)}
-                    disabled={hasUncorrected}
+                    disabled={hasUnconfirmed}
                     className={`px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1 ${
-                      hasUncorrected
+                      hasUnconfirmed
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-gray-600 text-white hover:bg-gray-700'
                     }`}
-                    title={hasUncorrected ? 'Нельзя отправить в архив: лист ожидает обработки' : ''}
+                    title={hasUnconfirmed ? 'Нельзя отправить в архив: необходимо подтвердить все позиции' : ''}
                   >
                     📦 Отправить в архив
                   </button>
@@ -222,11 +256,11 @@ export default function Returns() {
                         </td>
                         <td className="px-4 py-3">
                           <span className={`text-sm ${
-                            ret.corrected
+                            ret.confirmed
                               ? 'text-green-700'
                               : 'text-amber-700'
                           }`}>
-                            {ret.corrected ? 'Обработан' : 'Ожидает'}
+                            {ret.confirmed ? '✓ Подтверждено' : '⏳ Ожидает'}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-gray-600 text-sm">
@@ -234,14 +268,24 @@ export default function Returns() {
                            ret.correctedBy === 'storekeeper' ? 'Кладовщик' : '—'}
                         </td>
                         <td className="px-4 py-3">
-                          {!ret.corrected && correctingId !== ret.id && (
+                          <div className="flex items-center gap-2">
+                            {!ret.confirmed && (
+                              <button
+                                onClick={() => handleConfirm(ret.id)}
+                                className="text-green-700 text-sm hover:underline"
+                                title="Подтвердить позицию"
+                              >
+                                ✓ Подтвердить
+                              </button>
+                            )}
                             <button
-                              onClick={() => { setCorrectingId(ret.id); setNewQuantity(String(ret.quantity)); }}
+                              onClick={() => handleEdit(ret)}
                               className="text-blue-700 text-sm hover:underline"
+                              title="Изменить количество и причину"
                             >
-                              Корректировать
+                              ✏️ Изменить
                             </button>
-                          )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -260,6 +304,61 @@ export default function Returns() {
         </div>
       )}
 
+      {/* Edit Modal */}
+      {editingReturn && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Изменить позицию возврата</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Количество
+                </label>
+                <input
+                  type="number"
+                  value={editQuantity}
+                  onChange={(e) => setEditQuantity(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  min="1"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Причина возврата
+                </label>
+                <select
+                  value={editReason}
+                  onChange={(e) => setEditReason(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="Вышел срок годности">Вышел срок годности</option>
+                  <option value="Поломка оборудования">Поломка оборудования</option>
+                  <option value="Нарушение упаковки">Нарушение упаковки</option>
+                  <option value="Другая причина">Другая причина</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleCancelEdit}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Сохранить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Info */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <h4 className="font-semibold text-blue-800 text-sm mb-2">ℹ️ О возвратах</h4>
@@ -267,8 +366,9 @@ export default function Returns() {
           <li>• Возвраты создаются сотрудниками при возврате лекарств на склад</li>
           <li>• Возвраты одного сотрудника за один день объединяются в один лист</li>
           <li>• После возврата остаток сотрудника увеличивается</li>
-          <li>• Руководитель и кладовщик могут скорректировать количество возврата</li>
-          <li>• Все корректировки записываются в журнал изменений</li>
+          <li>• Каждая позиция должна быть подтверждена перед архивацией</li>
+          <li>• Можно изменить количество и причину возврата</li>
+          <li>• Все изменения записываются в журнал</li>
         </ul>
       </div>
     </div>

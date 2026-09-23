@@ -48,6 +48,8 @@ interface AppState {
 
   addReturn: (ret: Omit<ReturnOperation, 'id'>) => void;
   correctReturn: (id: string, newQuantity: number, userId: string) => void;
+  confirmReturn: (id: string, userId: string) => void;
+  updateReturn: (id: string, data: Partial<ReturnOperation>, userId: string) => void;
 
   addInitialStock: (stock: Omit<InitialStock, 'id'>) => void;
 
@@ -430,6 +432,54 @@ export const useStore = create<AppState>((set, get) => ({
           oldValue: String(ret?.quantity || ''),
           newValue: String(newQuantity),
         }]
+      };
+    });
+  },
+
+  confirmReturn: (id, userId) => {
+    set(state => {
+      return {
+        returns: state.returns.map(r => r.id === id ? {
+          ...r, confirmed: true
+        } : r),
+        journal: [...state.journal, {
+          id: `j_${Date.now()}`,
+          dateTime: new Date().toISOString().slice(0, 16),
+          userId,
+          table: 'Возвраты',
+          recordId: id,
+          field: 'Подтверждение',
+          oldValue: 'Не подтверждено',
+          newValue: 'Подтверждено',
+        }]
+      };
+    });
+  },
+
+  updateReturn: (id, data, userId) => {
+    set(state => {
+      const ret = state.returns.find(r => r.id === id);
+      const changes: string[] = [];
+      
+      if (data.quantity !== undefined && data.quantity !== ret?.quantity) {
+        changes.push(`Количество: ${ret?.quantity} → ${data.quantity}`);
+      }
+      if (data.reason !== undefined && data.reason !== ret?.reason) {
+        changes.push(`Причина: ${ret?.reason || '—'} → ${data.reason}`);
+      }
+
+      return {
+        returns: state.returns.map(r => r.id === id ? { ...r, ...data } : r),
+        journal: changes.length > 0 ? [...state.journal, {
+          id: `j_${Date.now()}`,
+          dateTime: new Date().toISOString().slice(0, 16),
+          userId,
+          table: 'Возвраты',
+          recordId: id,
+          field: 'Редактирование',
+          oldValue: '',
+          newValue: changes.join('; '),
+        }] : state.journal
       };
     });
   },

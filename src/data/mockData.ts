@@ -212,6 +212,7 @@ export const mockReturns: ReturnOperation[] = [
     date: '2026-01-10',
     corrected: false,
     reason: 'Вышел срок годности',
+    confirmed: false,
   },
   {
     id: 'ret_2',
@@ -223,6 +224,7 @@ export const mockReturns: ReturnOperation[] = [
     correctedBy: 'admin',
     newQuantity: 1,
     reason: 'Нарушение упаковки',
+    confirmed: true,
   },
   {
     id: 'ret_3',
@@ -232,6 +234,7 @@ export const mockReturns: ReturnOperation[] = [
     date: '2026-01-10',
     corrected: false,
     reason: 'Другая причина',
+    confirmed: false,
   },
 
   // Сидорова Анна Михайловна (emp_3) — 2 возврата в один день (12.01.2026)
@@ -245,6 +248,7 @@ export const mockReturns: ReturnOperation[] = [
     correctedBy: 'storekeeper',
     newQuantity: 2,
     reason: 'Вышел срок годности',
+    confirmed: true,
   },
   {
     id: 'ret_5',
@@ -254,6 +258,7 @@ export const mockReturns: ReturnOperation[] = [
     date: '2026-01-12',
     corrected: false,
     reason: 'Нарушение упаковки',
+    confirmed: false,
   },
 
   // Морозова Елена Владимировна (emp_5) — 3 возврата в один день (14.01.2026)
@@ -265,6 +270,7 @@ export const mockReturns: ReturnOperation[] = [
     date: '2026-01-14',
     corrected: false,
     reason: 'Другая причина',
+    confirmed: false,
   },
   {
     id: 'ret_7',
@@ -276,6 +282,7 @@ export const mockReturns: ReturnOperation[] = [
     correctedBy: 'admin',
     newQuantity: 3,
     reason: 'Вышел срок годности',
+    confirmed: true,
   },
   {
     id: 'ret_8',
@@ -285,6 +292,7 @@ export const mockReturns: ReturnOperation[] = [
     date: '2026-01-14',
     corrected: false,
     reason: 'Поломка оборудования',
+    confirmed: false,
   },
 
   // Козлов Дмитрий Алексеевич (emp_4) — 2 возврата в один день (16.01.2026)
@@ -296,6 +304,7 @@ export const mockReturns: ReturnOperation[] = [
     date: '2026-01-16',
     corrected: false,
     reason: 'Поломка оборудования',
+    confirmed: false,
   },
   {
     id: 'ret_10',
@@ -305,6 +314,7 @@ export const mockReturns: ReturnOperation[] = [
     date: '2026-01-16',
     corrected: false,
     reason: 'Вышел срок годности',
+    confirmed: false,
   },
 ];
 

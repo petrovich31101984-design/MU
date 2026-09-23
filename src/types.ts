@@ -82,6 +82,7 @@ export interface ReturnOperation {
   correctedBy?: string;
   newQuantity?: number;
   reason?: string;
+  confirmed?: boolean;
 }
 
 export interface Message {
