@@ -106,7 +106,7 @@ export default function Returns() {
         return (
           <div key={sheet.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Sheet Header */}
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200" style={{ backgroundColor: '#AFEEEE' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div>
