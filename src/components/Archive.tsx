@@ -4,7 +4,9 @@ import { useStore } from '../store/useStore';
 export default function Archive() {
   const employees = useStore(s => s.employees);
   const archivedExpenseSheets = useStore(s => s.archivedExpenseSheets);
-  const [search, setSearch] = useState('');
+  const [searchDate, setSearchDate] = useState('');
+  const [searchPatient, setSearchPatient] = useState('');
+  const [searchBirthDate, setSearchBirthDate] = useState('');
   const [activeTab, setActiveTab] = useState<'sheets' | 'employees'>('sheets');
 
   // Архивные сотрудники
@@ -12,15 +14,18 @@ export default function Archive() {
 
   // Фильтрация по листам расхода
   const filteredSheets = archivedExpenseSheets.filter(sheet => {
-    return sheet.patient.toLowerCase().includes(search.toLowerCase()) ||
-           sheet.employee.toLowerCase().includes(search.toLowerCase()) ||
-           sheet.therapyName.toLowerCase().includes(search.toLowerCase());
+    const matchesDate = !searchDate || sheet.date.includes(searchDate);
+    const matchesPatient = !searchPatient || 
+      sheet.patient.toLowerCase().includes(searchPatient.toLowerCase()) ||
+      formatPatientName(sheet.patient).toLowerCase().includes(searchPatient.toLowerCase());
+    const matchesBirthDate = !searchBirthDate || sheet.birthDate.includes(searchBirthDate);
+    return matchesDate && matchesPatient && matchesBirthDate;
   });
 
   // Фильтрация по сотрудникам
   const filteredEmployees = archivedEmployees.filter(emp => {
-    return emp.fullName.toLowerCase().includes(search.toLowerCase()) ||
-           emp.personalNumber.includes(search);
+    return emp.fullName.toLowerCase().includes(searchPatient.toLowerCase()) ||
+           emp.personalNumber.includes(searchPatient);
   });
 
   // Форматирование ФИО в инициалы
@@ -43,14 +48,40 @@ export default function Archive() {
               Информация, отправленная в архив
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <input
               type="text"
-              placeholder="Поиск..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+              placeholder="Дата создания (дд.мм.гг)"
+              value={searchDate}
+              onChange={e => setSearchDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
             />
+            <input
+              type="text"
+              placeholder="Пациент (ФИО)"
+              value={searchPatient}
+              onChange={e => setSearchPatient(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+            <input
+              type="text"
+              placeholder="Дата рождения (дд.мм.гггг)"
+              value={searchBirthDate}
+              onChange={e => setSearchBirthDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+            {(searchDate || searchPatient || searchBirthDate) && (
+              <button
+                onClick={() => {
+                  setSearchDate('');
+                  setSearchPatient('');
+                  setSearchBirthDate('');
+                }}
+                className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
+              >
+                ✕ Сбросить
+              </button>
+            )}
           </div>
         </div>
       </div>
