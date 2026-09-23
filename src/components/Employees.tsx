@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { STATUS_LABELS, STATUS_COLORS } from '../types';
+import { EmployeeStatus, STATUS_LABELS, STATUS_COLORS, Employee } from '../types';
+import { formatDate } from '../utils/dateFormat';
 
 export default function Employees() {
   const employees = useStore(s => s.employees);
+  const updateEmployeeStatus = useStore(s => s.updateEmployeeStatus);
   const updateEmployee = useStore(s => s.updateEmployee);
   const addEmployee = useStore(s => s.addEmployee);
   const archiveEmployee = useStore(s => s.archiveEmployee);
@@ -13,16 +15,21 @@ export default function Employees() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [actionsMenuId, setActionsMenuId] = useState<string | null>(null);
   const [showStatusModal, setShowStatusModal] = useState<string | null>(null);
-  const [showEditModal, setShowEditModal] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState<Employee | null>(null);
   const [showArchived, setShowArchived] = useState(false);
 
+  // Form states for adding
   const [newEmpName, setNewEmpName] = useState('');
   const [newEmpNumber, setNewEmpNumber] = useState('');
   const [newEmpPassword, setNewEmpPassword] = useState('');
-  const [newStatus, setNewStatus] = useState<'active' | 'inactive' | 'blocked' | 'fired'>('active');
+
+  // Edit form states
   const [editName, setEditName] = useState('');
   const [editNumber, setEditNumber] = useState('');
   const [editPassword, setEditPassword] = useState('');
+
+  // Status change
+  const [newStatus, setNewStatus] = useState<EmployeeStatus>('active');
 
   const filtered = employees.filter(e => {
     const matchesSearch = e.fullName.toLowerCase().includes(search.toLowerCase()) ||
@@ -53,18 +60,18 @@ export default function Employees() {
   };
 
   const handleStatusChange = (empId: string) => {
-    updateEmployee(empId, { status: newStatus });
+    updateEmployeeStatus(empId, newStatus);
     setShowStatusModal(null);
     setActionsMenuId(null);
   };
 
   const handleBlock = (empId: string) => {
-    updateEmployee(empId, { status: 'blocked' });
+    updateEmployeeStatus(empId, 'blocked');
     setActionsMenuId(null);
   };
 
   const handleFire = (empId: string) => {
-    updateEmployee(empId, { status: 'fired' });
+    updateEmployeeStatus(empId, 'fired');
     setActionsMenuId(null);
   };
 
@@ -73,20 +80,17 @@ export default function Employees() {
     setActionsMenuId(null);
   };
 
-  const handleEdit = (empId: string) => {
-    const emp = employees.find(e => e.id === empId);
-    if (emp) {
-      setEditName(emp.fullName);
-      setEditNumber(emp.personalNumber);
-      setEditPassword(emp.password);
-      setShowEditModal(empId);
-      setActionsMenuId(null);
-    }
+  const handleEdit = (emp: Employee) => {
+    setEditName(emp.fullName);
+    setEditNumber(emp.personalNumber);
+    setEditPassword(emp.password || '');
+    setShowEditModal(emp);
+    setActionsMenuId(null);
   };
 
   const handleEditSave = () => {
     if (!showEditModal) return;
-    updateEmployee(showEditModal, {
+    updateEmployee(showEditModal.id, {
       fullName: editName,
       personalNumber: editNumber,
       password: editPassword,
@@ -96,6 +100,7 @@ export default function Employees() {
 
   return (
     <div className="space-y-6">
+      {/* Controls */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row gap-4">
         <input
           type="text"
@@ -135,6 +140,7 @@ export default function Employees() {
         </button>
       </div>
 
+      {/* Employee List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {showArchived && (
           <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-sm text-amber-800">
@@ -165,11 +171,12 @@ export default function Employees() {
                   <td className="px-4 py-3 text-center relative">
                     <button
                       onClick={() => setActionsMenuId(actionsMenuId === emp.id ? null : emp.id)}
-                      className="px-3 py-1 text-xs text-gray-600 hover:text-gray-900 transition"
+                      className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium"
                     >
                       ⋮ Действия
                     </button>
 
+                    {/* Dropdown menu */}
                     {actionsMenuId === emp.id && (
                       <>
                         <div
@@ -178,7 +185,7 @@ export default function Employees() {
                         />
                         <div className="absolute right-4 top-full mt-1 z-20 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
                           <button
-                            onClick={() => handleEdit(emp.id)}
+                            onClick={() => handleEdit(emp)}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2"
                           >
                             <span>✏️</span> Редактировать
@@ -230,6 +237,7 @@ export default function Employees() {
         )}
       </div>
 
+      {/* Add Employee Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
@@ -287,6 +295,7 @@ export default function Employees() {
         </div>
       )}
 
+      {/* Status Change Modal */}
       {showStatusModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
@@ -298,7 +307,7 @@ export default function Employees() {
               <div>
                 <label className="text-sm text-gray-600 block mb-2">Выберите статус:</label>
                 <div className="space-y-2">
-                  {(['active', 'inactive', 'blocked', 'fired'] as const).map(status => (
+                  {(['active', 'inactive', 'blocked', 'fired'] as EmployeeStatus[]).map(status => (
                     <label key={status} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
                       <input
                         type="radio"
@@ -334,6 +343,7 @@ export default function Employees() {
         </div>
       )}
 
+      {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
