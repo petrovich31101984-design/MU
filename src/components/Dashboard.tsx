@@ -336,13 +336,12 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">Отчёты</span>
           </button>
           <button 
-            onClick={() => onNavigate?.('expenses')}
             className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all group cursor-pointer"
           >
-            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-orange-200 transition">
-              📤
+            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-amber-200 transition">
+              📁
             </div>
-            <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">Расход</span>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">Архив</span>
           </button>
         </div>
       </div>
