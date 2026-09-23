@@ -19,6 +19,7 @@ export default function Returns() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'corrected'>('all');
   const [correctingId, setCorrectingId] = useState<string | null>(null);
   const [newQuantity, setNewQuantity] = useState('');
+  const [archivedSheets, setArchivedSheets] = useState<Set<string>>(new Set());
 
   const getEmployeeName = (id: string) => employees.find(e => e.id === id)?.fullName || id;
   const getNomenclatureName = (id: string) => nomenclature.find(n => n.id === id)?.name || id;
@@ -50,13 +51,18 @@ export default function Returns() {
     return true;
   });
 
-  const sheets = groupReturns(filteredReturns);
+  const allSheets = groupReturns(filteredReturns);
+  const sheets = allSheets.filter(sheet => !archivedSheets.has(sheet.id));
 
   const handleCorrect = (id: string) => {
     if (!newQuantity) return;
     correctReturn(id, Number(newQuantity), 'admin');
     setCorrectingId(null);
     setNewQuantity('');
+  };
+
+  const handleArchiveSheet = (sheetId: string) => {
+    setArchivedSheets(prev => new Set(prev).add(sheetId));
   };
 
   const pendingCount = returns.filter(r => !r.corrected).length;
@@ -123,6 +129,12 @@ export default function Returns() {
                   <span className="text-sm text-gray-500">
                     {sheet.items.length} {sheet.items.length === 1 ? 'позиция' : 'позиций'}
                   </span>
+                  <button
+                    onClick={() => handleArchiveSheet(sheet.id)}
+                    className="px-3 py-1.5 bg-gray-600 text-white rounded-lg text-xs hover:bg-gray-700 transition flex items-center gap-1"
+                  >
+                    📦 Отправить в архив
+                  </button>
                 </div>
               </div>
             </div>
