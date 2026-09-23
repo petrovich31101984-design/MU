@@ -201,8 +201,53 @@ mockEmployees.filter(e => e.status === 'active').forEach(emp => {
   });
 });
 
-// Возвраты (пустые - все позиции номенклатуры удалены)
-export const mockReturns: ReturnOperation[] = [];
+// Возвраты от сотрудников
+export const mockReturns: ReturnOperation[] = [
+  {
+    id: 'ret_1',
+    employeeId: 'emp_1',
+    nomenclatureId: 'nom_1',
+    quantity: 5,
+    date: '2024-01-10',
+    corrected: false,
+  },
+  {
+    id: 'ret_2',
+    employeeId: 'emp_3',
+    nomenclatureId: 'nom_2',
+    quantity: 3,
+    date: '2024-01-12',
+    corrected: true,
+    correctedBy: 'storekeeper',
+    newQuantity: 2,
+  },
+  {
+    id: 'ret_3',
+    employeeId: 'emp_5',
+    nomenclatureId: 'nom_21',
+    quantity: 10,
+    date: '2024-01-14',
+    corrected: false,
+  },
+  {
+    id: 'ret_4',
+    employeeId: 'emp_1',
+    nomenclatureId: 'nom_24',
+    quantity: 2,
+    date: '2024-01-15',
+    corrected: true,
+    correctedBy: 'admin',
+    newQuantity: 1,
+  },
+  {
+    id: 'ret_5',
+    employeeId: 'emp_4',
+    nomenclatureId: 'nom_25',
+    quantity: 4,
+    date: '2024-01-16',
+    corrected: false,
+  },
+];
 
 // Сообщения (обновлены - убраны упоминания удалённых препаратов)
 export const mockMessages: Message[] = [
