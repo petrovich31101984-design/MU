@@ -9,6 +9,7 @@ import Report from './components/Report';
 import Journal from './components/Journal';
 import Chat from './components/Chat';
 import Returns from './components/Returns';
+import Archive from './components/Archive';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -24,6 +25,7 @@ function App() {
       case 'chat': return <Chat />;
       case 'report': return <Report />;
       case 'journal': return <Journal />;
+      case 'archive': return <Archive />;
       default: return <Dashboard />;
     }
   };
