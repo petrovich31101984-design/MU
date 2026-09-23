@@ -13,6 +13,7 @@ export interface Employee {
   archived?: boolean;
   hireDate: string;
   lastActivityDate: string;
+  firstLoginDate?: string;
 }
 
 export interface NomenclatureItem {
@@ -21,8 +22,8 @@ export interface NomenclatureItem {
   category: Category;
   unit: Unit;
   active: boolean;
-  packageQuantity?: number;
-  pricePerPackage?: number;
+  packageQuantity?: number; // количество в упаковке (для ПКУ)
+  pricePerPackage?: number; // цена за упаковку (для ПКУ)
 }
 
 export interface PriceHistory {
@@ -37,9 +38,49 @@ export interface Income {
   id: string;
   employeeId: string;
   amount: number;
-  period: string;
+  period: string; // YYYY-MM
+  shifts?: number;
   date: string;
   createdBy: string;
+}
+
+export interface Patient {
+  id: string;
+  fullName: string;
+  birthDate: string;
+  employeeId: string;
+  visitDate: string;
+}
+
+export interface Expense {
+  id: string;
+  employeeId: string;
+  patientId: string;
+  nomenclatureId: string;
+  quantity: number;
+  visitDate: string;
+  entryDate: string;
+  offline: boolean;
+}
+
+export interface InitialStock {
+  id: string;
+  employeeId: string;
+  nomenclatureId: string;
+  quantity: number;
+  date: string;
+  createdBy: string;
+}
+
+export interface ReturnOperation {
+  id: string;
+  employeeId: string;
+  nomenclatureId: string;
+  quantity: number;
+  date: string;
+  corrected: boolean;
+  correctedBy?: string;
+  newQuantity?: number;
 }
 
 export interface Message {
@@ -51,13 +92,25 @@ export interface Message {
   read: boolean;
 }
 
+export interface JournalEntry {
+  id: string;
+  dateTime: string;
+  userId: string;
+  table: string;
+  recordId: string;
+  field: string;
+  oldValue: string;
+  newValue: string;
+}
+
 export interface Notification {
   id: string;
-  type: 'overexpense' | 'inactivity' | 'return' | 'message' | 'price_change';
+  type: 'overexpense' | 'inactivity' | 'return' | 'message' | 'report' | 'price_change';
   title: string;
   description: string;
   date: string;
   read: boolean;
+  relatedId?: string;
 }
 
 export const UNIT_LABELS: Record<Unit, string> = {
@@ -69,7 +122,7 @@ export const UNIT_LABELS: Record<Unit, string> = {
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   medicine: 'Лекарства',
-  medicine_pku: 'ПКУ ЛС',
+  medicine_pku: 'Лекарства ПКУ',
   equipment: 'Оборудование',
   consumable: 'Расходные материалы',
 };
