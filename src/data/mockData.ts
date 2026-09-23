@@ -203,6 +203,7 @@ mockEmployees.filter(e => e.status === 'active').forEach(emp => {
 
 // Возвраты от сотрудников
 export const mockReturns: ReturnOperation[] = [
+  // Иванов Иван Иванович (emp_1) — 3 возврата
   {
     id: 'ret_1',
     employeeId: 'emp_1',
@@ -213,24 +214,6 @@ export const mockReturns: ReturnOperation[] = [
   },
   {
     id: 'ret_2',
-    employeeId: 'emp_3',
-    nomenclatureId: 'nom_2',
-    quantity: 3,
-    date: '2024-01-12',
-    corrected: true,
-    correctedBy: 'storekeeper',
-    newQuantity: 2,
-  },
-  {
-    id: 'ret_3',
-    employeeId: 'emp_5',
-    nomenclatureId: 'nom_21',
-    quantity: 10,
-    date: '2024-01-14',
-    corrected: false,
-  },
-  {
-    id: 'ret_4',
     employeeId: 'emp_1',
     nomenclatureId: 'nom_24',
     quantity: 2,
@@ -240,11 +223,77 @@ export const mockReturns: ReturnOperation[] = [
     newQuantity: 1,
   },
   {
+    id: 'ret_3',
+    employeeId: 'emp_1',
+    nomenclatureId: 'nom_21',
+    quantity: 8,
+    date: '2024-01-18',
+    corrected: false,
+  },
+
+  // Сидорова Анна Михайловна (emp_3) — 2 возврата
+  {
+    id: 'ret_4',
+    employeeId: 'emp_3',
+    nomenclatureId: 'nom_2',
+    quantity: 3,
+    date: '2024-01-12',
+    corrected: true,
+    correctedBy: 'storekeeper',
+    newQuantity: 2,
+  },
+  {
     id: 'ret_5',
+    employeeId: 'emp_3',
+    nomenclatureId: 'nom_29',
+    quantity: 15,
+    date: '2024-01-17',
+    corrected: false,
+  },
+
+  // Морозова Елена Владимировна (emp_5) — 3 возврата
+  {
+    id: 'ret_6',
+    employeeId: 'emp_5',
+    nomenclatureId: 'nom_21',
+    quantity: 10,
+    date: '2024-01-14',
+    corrected: false,
+  },
+  {
+    id: 'ret_7',
+    employeeId: 'emp_5',
+    nomenclatureId: 'nom_7',
+    quantity: 4,
+    date: '2024-01-16',
+    corrected: true,
+    correctedBy: 'admin',
+    newQuantity: 3,
+  },
+  {
+    id: 'ret_8',
+    employeeId: 'emp_5',
+    nomenclatureId: 'nom_25',
+    quantity: 6,
+    date: '2024-01-19',
+    corrected: false,
+  },
+
+  // Козлов Дмитрий Алексеевич (emp_4) — 2 возврата
+  {
+    id: 'ret_9',
     employeeId: 'emp_4',
     nomenclatureId: 'nom_25',
     quantity: 4,
     date: '2024-01-16',
+    corrected: false,
+  },
+  {
+    id: 'ret_10',
+    employeeId: 'emp_4',
+    nomenclatureId: 'nom_28',
+    quantity: 20,
+    date: '2024-01-20',
     corrected: false,
   },
 ];
