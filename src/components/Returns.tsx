@@ -131,7 +131,13 @@ export default function Returns() {
                   </span>
                   <button
                     onClick={() => handleArchiveSheet(sheet.id)}
-                    className="px-3 py-1.5 bg-gray-600 text-white rounded-lg text-xs hover:bg-gray-700 transition flex items-center gap-1"
+                    disabled={hasUncorrected}
+                    className={`px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1 ${
+                      hasUncorrected
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-gray-600 text-white hover:bg-gray-700'
+                    }`}
+                    title={hasUncorrected ? 'Нельзя отправить в архив: лист ожидает обработки' : ''}
                   >
                     📦 Отправить в архив
                   </button>
