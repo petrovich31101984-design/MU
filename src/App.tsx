@@ -15,7 +15,7 @@ function App() {
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard onNavigate={setCurrentPage} />;
       case 'employees': return <Employees />;
       case 'nomenclature': return <Nomenclature />;
       case 'income': return <Income />;

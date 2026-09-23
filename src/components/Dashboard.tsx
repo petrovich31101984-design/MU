@@ -1,7 +1,11 @@
 import { useStore } from '../store/useStore';
 import { formatDateTime } from '../utils/dateFormat';
 
-export default function Dashboard() {
+interface DashboardProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function Dashboard({ onNavigate }: DashboardProps) {
   const employees = useStore(s => s.employees);
   const nomenclature = useStore(s => s.nomenclature);
   const notifications = useStore(s => s.notifications);
@@ -52,8 +56,12 @@ export default function Dashboard() {
     return emp?.fullName || id;
   };
 
-  const handleNotificationClick = (id: string) => {
+  const handleNotificationClick = (id: string, type?: string) => {
     markNotificationRead(id);
+    // При клике на уведомление о превышении лимита расхода — переход к листам расхода
+    if (type === 'expense_limit' && onNavigate) {
+      onNavigate('expenses');
+    }
   };
 
   const handleMessageClick = (id: string) => {
@@ -184,7 +192,7 @@ export default function Dashboard() {
                 {unreadNotifications.slice(0, 5).map(notification => (
                   <div
                     key={notification.id}
-                    onClick={() => handleNotificationClick(notification.id)}
+                    onClick={() => handleNotificationClick(notification.id, notification.type)}
                     className={`p-4 cursor-pointer transition-colors ${
                       notification.type === 'overexpense' ? 'hover:bg-red-50' :
                       notification.type === 'inactivity' ? 'hover:bg-amber-50' :
@@ -203,7 +211,12 @@ export default function Dashboard() {
                          notification.type === 'expense_limit' ? '⚠️' : 'ℹ️'}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-gray-800">{notification.title}</p>
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium text-sm text-gray-800">{notification.title}</p>
+                          {notification.type === 'expense_limit' && (
+                            <span className="text-xs text-blue-600 ml-2 flex-shrink-0">Перейти →</span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-2">{notification.description}</p>
                         <p className="text-xs text-gray-400 mt-1">
                           {formatDateTime(notification.date)}
