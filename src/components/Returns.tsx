@@ -196,7 +196,6 @@ export default function Returns() {
                     <th className="px-4 py-3 font-medium text-gray-600">Кол-во</th>
                     <th className="px-4 py-3 font-medium text-gray-600">Причина возврата</th>
                     <th className="px-4 py-3 font-medium text-gray-600">Статус</th>
-                    <th className="px-4 py-3 font-medium text-gray-600">Кем скорр.</th>
                     <th className="px-4 py-3 font-medium text-gray-600">Действия</th>
                   </tr>
                 </thead>
@@ -262,10 +261,6 @@ export default function Returns() {
                           }`}>
                             {ret.confirmed ? '✓ Подтверждено' : '⏳ Ожидает'}
                           </span>
-                        </td>
-                        <td className="px-4 py-3 text-gray-600 text-sm">
-                          {ret.correctedBy === 'admin' ? 'Руководитель' :
-                           ret.correctedBy === 'storekeeper' ? 'Кладовщик' : '—'}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
