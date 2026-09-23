@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useStore } from '../store/useStore';
 
 export default function Expenses() {
@@ -14,8 +14,7 @@ export default function Expenses() {
   // Состояние для архивированных листов
   const [archivedSheets, setArchivedSheets] = useState<number[]>([]);
   
-  // Состояние для отслеживания отправленных уведомлений
-  const [notifiedSheets, setNotifiedSheets] = useState<Set<number>>(new Set());
+
 
   // Состояние для создания нового листа расхода
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -238,35 +237,8 @@ export default function Expenses() {
     }
   ]);
 
-  // Функция для проверки превышения лимита и создания уведомления
-  const checkExpenseLimit = (sheet: any) => {
-    const totalSum = sheet.items.reduce((sum: number, item: any) => sum + item.sum, 0);
-    const limit = sheet.therapyCost * 0.06;
-    
-    if (totalSum >= limit && !notifiedSheets.has(sheet.id)) {
-      addNotification({
-        type: 'expense_limit',
-        title: 'Превышение лимита расхода препаратов',
-        description: `Лист расхода от ${sheet.date}: ${sheet.employee} — ${formatPatientName(sheet.patient)}. Итого по препаратам: ${totalSum.toLocaleString('ru')} ₽ (лимит 6%: ${limit.toLocaleString('ru')} ₽)`,
-        date: new Date().toISOString(),
-        read: false,
-      });
-      setNotifiedSheets(prev => new Set(prev).add(sheet.id));
-    }
-  };
-
-  // Проверяем лимит при монтировании и при изменении листов
-  useEffect(() => {
-    expenseSheets.forEach(sheet => {
-      if (!archivedSheets.includes(sheet.id)) {
-        const totalSum = sheet.items.reduce((sum: number, item: any) => sum + item.sum, 0);
-        const limit = sheet.therapyCost * 0.06;
-        if (totalSum >= limit) {
-          checkExpenseLimit(sheet);
-        }
-      }
-    });
-  }, []);
+  // Уведомления о превышении лимита создаются только при создании НОВОГО листа расхода через форму.
+  // Предзаполненные уведомления для существующих листов находятся в mockNotifications.
 
   const handleExportExcel = () => {
     alert('Экспорт в Excel (демо-функция)\nВ реальном приложении здесь будет генерация XLSX через SheetJS');
