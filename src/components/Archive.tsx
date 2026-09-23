@@ -132,9 +132,9 @@ export default function Archive() {
                             Архивирован: {new Date(sheet.archivedDate).toLocaleDateString('ru-RU')}
                           </span>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
                           <div>
-                            <span className="text-gray-500">Дата:</span>
+                            <span className="text-gray-500">Дата создания:</span>
                             <span className="ml-1 font-medium">{sheet.date}</span>
                           </div>
                           <div>
@@ -144,10 +144,17 @@ export default function Archive() {
                           <div>
                             <span className="text-gray-500">Пациент:</span>
                             <span className="ml-1 font-medium">{formatPatientName(sheet.patient)}</span>
-                            <span className="ml-1 text-xs text-gray-500">({sheet.birthDate})</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Терапия:</span>
+                            <span className="text-gray-500">Дата рождения:</span>
+                            <span className="ml-1 font-medium">{sheet.birthDate}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Категория выезда:</span>
+                            <span className="ml-1 font-medium">{sheet.visitCategory}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Название терапии:</span>
                             <span className="ml-1 font-medium">{sheet.therapyName}</span>
                           </div>
                         </div>
