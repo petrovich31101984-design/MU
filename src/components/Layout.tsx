@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useStore } from '../store/useStore';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -8,6 +9,8 @@ interface LayoutProps {
 
 export default function Layout({ children, currentPage, onNavigate }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const notifications = useStore(s => s.notifications);
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const menuItems = [
     { id: 'dashboard', label: 'Панель руководителя', icon: '📊' },
@@ -15,13 +18,15 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
     { id: 'nomenclature', label: 'Номенклатура', icon: '💊' },
     { id: 'income', label: 'Приход к сотруднику', icon: '📥' },
     { id: 'expenses', label: 'Расход у сотрудника', icon: '📤' },
-    { id: 'chat', label: 'Сообщения', icon: '💬' },
+    { id: 'returns', label: 'Возвраты', icon: '↩️' },
+    { id: 'chat', label: 'Сообщения', icon: '💬', badge: unreadCount },
     { id: 'report', label: 'Отчеты', icon: '📄' },
     { id: 'journal', label: 'Журнал', icon: '📜' },
   ];
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
+      {/* Sidebar */}
       <aside className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300 flex-shrink-0`}>
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
@@ -64,13 +69,24 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
               }`}
             >
               <span className="text-lg flex-shrink-0">{item.icon}</span>
-              {sidebarOpen && <span className="text-sm flex-1">{item.label}</span>}
+              {sidebarOpen && (
+                <>
+                  <span className="text-sm flex-1">{item.label}</span>
+                  {item.badge && item.badge > 0 && (
+                    <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {item.badge}
+                    </span>
+                  )}
+                </>
+              )}
             </button>
           ))}
         </nav>
       </aside>
 
+      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar */}
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
           <div>
             <h2 className="text-lg font-semibold text-gray-800">
@@ -81,7 +97,7 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
             <div className="flex-1 mx-6 overflow-hidden">
               <div className="marquee-container">
                 <div className="marquee-content">
-                  <p className="text-base whitespace-nowrap font-bold italic" style={{ color: '#0000FF' }}>
+                  <p className="text-base whitespace-nowrap font-bold" style={{ color: '#0000FF' }}>
                     <span style={{ fontStyle: 'normal' }}>🖐</span><span className="italic">Здравствуйте, руководитель! </span><span style={{ fontStyle: 'normal' }}>🤖</span><span className="italic">Программа "МедУчёт" желает Вам продуктивного рабочего дня! Не забудьте отчитаться за прошлый месяц до 5-го числа. Спасибо! </span><span style={{ fontStyle: 'normal' }}>🙏</span>
                   </p>
                 </div>
@@ -96,6 +112,7 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
           </div>
         </header>
 
+        {/* Page Content */}
         <main className="flex-1 p-6 overflow-auto">
           {children}
         </main>
