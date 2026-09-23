@@ -201,9 +201,9 @@ mockEmployees.filter(e => e.status === 'active').forEach(emp => {
   });
 });
 
-// Возвраты от сотрудников
+// Возвраты от сотрудников (несколько препаратов в один день)
 export const mockReturns: ReturnOperation[] = [
-  // Иванов Иван Иванович (emp_1) — 3 возврата
+  // Иванов Иван Иванович (emp_1) — 3 возврата в один день (10.01.2024)
   {
     id: 'ret_1',
     employeeId: 'emp_1',
@@ -217,7 +217,7 @@ export const mockReturns: ReturnOperation[] = [
     employeeId: 'emp_1',
     nomenclatureId: 'nom_24',
     quantity: 2,
-    date: '2024-01-15',
+    date: '2024-01-10',
     corrected: true,
     correctedBy: 'admin',
     newQuantity: 1,
@@ -227,11 +227,11 @@ export const mockReturns: ReturnOperation[] = [
     employeeId: 'emp_1',
     nomenclatureId: 'nom_21',
     quantity: 8,
-    date: '2024-01-18',
+    date: '2024-01-10',
     corrected: false,
   },
 
-  // Сидорова Анна Михайловна (emp_3) — 2 возврата
+  // Сидорова Анна Михайловна (emp_3) — 2 возврата в один день (12.01.2024)
   {
     id: 'ret_4',
     employeeId: 'emp_3',
@@ -247,11 +247,11 @@ export const mockReturns: ReturnOperation[] = [
     employeeId: 'emp_3',
     nomenclatureId: 'nom_29',
     quantity: 15,
-    date: '2024-01-17',
+    date: '2024-01-12',
     corrected: false,
   },
 
-  // Морозова Елена Владимировна (emp_5) — 3 возврата
+  // Морозова Елена Владимировна (emp_5) — 3 возврата в один день (14.01.2024)
   {
     id: 'ret_6',
     employeeId: 'emp_5',
@@ -265,7 +265,7 @@ export const mockReturns: ReturnOperation[] = [
     employeeId: 'emp_5',
     nomenclatureId: 'nom_7',
     quantity: 4,
-    date: '2024-01-16',
+    date: '2024-01-14',
     corrected: true,
     correctedBy: 'admin',
     newQuantity: 3,
@@ -275,11 +275,11 @@ export const mockReturns: ReturnOperation[] = [
     employeeId: 'emp_5',
     nomenclatureId: 'nom_25',
     quantity: 6,
-    date: '2024-01-19',
+    date: '2024-01-14',
     corrected: false,
   },
 
-  // Козлов Дмитрий Алексеевич (emp_4) — 2 возврата
+  // Козлов Дмитрий Алексеевич (emp_4) — 2 возврата в один день (16.01.2024)
   {
     id: 'ret_9',
     employeeId: 'emp_4',
@@ -293,7 +293,7 @@ export const mockReturns: ReturnOperation[] = [
     employeeId: 'emp_4',
     nomenclatureId: 'nom_28',
     quantity: 20,
-    date: '2024-01-20',
+    date: '2024-01-16',
     corrected: false,
   },
 ];
