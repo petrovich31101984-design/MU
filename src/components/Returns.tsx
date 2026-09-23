@@ -15,6 +15,7 @@ export default function Returns() {
   const employees = useStore(s => s.employees);
   const nomenclature = useStore(s => s.nomenclature);
   const correctReturn = useStore(s => s.correctReturn);
+  const addArchivedReturns = useStore(s => s.addArchivedReturns);
 
   const [filter, setFilter] = useState<'all' | 'pending' | 'corrected'>('all');
   const [correctingId, setCorrectingId] = useState<string | null>(null);
@@ -76,6 +77,10 @@ export default function Returns() {
   };
 
   const handleArchiveSheet = (sheetId: string) => {
+    const sheet = allSheets.find(s => s.id === sheetId);
+    if (sheet) {
+      addArchivedReturns([sheet]);
+    }
     setArchivedSheets(prev => new Set(prev).add(sheetId));
   };
 
