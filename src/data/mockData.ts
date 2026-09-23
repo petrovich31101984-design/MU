@@ -225,7 +225,6 @@ export const mockReturns: ReturnOperation[] = [
     newQuantity: 1,
     reason: 'Нарушение упаковки',
     confirmed: true,
-    confirmedBy: 'admin',
   },
   {
     id: 'ret_3',
@@ -250,7 +249,6 @@ export const mockReturns: ReturnOperation[] = [
     newQuantity: 2,
     reason: 'Вышел срок годности',
     confirmed: true,
-    confirmedBy: 'storekeeper',
   },
   {
     id: 'ret_5',
@@ -285,7 +283,6 @@ export const mockReturns: ReturnOperation[] = [
     newQuantity: 3,
     reason: 'Вышел срок годности',
     confirmed: true,
-    confirmedBy: 'admin',
   },
   {
     id: 'ret_8',
