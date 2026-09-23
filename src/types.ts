@@ -107,7 +107,7 @@ export interface JournalEntry {
 
 export interface Notification {
   id: string;
-  type: 'overexpense' | 'inactivity' | 'return' | 'message' | 'report' | 'price_change';
+  type: 'overexpense' | 'inactivity' | 'return' | 'message' | 'report' | 'price_change' | 'expense_limit';
   title: string;
   description: string;
   date: string;

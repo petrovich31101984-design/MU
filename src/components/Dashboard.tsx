@@ -189,6 +189,7 @@ export default function Dashboard() {
                       notification.type === 'overexpense' ? 'hover:bg-red-50' :
                       notification.type === 'inactivity' ? 'hover:bg-amber-50' :
                       notification.type === 'return' ? 'hover:bg-blue-50' :
+                      notification.type === 'expense_limit' ? 'hover:bg-red-50' :
                       'hover:bg-gray-50'
                     }`}
                   >
@@ -198,7 +199,8 @@ export default function Dashboard() {
                          notification.type === 'inactivity' ? '⏰' :
                          notification.type === 'return' ? '↩️' :
                          notification.type === 'message' ? '💬' :
-                         notification.type === 'price_change' ? '💰' : 'ℹ️'}
+                         notification.type === 'price_change' ? '💰' : 
+                         notification.type === 'expense_limit' ? '⚠️' : 'ℹ️'}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-gray-800">{notification.title}</p>

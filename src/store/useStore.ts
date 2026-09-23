@@ -46,6 +46,8 @@ interface AppState {
   addMessage: (msg: Omit<Message, 'id' | 'date'>) => void;
   markMessageRead: (id: string) => void;
 
+  addNotification: (notification: Omit<Notification, 'id'>) => void;
+
   addReturn: (ret: Omit<ReturnOperation, 'id'>) => void;
   correctReturn: (id: string, newQuantity: number, userId: string) => void;
   confirmReturn: (id: string, userId: string) => void;
@@ -386,6 +388,12 @@ export const useStore = create<AppState>((set, get) => ({
   markMessageRead: (id) => {
     set(state => ({
       messages: state.messages.map(m => m.id === id ? { ...m, read: true } : m)
+    }));
+  },
+
+  addNotification: (notification) => {
+    set(state => ({
+      notifications: [...state.notifications, { ...notification, id: `n_${Date.now()}` }]
     }));
   },
 

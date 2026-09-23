@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+import { useStore } from '../store/useStore';
 
 export default function Expenses() {
+  const addNotification = useStore(s => s.addNotification);
+  
   // Тестовые данные для демонстрации
   const totalExpenseAmount = 385000; // Общая сумма расхода за месяц
 
@@ -10,6 +14,35 @@ export default function Expenses() {
 
   // Состояние для архивированных листов
   const [archivedSheets, setArchivedSheets] = useState<number[]>([]);
+  
+  // Состояние для отслеживания отправленных уведомлений
+  const [notifiedSheets, setNotifiedSheets] = useState<Set<number>>(new Set());
+  
+  // Функция для форматирования ФИО в инициалы
+  const formatPatientName = (fullName: string) => {
+    const parts = fullName.split(' ');
+    if (parts.length >= 3) {
+      return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
+    }
+    return fullName;
+  };
+  
+  // Функция для проверки превышения лимита и создания уведомления
+  const checkExpenseLimit = (sheet: any) => {
+    const totalSum = sheet.items.reduce((sum: number, item: any) => sum + item.sum, 0);
+    const limit = sheet.therapyCost * 0.06;
+    
+    if (totalSum >= limit && !notifiedSheets.has(sheet.id)) {
+      addNotification({
+        type: 'expense_limit',
+        title: 'Превышение лимита расхода препаратов',
+        description: `Лист расхода от ${sheet.date}: ${sheet.employee} - ${formatPatientName(sheet.patient)}. Итого по препаратам: ${totalSum.toLocaleString('ru')} ₽ (лимит: ${limit.toLocaleString('ru')} ₽)`,
+        date: new Date().toISOString(),
+        read: false,
+      });
+      setNotifiedSheets(prev => new Set(prev).add(sheet.id));
+    }
+  };
 
   // Тестовые данные листов расхода (10 пациентов)
   const expenseSheets = [
@@ -172,20 +205,44 @@ export default function Expenses() {
         { name: 'Катетер венозный 18G', type: 'Расходник', quantity: 2, unitPrice: 85, sum: 170 },
         { name: 'Система для в/в вливания', type: 'Расходник', quantity: 2, unitPrice: 45, sum: 90 },
       ]
+    },
+    // Примеры с превышением лимита 6%
+    {
+      id: 11,
+      date: '05.08.26',
+      employee: 'Петров Петр Сергеевич',
+      patient: 'Смирнов Алексей Иванович',
+      birthDate: '15.03.1975',
+      visitCategory: 'Экстренный вызов',
+      therapyName: 'Интенсивная терапия',
+      therapyCost: 5000, // 6% = 300 ₽
+      items: [
+        { name: 'Адреналин 0.1% 1мл', type: 'Лекарство', quantity: 2, unitPrice: 180, sum: 360 },
+        { name: 'Дексаметазон 4мг/мл', type: 'Лекарство', quantity: 1, unitPrice: 85, sum: 85 },
+        { name: 'Катетер венозный 20G', type: 'Расходник', quantity: 1, unitPrice: 85, sum: 85 },
+      ]
+      // Итого: 530 ₽ > 300 ₽ (превышение)
+    },
+    {
+      id: 12,
+      date: '04.08.26',
+      employee: 'Сидорова Анна Михайловна',
+      patient: 'Козлова Мария Петровна',
+      birthDate: '22.07.1988',
+      visitCategory: 'Повторный вызов',
+      therapyName: 'Хирургическая помощь',
+      therapyCost: 8000, // 6% = 480 ₽
+      items: [
+        { name: 'Преднизолон 30мг/мл', type: 'Лекарство', quantity: 3, unitPrice: 120, sum: 360 },
+        { name: 'Кеторол 30мг/мл', type: 'Лекарство', quantity: 2, unitPrice: 120, sum: 240 },
+        { name: 'Система для в/в вливания', type: 'Расходник', quantity: 2, unitPrice: 45, sum: 90 },
+      ]
+      // Итого: 690 ₽ > 480 ₽ (превышение)
     }
   ];
 
   const handleExportExcel = () => {
     alert('Экспорт в Excel (демо-функция)\nВ реальном приложении здесь будет генерация XLSX через SheetJS');
-  };
-
-  // Функция для форматирования ФИО в инициалы
-  const formatPatientName = (fullName: string) => {
-    const parts = fullName.split(' ');
-    if (parts.length >= 3) {
-      return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
-    }
-    return fullName;
   };
 
   // Функция для открытия модального окна редактирования
@@ -243,6 +300,13 @@ export default function Expenses() {
         .filter(sheet => !archivedSheets.includes(sheet.id))
         .map((sheet) => {
         const totalSum = sheet.items.reduce((sum, item) => sum + item.sum, 0);
+        const limit = sheet.therapyCost * 0.06;
+        const isOverLimit = totalSum >= limit;
+        
+        // Проверяем превышение лимита при первом рендере
+        if (isOverLimit) {
+          checkExpenseLimit(sheet);
+        }
         
         return (
           <div key={sheet.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -308,7 +372,10 @@ export default function Expenses() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">Итого по препаратам:</span>
-                  <span className="text-sm font-bold text-blue-600">{totalSum.toLocaleString('ru')} ₽</span>
+                  <span className={`text-sm font-bold ${isOverLimit ? 'text-red-600' : 'text-blue-600'}`}>
+                    {totalSum.toLocaleString('ru')} ₽
+                    {isOverLimit && <span className="text-xs ml-2">⚠️ Превышен лимит 6%</span>}
+                  </span>
                 </div>
               </div>
             </div>
