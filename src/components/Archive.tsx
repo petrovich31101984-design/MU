@@ -132,7 +132,7 @@ export default function Archive() {
 
         {/* Контент вкладок */}
         {activeTab === 'sheets' && (
-          <div className="p-4">
+          <div className="p-4 max-h-[600px] overflow-y-auto">
             {filteredSheets.length === 0 ? (
               <div className="p-12 text-center text-gray-400">
                 <div className="text-4xl mb-3">📭</div>
@@ -249,7 +249,7 @@ export default function Archive() {
         )}
 
         {activeTab === 'employees' && (
-          <div className="p-4">
+          <div className="p-4 max-h-[600px] overflow-y-auto">
             {filteredEmployees.length === 0 ? (
               <div className="p-12 text-center text-gray-400">
                 <div className="text-4xl mb-3">📭</div>
