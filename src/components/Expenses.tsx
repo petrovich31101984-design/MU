@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 
 export default function Expenses() {
   const addNotification = useStore(s => s.addNotification);
+  const openExpenseSheetId = useStore(s => s.openExpenseSheetId);
+  const setOpenExpenseSheetId = useStore(s => s.setOpenExpenseSheetId);
   
   // Тестовые данные для демонстрации
   const totalExpenseAmount = 385000; // Общая сумма расхода за месяц
@@ -15,6 +17,28 @@ export default function Expenses() {
   const [archivedSheets, setArchivedSheets] = useState<number[]>([]);
   
 
+
+  // Состояние для выделения конкретного листа расхода (при переходе из уведомлений)
+  const [highlightedSheetId, setHighlightedSheetId] = useState<number | null>(null);
+  const sheetRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+
+  // При переходе из уведомлений — выделить и прокрутить к нужному листу
+  useEffect(() => {
+    if (openExpenseSheetId !== null) {
+      setHighlightedSheetId(openExpenseSheetId);
+      // Прокрутка к листу через небольшую задержку (чтобы DOM обновился)
+      setTimeout(() => {
+        const element = sheetRefs.current[openExpenseSheetId];
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      // Сбрасываем состояние в store
+      setOpenExpenseSheetId(null);
+      // Убираем подсветку через 5 секунд
+      setTimeout(() => setHighlightedSheetId(null), 5000);
+    }
+  }, [openExpenseSheetId, setOpenExpenseSheetId]);
 
   // Состояние для создания нового листа расхода
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -312,6 +336,7 @@ export default function Expenses() {
         description: `Лист расхода от ${newSheet.date}: ${newSheet.employee} — ${formatPatientName(newSheet.patient)}. Итого по препаратам: ${totalSum.toLocaleString('ru')} ₽ (лимит 6%: ${limit.toLocaleString('ru')} ₽)`,
         date: new Date().toISOString(),
         read: false,
+        relatedId: String(newId),
       });
     } else {
       setLimitExceededMessage(
@@ -638,7 +663,28 @@ export default function Expenses() {
         const isOverLimit = totalSum >= limit;
         
         return (
-          <div key={sheet.id} className={`bg-white rounded-xl shadow-sm border overflow-hidden ${isOverLimit ? 'border-red-200' : 'border-gray-200'}`}>
+          <div 
+            key={sheet.id} 
+            ref={(el) => { sheetRefs.current[sheet.id] = el; }}
+            className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500 ${
+              highlightedSheetId === sheet.id 
+                ? 'border-blue-500 ring-4 ring-blue-200 shadow-lg' 
+                : isOverLimit ? 'border-red-200' : 'border-gray-200'
+            }`}
+          >
+            {/* Индикатор выделенного листа */}
+            {highlightedSheetId === sheet.id && (
+              <div className="bg-blue-500 text-white text-center py-1.5 text-sm font-medium flex items-center justify-center gap-2">
+                <span>📍</span>
+                <span>Лист расхода из уведомления — просмотр</span>
+                <button 
+                  onClick={() => setHighlightedSheetId(null)}
+                  className="ml-2 text-white/70 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
             {/* Шапка листа расхода */}
             <div className={`p-6 border-b border-gray-200 ${isOverLimit ? 'bg-gradient-to-r from-red-50 to-orange-50' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
               <div className="flex items-center justify-between mb-4">

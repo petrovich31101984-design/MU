@@ -15,6 +15,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   const getEmployeeStockAtDate = useStore(s => s.getEmployeeStockAtDate);
   const markNotificationRead = useStore(s => s.markNotificationRead);
   const markMessageRead = useStore(s => s.markMessageRead);
+  const setOpenExpenseSheetId = useStore(s => s.setOpenExpenseSheetId);
 
   const activeEmployees = employees.filter(e => e.status === 'active');
   const unreadNotifications = notifications.filter(n => !n.read && n.type !== 'message');
@@ -56,10 +57,13 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     return emp?.fullName || id;
   };
 
-  const handleNotificationClick = (id: string, type?: string) => {
-    markNotificationRead(id);
-    // При клике на уведомление о превышении лимита расхода — переход к листам расхода
-    if (type === 'expense_limit' && onNavigate) {
+  const handleNotificationClick = (notification: any) => {
+    markNotificationRead(notification.id);
+    // При клике на уведомление о превышении лимита расхода — переход к конкретному листу
+    if (notification.type === 'expense_limit' && onNavigate) {
+      if (notification.relatedId) {
+        setOpenExpenseSheetId(Number(notification.relatedId));
+      }
       onNavigate('expenses');
     }
   };
@@ -192,7 +196,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 {unreadNotifications.slice(0, 5).map(notification => (
                   <div
                     key={notification.id}
-                    onClick={() => handleNotificationClick(notification.id, notification.type)}
+                    onClick={() => handleNotificationClick(notification)}
                     className={`p-4 cursor-pointer transition-colors ${
                       notification.type === 'overexpense' ? 'hover:bg-red-50' :
                       notification.type === 'inactivity' ? 'hover:bg-amber-50' :

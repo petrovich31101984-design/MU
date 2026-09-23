@@ -55,6 +55,10 @@ interface AppState {
 
   addInitialStock: (stock: Omit<InitialStock, 'id'>) => void;
 
+  // UI state
+  openExpenseSheetId: number | null;
+  setOpenExpenseSheetId: (id: number | null) => void;
+
   // Computed helpers
   getCurrentPrice: (nomenclatureId: string) => number;
   getEmployeeExpenses: (employeeId: string) => Expense[];
@@ -66,6 +70,9 @@ interface AppState {
 }
 
 export const useStore = create<AppState>((set, get) => ({
+  openExpenseSheetId: null,
+  setOpenExpenseSheetId: (id) => set({ openExpenseSheetId: id }),
+
   employees: mockEmployees,
   nomenclature: mockNomenclature,
   priceHistory: mockPriceHistory,

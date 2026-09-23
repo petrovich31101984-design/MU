@@ -358,6 +358,7 @@ export const mockNotifications: Notification[] = [
     description: 'Лист расхода от 05.08.26: Петров Петр Сергеевич — Смирнов А.И. Итого по препаратам: 530 ₽ (лимит 6%: 300 ₽)',
     date: '2026-08-05T10:15',
     read: false,
+    relatedId: '11',
   },
   {
     id: 'n_exp_2',
@@ -366,5 +367,6 @@ export const mockNotifications: Notification[] = [
     description: 'Лист расхода от 04.08.26: Сидорова Анна Михайловна — Козлова М.П. Итого по препаратам: 690 ₽ (лимит 6%: 480 ₽)',
     date: '2026-08-04T14:40',
     read: false,
+    relatedId: '12',
   },
 ];
