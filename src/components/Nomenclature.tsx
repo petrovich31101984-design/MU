@@ -6,6 +6,7 @@ import { formatDate } from '../utils/dateFormat';
 export default function Nomenclature() {
   const nomenclature = useStore(s => s.nomenclature);
   const priceHistory = useStore(s => s.priceHistory);
+  const updatePrice = useStore(s => s.updatePrice);
   const updatePackagePrice = useStore(s => s.updatePackagePrice);
   const addNomenclature = useStore(s => s.addNomenclature);
   const removeNomenclature = useStore(s => s.removeNomenclature);
@@ -18,9 +19,11 @@ export default function Nomenclature() {
   const [newPrice, setNewPrice] = useState('');
   const [showHistory, setShowHistory] = useState<string | null>(null);
 
+  // New item form
   const [newName, setNewName] = useState('');
   const [newCategory, setNewCategory] = useState<Category>('medicine');
   const [newUnit, setNewUnit] = useState<Unit>('ampoule');
+  const [newItemPrice, setNewItemPrice] = useState('');
   const [newPackageQuantity, setNewPackageQuantity] = useState('');
   const [newPricePerPackage, setNewPricePerPackage] = useState('');
 
@@ -44,6 +47,7 @@ export default function Nomenclature() {
     
     addNomenclature(newItem);
     
+    // Сброс формы
     setNewName('');
     setNewPackageQuantity('');
     setNewPricePerPackage('');
@@ -51,13 +55,16 @@ export default function Nomenclature() {
   };
 
   const handleUpdatePrice = (nomenclatureId: string) => {
-    updatePackagePrice(nomenclatureId, Number(newPrice) || 0);
+    updatePackagePrice(nomenclatureId, Number(newPrice) || 0, 'admin');
     setNewPrice('');
     setEditingPrice(null);
   };
 
+  const totalValue = nomenclature.reduce((sum, n) => sum + getCurrentPrice(n.id), 0);
+
   return (
     <div className="space-y-6">
+      {/* Controls */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row gap-4">
         <input
           type="text"
@@ -85,6 +92,7 @@ export default function Nomenclature() {
         </button>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Всего позиций</p>
@@ -108,6 +116,7 @@ export default function Nomenclature() {
         </div>
       </div>
 
+      {/* Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -166,7 +175,11 @@ export default function Nomenclature() {
                             ✓
                           </button>
                           <button
-                            onClick={() => { setEditingPrice(null); setNewPrice(''); }}
+                            onClick={() => { 
+                              updatePackagePrice(nom.id, 0, 'admin');
+                              setEditingPrice(null); 
+                              setNewPrice('0'); 
+                            }}
                             className="p-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
                           >
                             ✕
@@ -230,6 +243,7 @@ export default function Nomenclature() {
         </div>
       </div>
 
+      {/* Price History Modal */}
       {showHistory && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-auto">
@@ -258,6 +272,7 @@ export default function Nomenclature() {
         </div>
       )}
 
+      {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
@@ -303,6 +318,7 @@ export default function Nomenclature() {
                 </select>
               </div>
               
+              {/* Данные упаковки для всех категорий */}
               <div className="border-t border-gray-200 pt-4 mt-4">
                 <p className="text-sm font-medium text-gray-700 mb-3">Данные упаковки</p>
               </div>
@@ -329,6 +345,7 @@ export default function Nomenclature() {
                   step="0.01"
                 />
               </div>
+              {/* Автоматический расчёт цены за единицу */}
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-4 mt-3">
                 <div className="flex items-center justify-between">
                   <div>
