@@ -14,6 +14,7 @@ export default function LayoutStorekeeper({ children, currentPage, onNavigate, o
     { id: 'dashboard', label: 'Панель кладовщика', icon: '🏠' },
     { id: 'nomenclature', label: 'Номенклатура', icon: '💊' },
     { id: 'income', label: 'Приходы', icon: '📥' },
+    { id: 'expenses', label: 'Расходы', icon: '📤' },
     { id: 'stock', label: 'Остатки', icon: '📊' },
     { id: 'returns', label: 'Возвраты', icon: '↩️' },
     { id: 'chat', label: 'Сообщения', icon: '💬' },

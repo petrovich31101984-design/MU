@@ -14,6 +14,7 @@ import Archive from './components/Archive';
 import DashboardStorekeeper from './components/DashboardStorekeeper';
 import NomenclatureStorekeeper from './components/NomenclatureStorekeeper';
 import IncomeStorekeeper from './components/IncomeStorekeeper';
+import ExpensesStorekeeper from './components/ExpensesStorekeeper';
 import StockStorekeeper from './components/StockStorekeeper';
 import ReturnsStorekeeper from './components/ReturnsStorekeeper';
 import ChatStorekeeper from './components/ChatStorekeeper';
@@ -58,6 +59,7 @@ function App() {
         case 'dashboard': return <DashboardStorekeeper onNavigate={setCurrentPage} />;
         case 'nomenclature': return <NomenclatureStorekeeper />;
         case 'income': return <IncomeStorekeeper />;
+        case 'expenses': return <ExpensesStorekeeper />;
         case 'stock': return <StockStorekeeper />;
         case 'returns': return <ReturnsStorekeeper />;
         case 'chat': return <ChatStorekeeper />;
