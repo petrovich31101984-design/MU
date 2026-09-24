@@ -78,10 +78,19 @@ export default function LayoutStorekeeper({ children, currentPage, onNavigate, o
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
-          <div>
+          <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-800">
               {menuItems.find(m => m.id === currentPage)?.label}
             </h2>
+            {currentPage === 'dashboard' && (
+              <div className="overflow-hidden mt-2">
+                <div className="whitespace-nowrap animate-marquee">
+                  <p className="text-base font-bold italic text-purple-600">
+                    👋 Здравствуйте! Разработчик желает Вам продуктивного дня! 🌟
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
