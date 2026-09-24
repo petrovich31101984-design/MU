@@ -18,17 +18,23 @@ import StockStorekeeper from './components/StockStorekeeper';
 import ReturnsStorekeeper from './components/ReturnsStorekeeper';
 import ChatStorekeeper from './components/ChatStorekeeper';
 import ReportStorekeeper from './components/ReportStorekeeper';
+import RoleSelectionScreen from './components/RoleSelectionScreen';
 
-type UserRole = 'admin' | 'storekeeper';
+type UserRole = 'admin' | 'storekeeper' | null;
 
 function App() {
-  const [userRole, setUserRole] = useState<UserRole>('admin');
+  const [userRole, setUserRole] = useState<UserRole>(null);
   const [currentPage, setCurrentPage] = useState('dashboard');
 
-  const handleRoleChange = (role: UserRole) => {
+  const handleRoleSelect = (role: UserRole) => {
     setUserRole(role);
-    setCurrentPage('dashboard'); // Сброс на главную при смене роли
+    setCurrentPage('dashboard');
   };
+
+  // Если роль не выбрана, показываем экран выбора роли
+  if (!userRole) {
+    return <RoleSelectionScreen onSelectRole={handleRoleSelect} />;
+  }
 
   const renderPage = () => {
     if (userRole === 'admin') {
@@ -63,39 +69,15 @@ function App() {
 
   const LayoutComponent = userRole === 'admin' ? Layout : LayoutStorekeeper;
 
-  return (
-    <>
-      {/* Переключатель ролей */}
-      <div className="fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg p-2 border border-gray-200">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-600">Роль:</span>
-          <button
-            onClick={() => handleRoleChange('admin')}
-            className={`px-3 py-1 rounded text-sm font-medium transition ${
-              userRole === 'admin'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            👨‍💼 Руководитель
-          </button>
-          <button
-            onClick={() => handleRoleChange('storekeeper')}
-            className={`px-3 py-1 rounded text-sm font-medium transition ${
-              userRole === 'storekeeper'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            📦 Кладовщик
-          </button>
-        </div>
-      </div>
+  const handleLogout = () => {
+    setUserRole(null);
+    setCurrentPage('dashboard');
+  };
 
-      <LayoutComponent currentPage={currentPage} onNavigate={setCurrentPage}>
-        {renderPage()}
-      </LayoutComponent>
-    </>
+  return (
+    <LayoutComponent currentPage={currentPage} onNavigate={setCurrentPage} onLogout={handleLogout}>
+      {renderPage()}
+    </LayoutComponent>
   );
 }
 

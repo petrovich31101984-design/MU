@@ -4,9 +4,10 @@ interface LayoutProps {
   children: React.ReactNode;
   currentPage: string;
   onNavigate: (page: string) => void;
+  onLogout?: () => void;
 }
 
-export default function LayoutStorekeeper({ children, currentPage, onNavigate }: LayoutProps) {
+export default function LayoutStorekeeper({ children, currentPage, onNavigate, onLogout }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const menuItems = [
@@ -86,6 +87,14 @@ export default function LayoutStorekeeper({ children, currentPage, onNavigate }:
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-sm">📦</div>
               <div className="text-sm font-medium text-gray-800">Кладовщик</div>
             </div>
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition"
+              >
+                🚪 Выйти
+              </button>
+            )}
           </div>
         </header>
 
