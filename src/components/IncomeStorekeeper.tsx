@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../store/useStore';
+import { Income as IncomeType } from '../types';
+import { formatDate } from '../utils/dateFormat';
 
 export default function IncomeStorekeeper() {
   const employees = useStore(s => s.employees);
@@ -9,12 +11,17 @@ export default function IncomeStorekeeper() {
   const removeIncome = useStore(s => s.removeIncome);
 
   const [showModal, setShowModal] = useState(false);
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [amount, setAmount] = useState('');
   const [modalPeriod, setModalPeriod] = useState('2026-08');
   const [selectedPeriod, setSelectedPeriod] = useState('2026-08');
 
+  // Прошедший месяц - август 2026
+  const period = '2026-08';
+  
+  // Функция для получения данных по выбранному периоду
   const getFilteredIncome = () => {
     if (selectedPeriod === 'all') {
       return income;
@@ -52,20 +59,51 @@ export default function IncomeStorekeeper() {
     }
   };
 
-  const getEmployeeName = (id: string) => {
-    const emp = employees.find(e => e.id === id);
-    return emp?.fullName || id;
-  };
-
-  const formatEmployeeName = (fullName: string) => {
-    const parts = fullName.split(' ');
-    if (parts.length >= 3) {
-      return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
+  const addArchivedIncome = useStore(s => s.addArchivedIncome);
+  
+  const handleArchive = () => {
+    if (periodIncome.length === 0) {
+      alert('Нет данных для архивирования за выбранный период');
+      return;
     }
-    return fullName;
+    setShowArchiveConfirm(true);
   };
 
-  const handleOpenModal = (incomeData?: any) => {
+  const confirmArchive = () => {
+    // Группируем приходы по сотрудникам
+    const incomeByEmployee: { [key: string]: { employeeId: string; totalAmount: number; count: number } } = {};
+    
+    periodIncome.forEach(inc => {
+      if (!incomeByEmployee[inc.employeeId]) {
+        incomeByEmployee[inc.employeeId] = {
+          employeeId: inc.employeeId,
+          totalAmount: 0,
+          count: 0
+        };
+      }
+      incomeByEmployee[inc.employeeId].totalAmount += inc.amount;
+      incomeByEmployee[inc.employeeId].count += 1;
+    });
+
+    // Создаем карточку для архива
+    const archiveData = {
+      period: getPeriodLabel(),
+      periodValue: selectedPeriod,
+      employees: Object.values(incomeByEmployee).map(emp => ({
+        employeeId: emp.employeeId,
+        totalAmount: emp.totalAmount,
+        count: emp.count
+      })),
+      totalAmount: totalIncome,
+      totalCount: periodIncome.length
+    };
+
+    addArchivedIncome(archiveData);
+    setShowArchiveConfirm(false);
+    alert(`Данные за период "${getPeriodLabel()}" успешно отправлены в архив`);
+  };
+
+  const handleOpenModal = (incomeData?: IncomeType) => {
     if (incomeData) {
       setEditingId(incomeData.id);
       setSelectedEmployee(incomeData.employeeId);
@@ -106,43 +144,37 @@ export default function IncomeStorekeeper() {
         date: new Date().toISOString().slice(0, 10),
         createdBy: 'storekeeper',
       });
+      // Автоматически переключаем фильтр на период добавленной записи
       setSelectedPeriod(modalPeriod);
     }
     handleCloseModal();
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Удалить запись о приходе?')) {
-      removeIncome(id);
-    }
+    removeIncome(id);
   };
 
   return (
     <div className="space-y-6">
-      {/* Заголовок */}
+      {/* Приход на подразделение за прошедший месяц */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-800">Приходы</h2>
-            <p className="text-sm text-gray-500 mt-1">Управление приходами для сотрудников</p>
-          </div>
-          <button
-            onClick={() => handleOpenModal()}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-800">Приход на подразделение</h3>
+          <button 
+            onClick={handleArchive}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium flex items-center gap-2"
           >
-            ➕ Добавить приход
+            📦 Отправить в архив
           </button>
         </div>
-      </div>
-
-      {/* Фильтр периода */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Период:</label>
+        
+        {/* Фильтр периода */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Выбрать период:</label>
           <select
             value={selectedPeriod}
-            onChange={e => setSelectedPeriod(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
           >
             <option value="2026-08">Август 2026</option>
             <option value="2026-07">Июль 2026</option>
@@ -153,50 +185,73 @@ export default function IncomeStorekeeper() {
             <option value="year">2026 год</option>
             <option value="all">Все время</option>
           </select>
-          <div className="ml-auto text-sm text-gray-600">
-            <span className="font-medium">Всего:</span> {periodIncome.length} записей на сумму <span className="font-bold text-green-700">{totalIncome.toLocaleString('ru')} ₽</span>
+        </div>
+
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 border border-green-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">{getPeriodLabel()}</p>
+              <p className="text-3xl font-bold text-green-700">{totalIncome.toLocaleString('ru')} ₽</p>
+              <p className="text-sm text-gray-500 mt-2">Общая сумма приходов всех сотрудников</p>
+            </div>
+            <div className="text-6xl opacity-20">💰</div>
           </div>
         </div>
       </div>
 
       {/* Таблица приходов */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+          <h3 className="font-semibold text-gray-800">Приходы за период: {getPeriodLabel()}</h3>
+          <button 
+            onClick={() => handleOpenModal()}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
+          >
+            + Добавить приход
+          </button>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 text-left">
-                <th className="px-4 py-3 font-medium text-gray-600">Дата</th>
-                <th className="px-4 py-3 font-medium text-gray-600">Сотрудник</th>
-                <th className="px-4 py-3 font-medium text-gray-600">Период</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">Сумма</th>
+                <th className="px-4 py-3 font-medium text-gray-600">ФИО</th>
+                <th className="px-4 py-3 font-medium text-gray-600">Дата внесения</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-right">Сумма (₽)</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Действия</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {periodIncome.map(inc => (
-                <tr key={inc.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-600">{inc.date}</td>
-                  <td className="px-4 py-3 font-medium text-gray-800">{formatEmployeeName(getEmployeeName(inc.employeeId))}</td>
-                  <td className="px-4 py-3 text-gray-600">{inc.period}</td>
-                  <td className="px-4 py-3 text-right text-green-700 font-bold">{inc.amount.toLocaleString('ru')} ₽</td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => handleOpenModal(inc)}
-                        className="text-blue-600 hover:text-blue-800 text-xs"
-                      >
-                        ✏️ Ред.
-                      </button>
-                      <button
-                        onClick={() => handleDelete(inc.id)}
-                        className="text-red-600 hover:text-red-800 text-xs"
-                      >
-                        🗑️ Удал.
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {periodIncome.map(inc => {
+                const emp = employees.find(e => e.id === inc.employeeId);
+                if (!emp) return null;
+                return (
+                  <tr key={inc.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-800">{emp.fullName}</td>
+                    <td className="px-4 py-3 text-gray-600">{formatDate(inc.date)}</td>
+                    <td className="px-4 py-3 text-right text-green-700 font-medium">
+                      {inc.amount.toLocaleString('ru')}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleOpenModal(inc)}
+                          className="p-1 text-gray-600 hover:text-green-600 transition"
+                          title="Редактировать"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDelete(inc.id)}
+                          className="p-1 text-gray-600 hover:text-red-600 transition"
+                          title="Удалить"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -204,66 +259,126 @@ export default function IncomeStorekeeper() {
 
       {/* Модальное окно */}
       {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              {editingId ? 'Редактировать приход' : 'Добавить приход'}
+            </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Период
+                </label>
+                <select
+                  value={modalPeriod}
+                  onChange={(e) => setModalPeriod(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                >
+                  <option value="2026-08">Август 2026</option>
+                  <option value="2026-07">Июль 2026</option>
+                  <option value="2026-06">Июнь 2026</option>
+                  <option value="2026-05">Май 2026</option>
+                  <option value="2026-04">Апрель 2026</option>
+                  <option value="2026-03">Март 2026</option>
+                  <option value="2026-02">Февраль 2026</option>
+                  <option value="2026-01">Январь 2026</option>
+                  <option value="2025-12">Декабрь 2025</option>
+                  <option value="2025-11">Ноябрь 2025</option>
+                  <option value="2025-10">Октябрь 2025</option>
+                  <option value="2025-09">Сентябрь 2025</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Сотрудник
+                </label>
+                <select
+                  value={selectedEmployee}
+                  onChange={(e) => setSelectedEmployee(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                >
+                  <option value="">Выберите сотрудника</option>
+                  {employees.filter(e => e.status === 'active').map(emp => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Сумма прихода (₽)
+                </label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Введите сумму"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleCloseModal}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+              >
+                Сохранить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно подтверждения архивирования */}
+      {showArchiveConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
             <div className="p-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">
-                {editingId ? 'Редактировать приход' : 'Новый приход'}
-              </h3>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Период</label>
-                  <select
-                    value={modalPeriod}
-                    onChange={e => setModalPeriod(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="2026-08">Август 2026</option>
-                    <option value="2026-07">Июль 2026</option>
-                    <option value="2026-06">Июнь 2026</option>
-                    <option value="2026-05">Май 2026</option>
-                  </select>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-2xl">
+                  📦
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Сотрудник</label>
-                  <select
-                    value={selectedEmployee}
-                    onChange={e => setSelectedEmployee(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="">Выберите сотрудника</option>
-                    {employees.filter(e => e.status === 'active').map(emp => (
-                      <option key={emp.id} value={emp.id}>{emp.fullName}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Сумма прихода (₽)</label>
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={e => setAmount(e.target.value)}
-                    placeholder="Введите сумму"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
+                <h3 className="text-lg font-bold text-gray-800">Отправить в архив?</h3>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <p className="text-sm text-gray-700 mb-2">
+                  <span className="font-medium">Период:</span> {getPeriodLabel()}
+                </p>
+                <p className="text-sm text-gray-700 mb-2">
+                  <span className="font-medium">Сотрудников:</span> {new Set(periodIncome.map(i => i.employeeId)).size}
+                </p>
+                <p className="text-sm text-gray-700 mb-2">
+                  <span className="font-medium">Приходов:</span> {periodIncome.length}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Общая сумма:</span> {totalIncome.toLocaleString('ru')} ₽
+                </p>
               </div>
 
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-3">
                 <button
-                  onClick={handleCloseModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  onClick={() => setShowArchiveConfirm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
                 >
                   Отмена
                 </button>
                 <button
-                  onClick={handleSave}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  onClick={confirmArchive}
+                  className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition"
                 >
-                  Сохранить
+                  Отправить в архив
                 </button>
               </div>
             </div>
