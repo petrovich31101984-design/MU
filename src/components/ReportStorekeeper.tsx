@@ -1,11 +1,8 @@
 import { useStore } from '../store/useStore';
 
 export default function ReportStorekeeper() {
-  const employees = useStore(s => s.employees);
   const income = useStore(s => s.income);
   const returns = useStore(s => s.returns);
-
-  const activeEmployees = employees.filter(e => e.status === 'active');
 
   // Определяем предыдущий месяц
   const currentDate = new Date();
@@ -57,60 +54,6 @@ export default function ReportStorekeeper() {
           <p className="text-xs text-blue-600">(за предыдущий месяц)</p>
           <p className="text-2xl font-bold text-blue-800 mt-1">{previousMonthExpenseSheets}</p>
           <p className="text-xs text-blue-600 mt-1">{previousMonthLabel}</p>
-        </div>
-      </div>
-
-      {/* Сводка по сотрудникам */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-800">Сводка по сотрудникам</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 text-left">
-                <th className="px-4 py-3 font-medium text-gray-600">Сотрудник</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">
-                  <div>Приходы (₽)</div>
-                  <div className="text-xs font-normal text-gray-400">за {previousMonthLabel}</div>
-                </th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-center">Возвратов</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">
-                  <div>Листов расхода</div>
-                  <div className="text-xs font-normal text-gray-400">за {previousMonthLabel}</div>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {activeEmployees.map(emp => {
-                const empIncome = income.filter(i => i.employeeId === emp.id && i.period === previousMonthPeriod).reduce((s, i) => s + i.amount, 0);
-                const empReturns = returns.filter(r => r.employeeId === emp.id).length;
-                const empExpenseSheets = archivedExpenseSheets.filter(sheet => {
-                  const sheetDate = new Date(sheet.date);
-                  return sheet.employee === emp.fullName &&
-                         sheetDate.getFullYear() === previousMonth.getFullYear() && 
-                         sheetDate.getMonth() === previousMonth.getMonth();
-                }).length;
-
-                return (
-                  <tr key={emp.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-800">{emp.fullName}</td>
-                    <td className="px-4 py-3 text-right text-green-700 font-medium">{empIncome.toLocaleString('ru')}</td>
-                    <td className="px-4 py-3 text-center text-purple-700 font-medium">{empReturns}</td>
-                    <td className="px-4 py-3 text-right text-blue-700 font-bold">{empExpenseSheets}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr className="bg-green-50 font-bold border-t-2 border-green-200">
-                <td className="px-4 py-3">ИТОГО</td>
-                <td className="px-4 py-3 text-right text-green-700">{previousMonthIncome.toLocaleString('ru')}</td>
-                <td className="px-4 py-3 text-center text-purple-700">{totalReturns}</td>
-                <td className="px-4 py-3 text-right text-blue-700">{previousMonthExpenseSheets}</td>
-              </tr>
-            </tfoot>
-          </table>
         </div>
       </div>
 
