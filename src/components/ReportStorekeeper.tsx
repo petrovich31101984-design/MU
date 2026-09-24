@@ -10,8 +10,18 @@ export default function ReportStorekeeper() {
 
   const activeEmployees = employees.filter(e => e.status === 'active');
 
+  // Определяем предыдущий месяц
+  const currentDate = new Date();
+  const previousMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+  const previousMonthPeriod = `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, '0')}`;
+  const previousMonthLabel = previousMonth.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+
+  // Приход за предыдущий месяц
+  const previousMonthIncome = income
+    .filter(i => i.period === previousMonthPeriod)
+    .reduce((s, i) => s + i.amount, 0);
+
   // Общая статистика
-  const totalIncome = income.reduce((s, i) => s + i.amount, 0);
   const totalReturns = returns.length;
 
   // Остатки у сотрудников
@@ -37,8 +47,9 @@ export default function ReportStorekeeper() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 border border-green-200">
           <p className="text-sm text-green-700 font-medium">Общий приход</p>
-          <p className="text-2xl font-bold text-green-800 mt-1">{totalIncome.toLocaleString('ru')} ₽</p>
-          <p className="text-xs text-green-600 mt-1">за всё время</p>
+          <p className="text-xs text-green-600">(за предыдущий месяц)</p>
+          <p className="text-2xl font-bold text-green-800 mt-1">{previousMonthIncome.toLocaleString('ru')} ₽</p>
+          <p className="text-xs text-green-600 mt-1">{previousMonthLabel}</p>
         </div>
         <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border border-purple-200">
           <p className="text-sm text-purple-700 font-medium">Возвратов</p>
@@ -62,14 +73,17 @@ export default function ReportStorekeeper() {
             <thead>
               <tr className="bg-gray-50 text-left">
                 <th className="px-4 py-3 font-medium text-gray-600">Сотрудник</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">Приходы (₽)</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-right">
+                  <div>Приходы (₽)</div>
+                  <div className="text-xs font-normal text-gray-400">за {previousMonthLabel}</div>
+                </th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Возвратов</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-right">Остатки (₽)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {activeEmployees.map(emp => {
-                const empIncome = income.filter(i => i.employeeId === emp.id).reduce((s, i) => s + i.amount, 0);
+                const empIncome = income.filter(i => i.employeeId === emp.id && i.period === previousMonthPeriod).reduce((s, i) => s + i.amount, 0);
                 const empReturns = returns.filter(r => r.employeeId === emp.id).length;
                 const empStock = nomenclature.reduce((sum, nom) => {
                   const stock = getEmployeeStock(emp.id, nom.id);
@@ -89,7 +103,7 @@ export default function ReportStorekeeper() {
             <tfoot>
               <tr className="bg-green-50 font-bold border-t-2 border-green-200">
                 <td className="px-4 py-3">ИТОГО</td>
-                <td className="px-4 py-3 text-right text-green-700">{totalIncome.toLocaleString('ru')}</td>
+                <td className="px-4 py-3 text-right text-green-700">{previousMonthIncome.toLocaleString('ru')}</td>
                 <td className="px-4 py-3 text-center text-purple-700">{totalReturns}</td>
                 <td className="px-4 py-3 text-right text-blue-700">{totalEmployeeStock.toLocaleString('ru')}</td>
               </tr>
