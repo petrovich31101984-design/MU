@@ -10,8 +10,10 @@ export default function ChatStorekeeper() {
 
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
+  const [search, setSearch] = useState('');
+  const [showNewChat, setShowNewChat] = useState(false);
 
-  // Получаем список диалогов
+  // Получаем список диалогов (уникальные собеседники)
   const dialogPartners = [...new Set(
     messages
       .filter(m => m.fromId === 'storekeeper' || m.toId === 'storekeeper')
@@ -20,6 +22,23 @@ export default function ChatStorekeeper() {
 
   // Все возможные собеседники (руководитель + все сотрудники)
   const allPossiblePartners = ['admin', ...employees.map(e => e.id)];
+
+  // Фильтруем по поиску
+  const filteredPartners = dialogPartners.filter(partnerId => {
+    if (partnerId === 'admin') return 'руководитель'.toLowerCase().includes(search.toLowerCase());
+    const emp = employees.find(e => e.id === partnerId);
+    if (!emp) return false;
+    return emp.fullName.toLowerCase().includes(search.toLowerCase());
+  });
+
+  // Собеседники для создания нового чата (те, с кем ещё нет диалога)
+  const availableNewPartners = allPossiblePartners.filter(partnerId => {
+    if (dialogPartners.includes(partnerId)) return false;
+    if (partnerId === 'admin') return 'руководитель'.toLowerCase().includes(search.toLowerCase());
+    const emp = employees.find(e => e.id === partnerId);
+    if (!emp) return false;
+    return emp.fullName.toLowerCase().includes(search.toLowerCase());
+  });
 
   const getChatMessages = (partnerId: string) => {
     return messages
@@ -65,6 +84,8 @@ export default function ChatStorekeeper() {
 
   const handleSelectNewChat = (partnerId: string) => {
     setSelectedChat(partnerId);
+    setShowNewChat(false);
+    setSearch('');
   };
 
   const selectedMessages = selectedChat ? getChatMessages(selectedChat) : [];
@@ -74,20 +95,55 @@ export default function ChatStorekeeper() {
       <div className="flex h-full">
         {/* Dialog List */}
         <div className="w-80 border-r border-gray-200 flex flex-col">
-          <div className="p-3 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 text-sm mb-2">Диалоги</h3>
+          <div className="p-3 border-b border-gray-200 space-y-2">
+            <input
+              type="text"
+              placeholder="Поиск..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500"
+            />
+            <button
+              onClick={() => setShowNewChat(!showNewChat)}
+              className="w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
+            >
+              ➕ Новый чат
+            </button>
           </div>
+
+          {/* Список для создания нового чата */}
+          {showNewChat && (
+            <div className="border-b border-gray-200 bg-green-50 max-h-48 overflow-auto">
+              <div className="p-2 text-xs font-medium text-gray-600">Выберите собеседника:</div>
+              {availableNewPartners.length === 0 ? (
+                <div className="p-3 text-sm text-gray-500 text-center">Нет доступных собеседников</div>
+              ) : (
+                availableNewPartners.map(partnerId => (
+                  <button
+                    key={partnerId}
+                    onClick={() => handleSelectNewChat(partnerId)}
+                    className="w-full p-2 text-left hover:bg-white transition flex items-center gap-2"
+                  >
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs">
+                      {partnerId === 'admin' ? '👨‍💼' : '👨‍⚕️'}
+                    </div>
+                    <span className="text-sm text-gray-800">{getPartnerName(partnerId)}</span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
 
           {/* Существующие диалоги */}
           <div className="flex-1 overflow-auto">
-            {dialogPartners.length === 0 ? (
+            {filteredPartners.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
                 <div className="text-3xl mb-2">📭</div>
                 <p className="text-sm">Нет диалогов</p>
-                <p className="text-xs mt-1">Выберите собеседника ниже</p>
+                <p className="text-xs mt-1">Нажмите "Новый чат" чтобы начать</p>
               </div>
             ) : (
-              dialogPartners.map(partnerId => {
+              filteredPartners.map(partnerId => {
                 const chatMsgs = getChatMessages(partnerId);
                 const lastMsg = chatMsgs[chatMsgs.length - 1];
                 const unread = getUnreadCount(partnerId);
@@ -125,20 +181,6 @@ export default function ChatStorekeeper() {
                 );
               })
             )}
-
-            {/* Новые диалоги */}
-            <div className="border-t border-gray-200 p-3">
-              <p className="text-xs text-gray-500 mb-2">Новый диалог:</p>
-              {allPossiblePartners.filter(p => !dialogPartners.includes(p)).map(partnerId => (
-                <button
-                  key={partnerId}
-                  onClick={() => handleSelectNewChat(partnerId)}
-                  className="w-full p-2 text-left hover:bg-green-50 rounded text-sm text-gray-700"
-                >
-                  {getPartnerName(partnerId)}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
 
@@ -207,7 +249,7 @@ export default function ChatStorekeeper() {
             <div className="flex-1 flex items-center justify-center text-gray-400">
               <div className="text-center">
                 <div className="text-4xl mb-2">💬</div>
-                <p>Выберите диалог</p>
+                <p>Выберите диалог или создайте новый</p>
               </div>
             </div>
           )}
