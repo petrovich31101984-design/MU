@@ -33,6 +33,7 @@ export default function ExpensesStorekeeper() {
       therapyName: 'Обезболивающая терапия',
       therapyCost: 6300,
       items: [
+        { name: 'Морфин 1% 1мл', type: 'Лекарство ПКУ', quantity: 1, unitPrice: 500, sum: 500 },
         { name: 'Анальгин 50% 2мл', type: 'Лекарство', quantity: 2, unitPrice: 45, sum: 90 },
         { name: 'Дексаметазон 4мг/мл', type: 'Лекарство', quantity: 1, unitPrice: 85, sum: 85 },
         { name: 'Шприц 5мл', type: 'Расходник', quantity: 3, unitPrice: 12, sum: 36 },
@@ -49,6 +50,8 @@ export default function ExpensesStorekeeper() {
       therapyName: 'Сердечно-сосудистая терапия',
       therapyCost: 8500,
       items: [
+        { name: 'Фентанил 0.005% 2мл', type: 'Лекарство ПКУ', quantity: 1, unitPrice: 640, sum: 640 },
+        { name: 'Промедол 2% 1мл', type: 'Лекарство ПКУ', quantity: 1, unitPrice: 360, sum: 360 },
         { name: 'Нитроглицерин 0.5мг', type: 'Лекарство', quantity: 3, unitPrice: 25, sum: 75 },
         { name: 'Магния сульфат 25% 5мл', type: 'Лекарство', quantity: 2, unitPrice: 55, sum: 110 },
         { name: 'Шприц 10мл', type: 'Расходник', quantity: 4, unitPrice: 15, sum: 60 },
@@ -375,12 +378,19 @@ export default function ExpensesStorekeeper() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {sheet.items.map((item: any, index: number) => (
+                    {[...sheet.items].sort((a: any, b: any) => {
+                      // Сортировка: лекарства ПКУ на первом месте
+                      if (a.type === 'Лекарство ПКУ' && b.type !== 'Лекарство ПКУ') return -1;
+                      if (a.type !== 'Лекарство ПКУ' && b.type === 'Лекарство ПКУ') return 1;
+                      return 0;
+                    }).map((item: any, index: number) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
                         <td className="px-4 py-3 text-center">
                           <span className={`text-xs px-2 py-1 rounded-full ${
-                            item.type === 'Лекарство' 
+                            item.type === 'Лекарство ПКУ'
+                              ? 'bg-red-100 text-red-700 font-bold'
+                              : item.type === 'Лекарство' 
                               ? 'bg-purple-100 text-purple-700' 
                               : 'bg-green-100 text-green-700'
                           }`}>
