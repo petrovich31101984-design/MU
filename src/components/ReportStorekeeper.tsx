@@ -1,12 +1,9 @@
 import { useStore } from '../store/useStore';
 
 export default function ReportStorekeeper() {
-  const nomenclature = useStore(s => s.nomenclature);
   const employees = useStore(s => s.employees);
   const income = useStore(s => s.income);
   const returns = useStore(s => s.returns);
-  const getCurrentPrice = useStore(s => s.getCurrentPrice);
-  const getEmployeeStock = useStore(s => s.getEmployeeStock);
 
   const activeEmployees = employees.filter(e => e.status === 'active');
 
@@ -24,14 +21,13 @@ export default function ReportStorekeeper() {
   // Общая статистика
   const totalReturns = returns.length;
 
-  // Остатки у сотрудников
-  const totalEmployeeStock = activeEmployees.reduce((sum, emp) => {
-    const empStock = nomenclature.reduce((empSum, nom) => {
-      const stock = getEmployeeStock(emp.id, nom.id);
-      return empSum + stock * getCurrentPrice(nom.id);
-    }, 0);
-    return sum + empStock;
-  }, 0);
+  // Количество листов расхода за предыдущий месяц
+  const archivedExpenseSheets = useStore(s => s.archivedExpenseSheets);
+  const previousMonthExpenseSheets = archivedExpenseSheets.filter(sheet => {
+    const sheetDate = new Date(sheet.date);
+    return sheetDate.getFullYear() === previousMonth.getFullYear() && 
+           sheetDate.getMonth() === previousMonth.getMonth();
+  }).length;
 
   return (
     <div className="space-y-6">
@@ -57,9 +53,10 @@ export default function ReportStorekeeper() {
           <p className="text-xs text-purple-600 mt-1">за всё время</p>
         </div>
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
-          <p className="text-sm text-blue-700 font-medium">Остатки у сотрудников</p>
-          <p className="text-2xl font-bold text-blue-800 mt-1">{totalEmployeeStock.toLocaleString('ru')} ₽</p>
-          <p className="text-xs text-blue-600 mt-1">общая стоимость</p>
+          <p className="text-sm text-blue-700 font-medium">Листов расхода</p>
+          <p className="text-xs text-blue-600">(за предыдущий месяц)</p>
+          <p className="text-2xl font-bold text-blue-800 mt-1">{previousMonthExpenseSheets}</p>
+          <p className="text-xs text-blue-600 mt-1">{previousMonthLabel}</p>
         </div>
       </div>
 
@@ -78,24 +75,29 @@ export default function ReportStorekeeper() {
                   <div className="text-xs font-normal text-gray-400">за {previousMonthLabel}</div>
                 </th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Возвратов</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-right">Остатки (₽)</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-right">
+                  <div>Листов расхода</div>
+                  <div className="text-xs font-normal text-gray-400">за {previousMonthLabel}</div>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {activeEmployees.map(emp => {
                 const empIncome = income.filter(i => i.employeeId === emp.id && i.period === previousMonthPeriod).reduce((s, i) => s + i.amount, 0);
                 const empReturns = returns.filter(r => r.employeeId === emp.id).length;
-                const empStock = nomenclature.reduce((sum, nom) => {
-                  const stock = getEmployeeStock(emp.id, nom.id);
-                  return sum + stock * getCurrentPrice(nom.id);
-                }, 0);
+                const empExpenseSheets = archivedExpenseSheets.filter(sheet => {
+                  const sheetDate = new Date(sheet.date);
+                  return sheet.employee === emp.fullName &&
+                         sheetDate.getFullYear() === previousMonth.getFullYear() && 
+                         sheetDate.getMonth() === previousMonth.getMonth();
+                }).length;
 
                 return (
                   <tr key={emp.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-800">{emp.fullName}</td>
                     <td className="px-4 py-3 text-right text-green-700 font-medium">{empIncome.toLocaleString('ru')}</td>
                     <td className="px-4 py-3 text-center text-purple-700 font-medium">{empReturns}</td>
-                    <td className="px-4 py-3 text-right text-blue-700 font-bold">{empStock.toLocaleString('ru')}</td>
+                    <td className="px-4 py-3 text-right text-blue-700 font-bold">{empExpenseSheets}</td>
                   </tr>
                 );
               })}
@@ -105,7 +107,7 @@ export default function ReportStorekeeper() {
                 <td className="px-4 py-3">ИТОГО</td>
                 <td className="px-4 py-3 text-right text-green-700">{previousMonthIncome.toLocaleString('ru')}</td>
                 <td className="px-4 py-3 text-center text-purple-700">{totalReturns}</td>
-                <td className="px-4 py-3 text-right text-blue-700">{totalEmployeeStock.toLocaleString('ru')}</td>
+                <td className="px-4 py-3 text-right text-blue-700">{previousMonthExpenseSheets}</td>
               </tr>
             </tfoot>
           </table>
