@@ -2,9 +2,6 @@ import { useState } from 'react';
 import { useStore } from '../store/useStore';
 
 export default function ExpensesStorekeeper() {
-  // Тестовые данные для демонстрации
-  const totalExpenseAmount = 385000; // Общая сумма расхода за месяц
-
   // Состояние для редактирования
   const [editingSheet, setEditingSheet] = useState<any>(null);
   const [editData, setEditData] = useState<any>(null);
@@ -255,17 +252,7 @@ export default function ExpensesStorekeeper() {
   return (
     <div className="space-y-6">
       {/* Карточки KPI */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Общая сумма расхода за месяц */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
-          <div className="pl-2">
-            <p className="text-sm text-gray-500">Общая сумма расхода за месяц</p>
-            <p className="text-2xl font-bold text-red-700 mt-1">{totalExpenseAmount.toLocaleString('ru')} ₽</p>
-            <p className="text-xs text-gray-400 mt-1">за август 2026</p>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
         {/* Листов расхода за месяц */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-green-500"></div>
@@ -273,21 +260,6 @@ export default function ExpensesStorekeeper() {
             <p className="text-sm text-gray-500">Листов расхода за месяц</p>
             <p className="text-2xl font-bold text-green-700 mt-1">{expenseSheets.length}</p>
             <p className="text-xs text-gray-400 mt-1">за август 2026</p>
-          </div>
-        </div>
-
-        {/* Превышений лимита */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
-          <div className="pl-2">
-            <p className="text-sm text-gray-500">Превышений лимита 6%</p>
-            <p className="text-2xl font-bold text-amber-700 mt-1">
-              {expenseSheets.filter(s => {
-                const total = s.items.reduce((sum: number, item: any) => sum + item.sum, 0);
-                return total >= s.therapyCost * 0.06;
-              }).length}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">уведомления отправлены</p>
           </div>
         </div>
       </div>
