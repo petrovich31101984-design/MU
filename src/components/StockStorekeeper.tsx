@@ -16,6 +16,23 @@ export default function StockStorekeeper() {
     return fullName;
   };
 
+  const formatUnit = (unit: string) => {
+    const unitMap: Record<string, string> = {
+      'ampoule': 'амп.',
+      'tablet': 'таб.',
+      'flacon': 'фл.',
+      'piece': 'шт.'
+    };
+    return unitMap[unit] || unit;
+  };
+
+  // Сортировка номенклатуры: ПКУ лекарства вверху
+  const sortedNomenclature = [...nomenclature].sort((a, b) => {
+    if (a.category === 'medicine_pku' && b.category !== 'medicine_pku') return -1;
+    if (a.category !== 'medicine_pku' && b.category === 'medicine_pku') return 1;
+    return 0;
+  });
+
   return (
     <div className="space-y-6">
       {/* Заголовок */}
@@ -44,15 +61,20 @@ export default function StockStorekeeper() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {nomenclature.map(nom => {
+              {sortedNomenclature.map(nom => {
                 let totalQty = 0;
                 let totalValue = 0;
                 const price = getCurrentPrice(nom.id);
 
                 return (
-                  <tr key={nom.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-800">{nom.name}</td>
-                    <td className="px-4 py-3 text-center text-gray-600">{nom.unit}</td>
+                  <tr key={nom.id} className={`hover:bg-gray-50 ${nom.category === 'medicine_pku' ? 'bg-indigo-50' : ''}`}>
+                    <td className="px-4 py-3 font-medium text-gray-800">
+                      {nom.name}
+                      {nom.category === 'medicine_pku' && (
+                        <span className="ml-2 text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">ПКУ</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center text-gray-600">{formatUnit(nom.unit)}</td>
                     <td className="px-4 py-3 text-right text-green-700 font-medium">{price.toLocaleString('ru')} ₽</td>
                     {activeEmployees.map(emp => {
                       const stock = getEmployeeStock(emp.id, nom.id);
@@ -80,7 +102,7 @@ export default function StockStorekeeper() {
               <tr className="bg-green-50 font-bold">
                 <td className="px-4 py-3" colSpan={3}>ИТОГО по сотрудникам</td>
                 {activeEmployees.map(emp => {
-                  const empTotal = nomenclature.reduce((sum, nom) => {
+                  const empTotal = sortedNomenclature.reduce((sum, nom) => {
                     const stock = getEmployeeStock(emp.id, nom.id);
                     return sum + stock * getCurrentPrice(nom.id);
                   }, 0);
@@ -93,7 +115,7 @@ export default function StockStorekeeper() {
                 })}
                 <td className="px-4 py-3 text-center text-green-700">
                   {activeEmployees.reduce((sum, emp) => {
-                    const empTotal = nomenclature.reduce((s, nom) => {
+                    const empTotal = sortedNomenclature.reduce((s, nom) => {
                       const stock = getEmployeeStock(emp.id, nom.id);
                       return s + stock * getCurrentPrice(nom.id);
                     }, 0);
