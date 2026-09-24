@@ -313,13 +313,15 @@ export default function ChatStorekeeper() {
                         <p className={`text-xs mt-1 ${msg.fromId === 'storekeeper' ? 'text-green-200' : 'text-gray-400'}`}>
                           {formatDateTime(msg.date)}
                         </p>
-                        <button
-                          onClick={() => handlePrintMessage(msg)}
-                          className={`absolute -top-2 ${msg.fromId === 'storekeeper' ? '-left-8' : '-right-8'} opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-100 shadow-sm`}
-                          title="Распечатать сообщение"
-                        >
-                          🖨️
-                        </button>
+                        {msg.fromId !== 'storekeeper' && (
+                          <button
+                            onClick={() => handlePrintMessage(msg)}
+                            className="absolute -top-2 -right-8 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-100 shadow-sm"
+                            title="Распечатать сообщение"
+                          >
+                            🖨️
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))
