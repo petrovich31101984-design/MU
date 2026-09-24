@@ -9,6 +9,9 @@ export default function ExpensesStorekeeper() {
   // Состояние для архивированных листов
   const [archivedSheets, setArchivedSheets] = useState<number[]>([]);
 
+  // Состояние для просмотренных листов
+  const [viewedSheets, setViewedSheets] = useState<number[]>([]);
+
   // Функция для форматирования ФИО в инициалы
   const formatPatientName = (fullName: string) => {
     const parts = fullName.split(' ');
@@ -249,6 +252,15 @@ export default function ExpensesStorekeeper() {
     setArchivedSheets([...archivedSheets, sheetId]);
   };
 
+  // Функция для отметки листа как просмотренного
+  const handleViewed = (sheetId: number) => {
+    setViewedSheets([...viewedSheets, sheetId]);
+    // Через 5 секунд убрать лист из отображения
+    setTimeout(() => {
+      setArchivedSheets([...archivedSheets, sheetId]);
+    }, 5000);
+  };
+
   return (
     <div className="space-y-6">
       {/* Карточки KPI */}
@@ -271,25 +283,24 @@ export default function ExpensesStorekeeper() {
       {expenseSheets
         .filter(sheet => !archivedSheets.includes(sheet.id))
         .map((sheet) => {
+        const isViewed = viewedSheets.includes(sheet.id);
         const totalSum = sheet.items.reduce((sum: number, item: any) => sum + item.sum, 0);
-        const limit = sheet.therapyCost * 0.06;
-        const isOverLimit = totalSum >= limit;
         
         return (
           <div 
             key={sheet.id} 
-            className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500 ${
-              isOverLimit ? 'border-red-200' : 'border-gray-200'
+            className={`rounded-xl shadow-sm border overflow-hidden transition-all duration-500 ${
+              isViewed ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-200'
             }`}
           >
             {/* Шапка листа расхода */}
-            <div className={`p-6 border-b border-gray-200 ${isOverLimit ? 'bg-gradient-to-r from-red-50 to-orange-50' : 'bg-gradient-to-r from-green-50 to-emerald-50'}`}>
+            <div className={`p-6 border-b border-gray-200 ${isViewed ? 'bg-gradient-to-r from-blue-100 to-blue-50' : 'bg-gradient-to-r from-green-50 to-emerald-50'}`}>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="text-xl font-bold text-gray-800">Лист расхода</h3>
-                  {isOverLimit && (
-                    <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full border border-red-200 animate-pulse">
-                      ⚠️ ЛИМИТ ПРЕВЫШЕН
+                  {isViewed && (
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full border border-blue-200">
+                      ✓ Просмотрено
                     </span>
                   )}
                 </div>
@@ -300,12 +311,14 @@ export default function ExpensesStorekeeper() {
                   >
                     ✏️ Редактировать
                   </button>
-                  <button
-                    onClick={() => handleArchive(sheet.id)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium flex items-center gap-2"
-                  >
-                    📦 В архив
-                  </button>
+                  {!isViewed && (
+                    <button
+                      onClick={() => handleViewed(sheet.id)}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
+                    >
+                      ✓ Просмотрено
+                    </button>
+                  )}
                   <button
                     onClick={handleExportExcel}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
@@ -332,47 +345,7 @@ export default function ExpensesStorekeeper() {
                   <span className="text-xs text-gray-500">Дата рождения:</span>
                   <span className="text-sm font-medium text-gray-800">{sheet.birthDate}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">Категория выезда:</span>
-                  <span className="text-sm font-medium text-gray-800">{sheet.visitCategory}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">Название терапии:</span>
-                  <span className="text-sm font-medium text-gray-800">{sheet.therapyName}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">Стоимость терапии:</span>
-                  <span className="text-sm font-bold text-green-600">
-                    {sheet.therapyCost.toLocaleString('ru')} ₽ 
-                    <span className="text-xs font-normal text-gray-500 ml-1">
-                      (лимит 6%: {(sheet.therapyCost * 0.06).toLocaleString('ru')} ₽)
-                    </span>
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">Итого по препаратам:</span>
-                  <span className={`text-sm font-bold ${isOverLimit ? 'text-red-600' : 'text-green-600'}`}>
-                    {totalSum.toLocaleString('ru')} ₽
-                    {isOverLimit && <span className="text-xs ml-2 text-red-500">⚠️ Превышен лимит 6%</span>}
-                  </span>
-                </div>
               </div>
-
-              {/* Прогресс-бар лимита */}
-              {sheet.therapyCost > 0 && (
-                <div className="mt-3">
-                  <div className="flex justify-between text-xs text-gray-500 mb-1">
-                    <span>Использование лимита</span>
-                    <span>{Math.round((totalSum / limit) * 100)}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all ${isOverLimit ? 'bg-red-500' : 'bg-green-500'}`}
-                      style={{ width: `${Math.min((totalSum / limit) * 100, 100)}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Содержимое листа расхода */}
