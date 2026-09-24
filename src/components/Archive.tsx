@@ -105,7 +105,7 @@ export default function Archive() {
       </div>
 
       {/* Статистика */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
           <p className="text-sm text-gray-700 font-medium">Листов расхода в архиве</p>
           <p className="text-2xl font-bold text-gray-800 mt-1">{archivedExpenseSheets.length}</p>
@@ -121,11 +121,7 @@ export default function Archive() {
           <p className="text-2xl font-bold text-blue-800 mt-1">{archivedEmployees.length}</p>
           <p className="text-xs text-blue-600 mt-1">неактивных</p>
         </div>
-        <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-5 border border-amber-200">
-          <p className="text-sm text-amber-700 font-medium">Всего сотрудников</p>
-          <p className="text-2xl font-bold text-amber-800 mt-1">{employees.length}</p>
-          <p className="text-xs text-amber-600 mt-1">в системе</p>
-        </div>
+
       </div>
 
       {/* Переключатель вкладок */}
