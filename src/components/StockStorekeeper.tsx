@@ -48,7 +48,7 @@ export default function StockStorekeeper() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 text-left">
-                <th className="px-4 py-3 font-medium text-gray-600">Номенклатура</th>
+                <th className="px-4 py-3 font-medium text-gray-600 sticky left-0 bg-gray-50 z-10">Номенклатура</th>
                 <th className="px-4 py-3 font-medium text-gray-600 text-center">Ед. изм.</th>
                 {activeEmployees.map(emp => (
                   <th key={emp.id} className="px-4 py-3 font-medium text-gray-600 text-center">
@@ -63,7 +63,7 @@ export default function StockStorekeeper() {
                 let totalQty = 0;
  
                 return (                  <tr key={nom.id} className={`hover:bg-gray-50 ${nom.category === 'medicine_pku' ? 'bg-indigo-50' : ''}`}>
-                    <td className="px-4 py-3 font-medium text-gray-800">
+                    <td className={`px-4 py-3 font-medium text-gray-800 sticky left-0 z-10 ${nom.category === 'medicine_pku' ? 'bg-indigo-50' : 'bg-white'}`}>
                       {nom.name}
                       {nom.category === 'medicine_pku' && (
                         <span className="ml-2 text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">ПКУ</span>
