@@ -11,6 +11,7 @@ import Journal from './components/Journal';
 import Chat from './components/Chat';
 import Returns from './components/Returns';
 import Archive from './components/Archive';
+import Stock from './components/Stock';
 import DashboardStorekeeper from './components/DashboardStorekeeper';
 import NomenclatureStorekeeper from './components/NomenclatureStorekeeper';
 import IncomeStorekeeper from './components/IncomeStorekeeper';
@@ -46,6 +47,7 @@ function App() {
         case 'nomenclature': return <Nomenclature />;
         case 'income': return <Income />;
         case 'expenses': return <Expenses />;
+        case 'stock': return <Stock />;
         case 'returns': return <Returns />;
         case 'chat': return <Chat />;
         case 'report': return <Report />;
