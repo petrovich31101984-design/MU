@@ -58,9 +58,45 @@ export default function Income() {
     }
   };
 
+  const addArchivedIncome = useStore(s => s.addArchivedIncome);
+
   const handleArchive = () => {
-    if (confirm('Отправить данные за прошедший месяц в архив?')) {
-      alert('Данные успешно отправлены в архив');
+    if (periodIncome.length === 0) {
+      alert('Нет данных для архивирования за выбранный период');
+      return;
+    }
+
+    if (confirm(`Отправить данные за период "${getPeriodLabel()}" в архив?`)) {
+      // Группируем приходы по сотрудникам
+      const incomeByEmployee: { [key: string]: { employeeId: string; totalAmount: number; count: number } } = {};
+      
+      periodIncome.forEach(inc => {
+        if (!incomeByEmployee[inc.employeeId]) {
+          incomeByEmployee[inc.employeeId] = {
+            employeeId: inc.employeeId,
+            totalAmount: 0,
+            count: 0
+          };
+        }
+        incomeByEmployee[inc.employeeId].totalAmount += inc.amount;
+        incomeByEmployee[inc.employeeId].count += 1;
+      });
+
+      // Создаем карточку для архива
+      const archiveData = {
+        period: getPeriodLabel(),
+        periodValue: selectedPeriod,
+        employees: Object.values(incomeByEmployee).map(emp => ({
+          employeeId: emp.employeeId,
+          totalAmount: emp.totalAmount,
+          count: emp.count
+        })),
+        totalAmount: totalIncome,
+        totalCount: periodIncome.length
+      };
+
+      addArchivedIncome(archiveData);
+      alert(`Данные за период "${getPeriodLabel()}" успешно отправлены в архив`);
     }
   };
 

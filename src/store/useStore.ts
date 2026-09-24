@@ -62,6 +62,8 @@ interface AppState {
   addArchivedExpenseSheet: (sheet: any) => void;
   archivedReturns: any[];
   addArchivedReturns: (sheets: any[]) => void;
+  archivedIncome: any[];
+  addArchivedIncome: (data: any) => void;
 
   // Computed helpers
   getCurrentPrice: (nomenclatureId: string) => number;
@@ -83,6 +85,10 @@ export const useStore = create<AppState>((set, get) => ({
   archivedReturns: [],
   addArchivedReturns: (sheets) => set(state => ({
     archivedReturns: [...state.archivedReturns, ...sheets.map(sheet => ({ ...sheet, archivedDate: new Date().toISOString() }))]
+  })),
+  archivedIncome: [],
+  addArchivedIncome: (data) => set(state => ({
+    archivedIncome: [...state.archivedIncome, { ...data, archivedDate: new Date().toISOString() }]
   })),
 
   employees: mockEmployees,

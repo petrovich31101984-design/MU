@@ -7,10 +7,11 @@ export default function Archive() {
   const nomenclature = useStore(s => s.nomenclature);
   const archivedExpenseSheets = useStore(s => s.archivedExpenseSheets);
   const archivedReturns = useStore(s => s.archivedReturns);
+  const archivedIncome = useStore(s => s.archivedIncome);
   const [searchDate, setSearchDate] = useState('');
   const [searchPatient, setSearchPatient] = useState('');
   const [searchBirthDate, setSearchBirthDate] = useState('');
-  const [activeTab, setActiveTab] = useState<'sheets' | 'returns' | 'employees'>('sheets');
+  const [activeTab, setActiveTab] = useState<'sheets' | 'returns' | 'income' | 'employees'>('sheets');
 
   // Архивные сотрудники
   const archivedEmployees = employees.filter(e => e.archived);
@@ -40,6 +41,18 @@ export default function Archive() {
       empName.toLowerCase().includes(searchPatient.toLowerCase()) ||
       formatPatientName(empName).toLowerCase().includes(searchPatient.toLowerCase());
     return matchesDate && matchesEmployee;
+  });
+
+  // Фильтрация по приходам
+  const filteredIncome = archivedIncome.filter(data => {
+    const matchesPeriod = !searchDate || data.period.toLowerCase().includes(searchDate.toLowerCase());
+    const matchesEmployee = !searchPatient || data.employees.some((emp: any) => {
+      const empData = employees.find(e => e.id === emp.employeeId);
+      const empName = empData?.fullName || '';
+      return empName.toLowerCase().includes(searchPatient.toLowerCase()) ||
+             formatPatientName(empName).toLowerCase().includes(searchPatient.toLowerCase());
+    });
+    return matchesPeriod && matchesEmployee;
   });
 
   // Получение названия номенклатуры
@@ -105,7 +118,7 @@ export default function Archive() {
       </div>
 
       {/* Статистика */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
           <p className="text-sm text-gray-700 font-medium">Листов расхода в архиве</p>
           <p className="text-2xl font-bold text-gray-800 mt-1">{archivedExpenseSheets.length}</p>
@@ -116,12 +129,16 @@ export default function Archive() {
           <p className="text-2xl font-bold text-purple-800 mt-1">{archivedReturns.length}</p>
           <p className="text-xs text-purple-600 mt-1">листов возвратов</p>
         </div>
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 border border-green-200">
+          <p className="text-sm text-green-700 font-medium">Приходов в архиве</p>
+          <p className="text-2xl font-bold text-green-800 mt-1">{archivedIncome.length}</p>
+          <p className="text-xs text-green-600 mt-1">карточек приходов</p>
+        </div>
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
           <p className="text-sm text-blue-700 font-medium">Сотрудников в архиве</p>
           <p className="text-2xl font-bold text-blue-800 mt-1">{archivedEmployees.length}</p>
           <p className="text-xs text-blue-600 mt-1">неактивных</p>
         </div>
-
       </div>
 
       {/* Переключатель вкладок */}
@@ -146,6 +163,16 @@ export default function Archive() {
             }`}
           >
             ↩️ Возвраты ({archivedReturns.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('income')}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'income'
+                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            📥 Приходы ({archivedIncome.length})
           </button>
           <button
             onClick={() => setActiveTab('employees')}
@@ -358,6 +385,81 @@ export default function Archive() {
           </div>
         )}
 
+        {activeTab === 'income' && (
+          <div className="p-4 max-h-[600px] overflow-y-auto">
+            {filteredIncome.length === 0 ? (
+              <div className="p-12 text-center text-gray-400">
+                <div className="text-4xl mb-3">📭</div>
+                <p className="text-sm">Архив приходов пуст</p>
+                <p className="text-xs mt-1">Приходы, отправленные в архив, будут отображаться здесь</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredIncome.map((data, index) => (
+                  <div key={index} className="border border-gray-200 rounded-xl overflow-hidden">
+                    {/* Шапка карточки прихода */}
+                    <div className="p-4 bg-green-50 border-b border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-bold text-gray-800">📥 Приходы за период: {data.period}</h4>
+                        <span className="text-xs text-gray-500">
+                          Архивирован: {new Date(data.archivedDate).toLocaleDateString('ru-RU')}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                        <div>
+                          <span className="text-gray-500">Всего сотрудников:</span>
+                          <span className="ml-1 font-bold text-green-700">{data.employees.length}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Всего приходов:</span>
+                          <span className="ml-1 font-bold text-green-700">{data.totalCount}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Общая сумма:</span>
+                          <span className="ml-1 font-bold text-green-700">{data.totalAmount.toLocaleString('ru')} ₽</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Таблица сотрудников */}
+                    <div className="p-4">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-gray-50 text-left">
+                            <th className="px-3 py-2 font-medium text-gray-600">Сотрудник</th>
+                            <th className="px-3 py-2 font-medium text-gray-600 text-center">Кол-во приходов</th>
+                            <th className="px-3 py-2 font-medium text-gray-600 text-right">Сумма прихода</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {data.employees.map((emp: any, idx: number) => {
+                            const empData = employees.find(e => e.id === emp.employeeId);
+                            const empName = empData?.fullName || emp.employeeId;
+                            return (
+                              <tr key={idx} className="hover:bg-gray-50">
+                                <td className="px-3 py-2 font-medium text-gray-800">{formatPatientName(empName)}</td>
+                                <td className="px-3 py-2 text-center text-gray-700">{emp.count}</td>
+                                <td className="px-3 py-2 text-right font-bold text-green-700">{emp.totalAmount.toLocaleString('ru')} ₽</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                        <tfoot>
+                          <tr className="bg-green-50 font-bold">
+                            <td className="px-3 py-2">ИТОГО</td>
+                            <td className="px-3 py-2 text-center text-gray-800">{data.totalCount}</td>
+                            <td className="px-3 py-2 text-right text-green-700">{data.totalAmount.toLocaleString('ru')} ₽</td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {activeTab === 'employees' && (
           <div className="p-4 max-h-[600px] overflow-y-auto">
             {filteredEmployees.length === 0 ? (
@@ -404,9 +506,10 @@ export default function Archive() {
         <ul className="text-sm text-blue-700 space-y-1">
           <li>• Листы расхода попадают в архив после проверки руководителем</li>
           <li>• Возвраты попадают в архив после отправки руководителем</li>
-          <li>• В архиве хранится полная информация о препаратах, стоимости и возвратах</li>
+          <li>• Приходы попадают в архив из раздела "Приход к сотруднику"</li>
+          <li>• В архиве хранится полная информация о препаратах, стоимости, возвратах и приходах</li>
           <li>• Архивные сотрудники не отображаются в активных списках</li>
-          <li>• Поиск работает по дате, ФИО пациента, дате рождения</li>
+          <li>• Поиск работает по дате, ФИО, дате рождения</li>
         </ul>
       </div>
     </div>
