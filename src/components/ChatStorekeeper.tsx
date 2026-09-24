@@ -90,6 +90,97 @@ export default function ChatStorekeeper() {
 
   const selectedMessages = selectedChat ? getChatMessages(selectedChat) : [];
 
+  const handlePrintChat = () => {
+    if (!selectedChat || selectedMessages.length === 0) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Не удалось открыть окно печати. Проверьте настройки блокировки всплывающих окон.');
+      return;
+    }
+
+    const partnerName = getPartnerName(selectedChat);
+    const currentDate = new Date().toLocaleString('ru-RU');
+
+    let messagesHtml = '';
+    selectedMessages.forEach(msg => {
+      const isStorekeeper = msg.fromId === 'storekeeper';
+      const senderName = isStorekeeper ? 'Кладовщик' : getPartnerName(msg.fromId);
+      const align = isStorekeeper ? 'right' : 'left';
+      const bgColor = isStorekeeper ? '#16a34a' : '#ffffff';
+      const textColor = isStorekeeper ? '#ffffff' : '#1f2937';
+      const border = isStorekeeper ? 'none' : '1px solid #e5e7eb';
+
+      messagesHtml += `
+        <div style="display: flex; justify-content: ${align}; margin-bottom: 12px;">
+          <div style="max-width: 70%; background-color: ${bgColor}; border: ${border}; border-radius: 12px; padding: 12px 16px; color: ${textColor};">
+            <div style="font-size: 11px; font-weight: 600; margin-bottom: 4px; opacity: 0.8;">${senderName}</div>
+            <div style="font-size: 14px; line-height: 1.5;">${msg.text}</div>
+            <div style="font-size: 11px; margin-top: 6px; opacity: 0.7;">${formatDateTime(msg.date)}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="ru">
+      <head>
+        <meta charset="UTF-8">
+        <title>Диалог с ${partnerName}</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          .header {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+          }
+          .header h1 {
+            font-size: 24px;
+            margin: 0 0 8px 0;
+            color: #1f2937;
+          }
+          .header p {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 4px 0;
+          }
+          .messages {
+            margin-top: 20px;
+          }
+          @media print {
+            body {
+              padding: 0;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>💬 Диалог с ${partnerName}</h1>
+          <p><strong>Дата печати:</strong> ${currentDate}</p>
+          <p><strong>Всего сообщений:</strong> ${selectedMessages.length}</p>
+        </div>
+        <div class="messages">
+          ${messagesHtml}
+        </div>
+      </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-[calc(100vh-12rem)]">
       <div className="flex h-full">
@@ -189,8 +280,17 @@ export default function ChatStorekeeper() {
           {selectedChat ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200 bg-gray-50">
+              <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                 <h3 className="font-semibold text-gray-800">{getPartnerName(selectedChat)}</h3>
+                {selectedMessages.length > 0 && (
+                  <button
+                    onClick={handlePrintChat}
+                    className="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 text-sm font-medium flex items-center gap-2 transition"
+                    title="Распечатать диалог"
+                  >
+                    🖨️ Печать
+                  </button>
+                )}
               </div>
 
               {/* Messages */}
