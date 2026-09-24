@@ -264,7 +264,7 @@ export default function ExpensesStorekeeper() {
   return (
     <div className="space-y-6">
       {/* Карточки KPI */}
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Листов расхода за месяц */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-green-500"></div>
@@ -272,6 +272,18 @@ export default function ExpensesStorekeeper() {
             <p className="text-sm text-gray-500">Листов расхода за месяц</p>
             <p className="text-2xl font-bold text-green-700 mt-1">{expenseSheets.length}</p>
             <p className="text-xs text-gray-400 mt-1">за август 2026</p>
+          </div>
+        </div>
+
+        {/* Не просмотренные листы расхода */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
+          <div className="pl-2">
+            <p className="text-sm text-gray-500">Не просмотренные листы расхода</p>
+            <p className="text-2xl font-bold text-red-700 mt-1">
+              {expenseSheets.filter(s => !viewedSheets.includes(s.id) && !archivedSheets.includes(s.id)).length}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">требуют просмотра</p>
           </div>
         </div>
       </div>
@@ -289,8 +301,8 @@ export default function ExpensesStorekeeper() {
         return (
           <div 
             key={sheet.id} 
-            className={`rounded-xl shadow-sm border overflow-hidden transition-all duration-500 ${
-              isViewed ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-200'
+            className={`rounded-xl shadow-sm border-2 overflow-hidden transition-all duration-500 ${
+              isViewed ? 'bg-blue-50 border-blue-300' : 'bg-white border-red-500'
             }`}
           >
             {/* Шапка листа расхода */}
