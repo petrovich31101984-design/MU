@@ -31,6 +31,7 @@ interface AppState {
   archiveEmployee: (id: string) => void;
 
   addNomenclature: (item: Omit<NomenclatureItem, 'id'>) => void;
+  updateNomenclature: (id: string, data: Partial<NomenclatureItem>) => void;
   updatePrice: (nomenclatureId: string, newPrice: number, userId: string) => void;
   updatePackagePrice: (nomenclatureId: string, newPackagePrice: number, userId: string) => void;
   removeNomenclature: (nomenclatureId: string) => void;
@@ -299,6 +300,25 @@ export const useStore = create<AppState>((set, get) => ({
           field: 'Цена за упаковку',
           oldValue: String(oldPackagePrice),
           newValue: String(newPackagePrice),
+        }]
+      };
+    });
+  },
+
+  updateNomenclature: (id, data) => {
+    set(state => {
+      const oldItem = state.nomenclature.find(n => n.id === id);
+      return {
+        nomenclature: state.nomenclature.map(n => n.id === id ? { ...n, ...data } : n),
+        journal: [...state.journal, {
+          id: `j_${Date.now()}`,
+          dateTime: new Date().toISOString().slice(0, 16),
+          userId: 'storekeeper',
+          table: 'Номенклатура',
+          recordId: id,
+          field: 'Обновление',
+          oldValue: oldItem?.name || '',
+          newValue: data.name || oldItem?.name || '',
         }]
       };
     });

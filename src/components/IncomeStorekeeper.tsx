@@ -1,0 +1,275 @@
+import { useState } from 'react';
+import { useStore } from '../store/useStore';
+
+export default function IncomeStorekeeper() {
+  const employees = useStore(s => s.employees);
+  const income = useStore(s => s.income);
+  const addIncome = useStore(s => s.addIncome);
+  const updateIncome = useStore(s => s.updateIncome);
+  const removeIncome = useStore(s => s.removeIncome);
+
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState('');
+  const [amount, setAmount] = useState('');
+  const [modalPeriod, setModalPeriod] = useState('2026-08');
+  const [selectedPeriod, setSelectedPeriod] = useState('2026-08');
+
+  const getFilteredIncome = () => {
+    if (selectedPeriod === 'all') {
+      return income;
+    } else if (selectedPeriod === 'year') {
+      return income.filter(i => i.period.startsWith('2026'));
+    } else if (selectedPeriod === 'half-year') {
+      return income.filter(i => {
+        const month = parseInt(i.period.split('-')[1]);
+        return month >= 1 && month <= 6 && i.period.startsWith('2026');
+      });
+    } else if (selectedPeriod === 'quarter') {
+      return income.filter(i => {
+        const month = parseInt(i.period.split('-')[1]);
+        return month >= 7 && month <= 9 && i.period.startsWith('2026');
+      });
+    } else {
+      return income.filter(i => i.period === selectedPeriod);
+    }
+  };
+
+  const periodIncome = getFilteredIncome();
+  const totalIncome = periodIncome.reduce((s, i) => s + i.amount, 0);
+
+  const getPeriodLabel = () => {
+    switch (selectedPeriod) {
+      case 'all': return 'Все время';
+      case 'year': return '2026 год';
+      case 'half-year': return '1-е полугодие 2026';
+      case 'quarter': return '3-й квартал 2026';
+      case '2026-08': return 'Август 2026';
+      case '2026-07': return 'Июль 2026';
+      case '2026-06': return 'Июнь 2026';
+      case '2026-05': return 'Май 2026';
+      default: return selectedPeriod;
+    }
+  };
+
+  const getEmployeeName = (id: string) => {
+    const emp = employees.find(e => e.id === id);
+    return emp?.fullName || id;
+  };
+
+  const formatEmployeeName = (fullName: string) => {
+    const parts = fullName.split(' ');
+    if (parts.length >= 3) {
+      return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
+    }
+    return fullName;
+  };
+
+  const handleOpenModal = (incomeData?: any) => {
+    if (incomeData) {
+      setEditingId(incomeData.id);
+      setSelectedEmployee(incomeData.employeeId);
+      setAmount(String(incomeData.amount));
+      setModalPeriod(incomeData.period);
+    } else {
+      setEditingId(null);
+      setSelectedEmployee('');
+      setAmount('');
+      setModalPeriod(selectedPeriod === 'all' || selectedPeriod === 'year' || selectedPeriod === 'half-year' || selectedPeriod === 'quarter' ? '2026-08' : selectedPeriod);
+    }
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingId(null);
+    setSelectedEmployee('');
+    setAmount('');
+    setModalPeriod('2026-08');
+  };
+
+  const handleSave = () => {
+    if (!selectedEmployee || !amount) return;
+
+    if (editingId) {
+      updateIncome(editingId, {
+        employeeId: selectedEmployee,
+        amount: Number(amount),
+        period: modalPeriod,
+      });
+    } else {
+      addIncome({
+        employeeId: selectedEmployee,
+        amount: Number(amount),
+        period: modalPeriod,
+        shifts: 0,
+        date: new Date().toISOString().slice(0, 10),
+        createdBy: 'storekeeper',
+      });
+      setSelectedPeriod(modalPeriod);
+    }
+    handleCloseModal();
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Удалить запись о приходе?')) {
+      removeIncome(id);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Заголовок */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">Приходы</h2>
+            <p className="text-sm text-gray-500 mt-1">Управление приходами для сотрудников</p>
+          </div>
+          <button
+            onClick={() => handleOpenModal()}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
+          >
+            ➕ Добавить приход
+          </button>
+        </div>
+      </div>
+
+      {/* Фильтр периода */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium text-gray-700">Период:</label>
+          <select
+            value={selectedPeriod}
+            onChange={e => setSelectedPeriod(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+          >
+            <option value="2026-08">Август 2026</option>
+            <option value="2026-07">Июль 2026</option>
+            <option value="2026-06">Июнь 2026</option>
+            <option value="2026-05">Май 2026</option>
+            <option value="quarter">3-й квартал 2026</option>
+            <option value="half-year">1-е полугодие 2026</option>
+            <option value="year">2026 год</option>
+            <option value="all">Все время</option>
+          </select>
+          <div className="ml-auto text-sm text-gray-600">
+            <span className="font-medium">Всего:</span> {periodIncome.length} записей на сумму <span className="font-bold text-green-700">{totalIncome.toLocaleString('ru')} ₽</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Таблица приходов */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 text-left">
+                <th className="px-4 py-3 font-medium text-gray-600">Дата</th>
+                <th className="px-4 py-3 font-medium text-gray-600">Сотрудник</th>
+                <th className="px-4 py-3 font-medium text-gray-600">Период</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-right">Сумма</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-center">Действия</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {periodIncome.map(inc => (
+                <tr key={inc.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-gray-600">{inc.date}</td>
+                  <td className="px-4 py-3 font-medium text-gray-800">{formatEmployeeName(getEmployeeName(inc.employeeId))}</td>
+                  <td className="px-4 py-3 text-gray-600">{inc.period}</td>
+                  <td className="px-4 py-3 text-right text-green-700 font-bold">{inc.amount.toLocaleString('ru')} ₽</td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => handleOpenModal(inc)}
+                        className="text-blue-600 hover:text-blue-800 text-xs"
+                      >
+                        ✏️ Ред.
+                      </button>
+                      <button
+                        onClick={() => handleDelete(inc.id)}
+                        className="text-red-600 hover:text-red-800 text-xs"
+                      >
+                        🗑️ Удал.
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Модальное окно */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div className="p-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">
+                {editingId ? 'Редактировать приход' : 'Новый приход'}
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Период</label>
+                  <select
+                    value={modalPeriod}
+                    onChange={e => setModalPeriod(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="2026-08">Август 2026</option>
+                    <option value="2026-07">Июль 2026</option>
+                    <option value="2026-06">Июнь 2026</option>
+                    <option value="2026-05">Май 2026</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Сотрудник</label>
+                  <select
+                    value={selectedEmployee}
+                    onChange={e => setSelectedEmployee(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="">Выберите сотрудника</option>
+                    {employees.filter(e => e.status === 'active').map(emp => (
+                      <option key={emp.id} value={emp.id}>{emp.fullName}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Сумма прихода (₽)</label>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={e => setAmount(e.target.value)}
+                    placeholder="Введите сумму"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleCloseModal}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Сохранить
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

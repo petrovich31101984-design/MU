@@ -1,0 +1,118 @@
+import { useStore } from '../store/useStore';
+
+export default function StockStorekeeper() {
+  const employees = useStore(s => s.employees);
+  const nomenclature = useStore(s => s.nomenclature);
+  const getEmployeeStock = useStore(s => s.getEmployeeStock);
+  const getCurrentPrice = useStore(s => s.getCurrentPrice);
+
+  const activeEmployees = employees.filter(e => e.status === 'active');
+
+  const formatEmployeeName = (fullName: string) => {
+    const parts = fullName.split(' ');
+    if (parts.length >= 3) {
+      return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
+    }
+    return fullName;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Заголовок */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">Остатки</h2>
+          <p className="text-sm text-gray-500 mt-1">Просмотр остатков номенклатуры у сотрудников</p>
+        </div>
+      </div>
+
+      {/* Таблица остатков */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 text-left">
+                <th className="px-4 py-3 font-medium text-gray-600">Номенклатура</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-center">Ед. изм.</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-right">Цена</th>
+                {activeEmployees.map(emp => (
+                  <th key={emp.id} className="px-4 py-3 font-medium text-gray-600 text-center">
+                    {formatEmployeeName(emp.fullName)}
+                  </th>
+                ))}
+                <th className="px-4 py-3 font-medium text-gray-600 text-center">Итого</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {nomenclature.map(nom => {
+                let totalQty = 0;
+                let totalValue = 0;
+                const price = getCurrentPrice(nom.id);
+
+                return (
+                  <tr key={nom.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-800">{nom.name}</td>
+                    <td className="px-4 py-3 text-center text-gray-600">{nom.unit}</td>
+                    <td className="px-4 py-3 text-right text-green-700 font-medium">{price.toLocaleString('ru')} ₽</td>
+                    {activeEmployees.map(emp => {
+                      const stock = getEmployeeStock(emp.id, nom.id);
+                      totalQty += stock;
+                      totalValue += stock * price;
+
+                      return (
+                        <td key={emp.id} className="px-4 py-3 text-center">
+                          {stock > 0 ? (
+                            <span className="font-medium text-blue-700">{stock}</span>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td className="px-4 py-3 text-center font-bold text-purple-700">
+                      {totalQty > 0 ? totalQty : '—'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="bg-green-50 font-bold">
+                <td className="px-4 py-3" colSpan={3}>ИТОГО по сотрудникам</td>
+                {activeEmployees.map(emp => {
+                  const empTotal = nomenclature.reduce((sum, nom) => {
+                    const stock = getEmployeeStock(emp.id, nom.id);
+                    return sum + stock * getCurrentPrice(nom.id);
+                  }, 0);
+
+                  return (
+                    <td key={emp.id} className="px-4 py-3 text-center text-green-700">
+                      {empTotal.toLocaleString('ru')} ₽
+                    </td>
+                  );
+                })}
+                <td className="px-4 py-3 text-center text-green-700">
+                  {activeEmployees.reduce((sum, emp) => {
+                    const empTotal = nomenclature.reduce((s, nom) => {
+                      const stock = getEmployeeStock(emp.id, nom.id);
+                      return s + stock * getCurrentPrice(nom.id);
+                    }, 0);
+                    return sum + empTotal;
+                  }, 0).toLocaleString('ru')} ₽
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      {/* Информация */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <p className="text-sm text-blue-700">
+          <span className="font-semibold">Примечание:</span> Остатки отображаются на текущую дату. 
+          Для изменения остатков используйте разделы "Приходы" и "Возвраты".
+        </p>
+      </div>
+    </div>
+  );
+}
