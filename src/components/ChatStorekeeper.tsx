@@ -90,84 +90,87 @@ export default function ChatStorekeeper() {
 
   const selectedMessages = selectedChat ? getChatMessages(selectedChat) : [];
 
-  const handlePrintChat = () => {
-    if (!selectedChat || selectedMessages.length === 0) return;
-
+  const handlePrintMessage = (msg: any) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       alert('Не удалось открыть окно печати. Проверьте настройки блокировки всплывающих окон.');
       return;
     }
 
-    const partnerName = getPartnerName(selectedChat);
+    const isStorekeeper = msg.fromId === 'storekeeper';
+    const senderName = isStorekeeper ? 'Кладовщик' : getPartnerName(msg.fromId);
     const currentDate = new Date().toLocaleString('ru-RU');
-
-    let messagesHtml = '';
-    selectedMessages.forEach(msg => {
-      const isStorekeeper = msg.fromId === 'storekeeper';
-      const senderName = isStorekeeper ? 'Кладовщик' : getPartnerName(msg.fromId);
-      const align = isStorekeeper ? 'right' : 'left';
-      const bgColor = isStorekeeper ? '#16a34a' : '#ffffff';
-      const textColor = isStorekeeper ? '#ffffff' : '#1f2937';
-      const border = isStorekeeper ? 'none' : '1px solid #e5e7eb';
-
-      messagesHtml += `
-        <div style="display: flex; justify-content: ${align}; margin-bottom: 12px;">
-          <div style="max-width: 70%; background-color: ${bgColor}; border: ${border}; border-radius: 12px; padding: 12px 16px; color: ${textColor};">
-            <div style="font-size: 11px; font-weight: 600; margin-bottom: 4px; opacity: 0.8;">${senderName}</div>
-            <div style="font-size: 14px; line-height: 1.5;">${msg.text}</div>
-            <div style="font-size: 11px; margin-top: 6px; opacity: 0.7;">${formatDateTime(msg.date)}</div>
-          </div>
-        </div>
-      `;
-    });
 
     printWindow.document.write(`
       <!DOCTYPE html>
       <html lang="ru">
       <head>
         <meta charset="UTF-8">
-        <title>Диалог с ${partnerName}</title>
+        <title>Сообщение от ${senderName}</title>
         <style>
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            padding: 20px;
-            max-width: 800px;
+            padding: 40px;
+            max-width: 700px;
             margin: 0 auto;
           }
           .header {
             border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 16px;
-            margin-bottom: 24px;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
           }
           .header h1 {
-            font-size: 24px;
-            margin: 0 0 8px 0;
+            font-size: 28px;
+            margin: 0 0 12px 0;
             color: #1f2937;
           }
           .header p {
             font-size: 14px;
             color: #6b7280;
-            margin: 4px 0;
+            margin: 6px 0;
           }
-          .messages {
+          .message-box {
+            background-color: ${isStorekeeper ? '#16a34a' : '#ffffff'};
+            border: ${isStorekeeper ? 'none' : '2px solid #e5e7eb'};
+            border-radius: 16px;
+            padding: 24px;
+            color: ${isStorekeeper ? '#ffffff' : '#1f2937'};
             margin-top: 20px;
+          }
+          .sender {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            opacity: 0.9;
+          }
+          .message-text {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+          }
+          .message-date {
+            font-size: 13px;
+            opacity: 0.7;
+            margin-top: 12px;
           }
           @media print {
             body {
-              padding: 0;
+              padding: 20px;
             }
           }
         </style>
       </head>
       <body>
         <div class="header">
-          <h1>💬 Диалог с ${partnerName}</h1>
+          <h1>📨 Сообщение</h1>
+          <p><strong>От:</strong> ${senderName}</p>
+          <p><strong>Дата отправки:</strong> ${formatDateTime(msg.date)}</p>
           <p><strong>Дата печати:</strong> ${currentDate}</p>
-          <p><strong>Всего сообщений:</strong> ${selectedMessages.length}</p>
         </div>
-        <div class="messages">
-          ${messagesHtml}
+        <div class="message-box">
+          <div class="sender">${senderName}</div>
+          <div class="message-text">${msg.text}</div>
+          <div class="message-date">${formatDateTime(msg.date)}</div>
         </div>
       </body>
       </html>
@@ -280,17 +283,8 @@ export default function ChatStorekeeper() {
           {selectedChat ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+              <div className="p-4 border-b border-gray-200 bg-gray-50">
                 <h3 className="font-semibold text-gray-800">{getPartnerName(selectedChat)}</h3>
-                {selectedMessages.length > 0 && (
-                  <button
-                    onClick={handlePrintChat}
-                    className="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 text-sm font-medium flex items-center gap-2 transition"
-                    title="Распечатать диалог"
-                  >
-                    🖨️ Печать
-                  </button>
-                )}
               </div>
 
               {/* Messages */}
@@ -306,10 +300,10 @@ export default function ChatStorekeeper() {
                   selectedMessages.map(msg => (
                     <div
                       key={msg.id}
-                      className={`flex ${msg.fromId === 'storekeeper' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${msg.fromId === 'storekeeper' ? 'justify-end' : 'justify-start'} group`}
                     >
                       <div
-                        className={`max-w-[70%] rounded-xl px-4 py-2 ${
+                        className={`max-w-[70%] rounded-xl px-4 py-2 relative ${
                           msg.fromId === 'storekeeper'
                             ? 'bg-green-600 text-white'
                             : 'bg-white border border-gray-200 text-gray-800'
@@ -319,6 +313,13 @@ export default function ChatStorekeeper() {
                         <p className={`text-xs mt-1 ${msg.fromId === 'storekeeper' ? 'text-green-200' : 'text-gray-400'}`}>
                           {formatDateTime(msg.date)}
                         </p>
+                        <button
+                          onClick={() => handlePrintMessage(msg)}
+                          className={`absolute -top-2 ${msg.fromId === 'storekeeper' ? '-left-8' : '-right-8'} opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full bg-white border border-gray-300 hover:bg-gray-100 shadow-sm`}
+                          title="Распечатать сообщение"
+                        >
+                          🖨️
+                        </button>
                       </div>
                     </div>
                   ))
