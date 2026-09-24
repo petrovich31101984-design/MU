@@ -373,8 +373,6 @@ export default function ExpensesStorekeeper() {
                       <th className="px-4 py-3 font-medium text-gray-600">Название</th>
                       <th className="px-4 py-3 font-medium text-gray-600 text-center">Тип</th>
                       <th className="px-4 py-3 font-medium text-gray-600 text-center">Кол-во</th>
-                      <th className="px-4 py-3 font-medium text-gray-600 text-right">Цена за единицу (₽)</th>
-                      <th className="px-4 py-3 font-medium text-gray-600 text-right">Сумма (₽)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -398,15 +396,12 @@ export default function ExpensesStorekeeper() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center text-gray-700">{item.quantity}</td>
-                        <td className="px-4 py-3 text-right text-gray-600">{item.unitPrice}</td>
-                        <td className="px-4 py-3 text-right font-medium text-orange-700">{item.sum}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
                     <tr className="bg-gray-50 font-bold">
-                      <td className="px-4 py-3" colSpan={4}>ИТОГО</td>
-                      <td className="px-4 py-3 text-right text-red-700">{totalSum.toLocaleString('ru')} ₽</td>
+                      <td className="px-4 py-3" colSpan={3}>ИТОГО</td>
                     </tr>
                   </tfoot>
                 </table>
