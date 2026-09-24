@@ -255,10 +255,10 @@ export default function ExpensesStorekeeper() {
   // Функция для отметки листа как просмотренного
   const handleViewed = (sheetId: number) => {
     setViewedSheets([...viewedSheets, sheetId]);
-    // Через 5 секунд убрать лист из отображения
+    // Через 3 секунды убрать лист из отображения
     setTimeout(() => {
       setArchivedSheets([...archivedSheets, sheetId]);
-    }, 5000);
+    }, 3000);
   };
 
   return (
