@@ -7,8 +7,6 @@ interface DashboardProps {
 export default function DashboardStorekeeper({ onNavigate }: DashboardProps) {
   const nomenclature = useStore(s => s.nomenclature);
   const employees = useStore(s => s.employees);
-  const getCurrentPrice = useStore(s => s.getCurrentPrice);
-  const getEmployeeStock = useStore(s => s.getEmployeeStock);
 
   const activeEmployees = employees.filter(e => e.status === 'active');
 
@@ -17,15 +15,6 @@ export default function DashboardStorekeeper({ onNavigate }: DashboardProps) {
 
   // Количество активных сотрудников
   const totalEmployees = activeEmployees.length;
-
-  // Общая стоимость остатков у сотрудников
-  const totalEmployeeStock = activeEmployees.reduce((sum, emp) => {
-    const empStock = nomenclature.reduce((empSum, nom) => {
-      const stock = getEmployeeStock(emp.id, nom.id);
-      return empSum + stock * getCurrentPrice(nom.id);
-    }, 0);
-    return sum + empStock;
-  }, 0);
 
   return (
     <div className="space-y-6">
@@ -61,13 +50,13 @@ export default function DashboardStorekeeper({ onNavigate }: DashboardProps) {
           </div>
         </div>
 
-        {/* Остатки у сотрудников */}
+        {/* Не просмотренные листы расхода */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden">
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
           <div className="pl-2">
-            <p className="text-sm text-gray-500">Остатки у сотрудников</p>
-            <p className="text-xs text-gray-400">(общая стоимость)</p>
-            <p className="text-2xl font-bold text-amber-700 mt-1">{totalEmployeeStock.toLocaleString('ru')} ₽</p>
+            <p className="text-sm text-gray-500">Не просмотренные листы расхода</p>
+            <p className="text-xs text-gray-400">(требуют проверки)</p>
+            <p className="text-2xl font-bold text-red-700 mt-1">12</p>
           </div>
         </div>
       </div>
