@@ -338,6 +338,17 @@ export const mockMessages: Message[] = [
   { id: 'msg_13', fromId: 'emp_15', toId: 'admin', text: 'Пациент Смирнов А.П. жалуется на головокружение', date: '2024-01-15T12:30', read: false },
   { id: 'msg_14', fromId: 'emp_8', toId: 'admin', text: 'Прошу заменить оборудование, старое неисправно', date: '2024-01-15T13:00', read: false },
   { id: 'msg_15', fromId: 'emp_20', toId: 'admin', text: 'Сегодня 18 вызовов, все отчёты внесены', date: '2024-01-15T13:30', read: false },
+  // Сообщения от сотрудников к кладовщику
+  { id: 'msg_16', fromId: 'emp_1', toId: 'storekeeper', text: 'Добрый день! Подскажите, есть ли в наличии Анальгин 50% 2мл? Нужно 20 ампул', date: '2024-01-15T09:15', read: false },
+  { id: 'msg_17', fromId: 'storekeeper', toId: 'emp_1', text: 'Добрый день! Да, есть в наличии. Подготовлю к выдаче', date: '2024-01-15T09:20', read: true },
+  { id: 'msg_18', fromId: 'emp_3', toId: 'storekeeper', text: 'Здравствуйте! Нужны расходные материалы: шприцы 5мл - 50 шт, шприцы 10мл - 30 шт', date: '2024-01-15T10:30', read: false },
+  { id: 'msg_19', fromId: 'emp_5', toId: 'storekeeper', text: 'Добрый день! У меня закончились перчатки нитриловые. Можно получить 2 коробки?', date: '2024-01-15T11:00', read: false },
+  { id: 'msg_20', fromId: 'storekeeper', toId: 'emp_5', text: 'Здравствуйте! Да, конечно. Приходите после обеда', date: '2024-01-15T11:05', read: true },
+  { id: 'msg_21', fromId: 'emp_7', toId: 'storekeeper', text: 'Срочно нужны салфетки спиртовые и ватные диски. Сколько есть в наличии?', date: '2024-01-15T11:45', read: false },
+  { id: 'msg_22', fromId: 'emp_10', toId: 'storekeeper', text: 'Здравствуйте! Подскажите, когда будет поступление Дексаметазона? У нас его почти не осталось', date: '2024-01-15T12:15', read: false },
+  { id: 'msg_23', fromId: 'emp_13', toId: 'storekeeper', text: 'Добрый день! Хочу оформить возврат препаратов с истекающим сроком годности. Когда можно подойти?', date: '2024-01-15T13:00', read: false },
+  { id: 'msg_24', fromId: 'storekeeper', toId: 'emp_13', text: 'Добрый день! Можно подойти сегодня с 14:00 до 16:00. Возьмите с собой накладную', date: '2024-01-15T13:10', read: true },
+  { id: 'msg_25', fromId: 'emp_2', toId: 'storekeeper', text: 'Привет! Есть ли Prednisolone в таблетках? Нужно 100 штук', date: '2024-01-15T14:00', read: false },
 ];
 
 // Журнал изменений (очищен от записей о номенклатуре)
