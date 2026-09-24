@@ -27,7 +27,7 @@ export default function LayoutStorekeeper({ children, currentPage, onNavigate, o
       <aside className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-white border-r border-gray-200 flex flex-col transition-all duration-300 flex-shrink-0`}>
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
               МУ
             </div>
             {sidebarOpen && (
