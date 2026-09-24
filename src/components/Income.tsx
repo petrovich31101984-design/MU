@@ -11,6 +11,7 @@ export default function Income() {
   const removeIncome = useStore(s => s.removeIncome);
 
   const [showModal, setShowModal] = useState(false);
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [amount, setAmount] = useState('');
@@ -65,39 +66,41 @@ export default function Income() {
       alert('Нет данных для архивирования за выбранный период');
       return;
     }
+    setShowArchiveConfirm(true);
+  };
 
-    if (confirm(`Отправить данные за период "${getPeriodLabel()}" в архив?`)) {
-      // Группируем приходы по сотрудникам
-      const incomeByEmployee: { [key: string]: { employeeId: string; totalAmount: number; count: number } } = {};
-      
-      periodIncome.forEach(inc => {
-        if (!incomeByEmployee[inc.employeeId]) {
-          incomeByEmployee[inc.employeeId] = {
-            employeeId: inc.employeeId,
-            totalAmount: 0,
-            count: 0
-          };
-        }
-        incomeByEmployee[inc.employeeId].totalAmount += inc.amount;
-        incomeByEmployee[inc.employeeId].count += 1;
-      });
+  const confirmArchive = () => {
+    // Группируем приходы по сотрудникам
+    const incomeByEmployee: { [key: string]: { employeeId: string; totalAmount: number; count: number } } = {};
+    
+    periodIncome.forEach(inc => {
+      if (!incomeByEmployee[inc.employeeId]) {
+        incomeByEmployee[inc.employeeId] = {
+          employeeId: inc.employeeId,
+          totalAmount: 0,
+          count: 0
+        };
+      }
+      incomeByEmployee[inc.employeeId].totalAmount += inc.amount;
+      incomeByEmployee[inc.employeeId].count += 1;
+    });
 
-      // Создаем карточку для архива
-      const archiveData = {
-        period: getPeriodLabel(),
-        periodValue: selectedPeriod,
-        employees: Object.values(incomeByEmployee).map(emp => ({
-          employeeId: emp.employeeId,
-          totalAmount: emp.totalAmount,
-          count: emp.count
-        })),
-        totalAmount: totalIncome,
-        totalCount: periodIncome.length
-      };
+    // Создаем карточку для архива
+    const archiveData = {
+      period: getPeriodLabel(),
+      periodValue: selectedPeriod,
+      employees: Object.values(incomeByEmployee).map(emp => ({
+        employeeId: emp.employeeId,
+        totalAmount: emp.totalAmount,
+        count: emp.count
+      })),
+      totalAmount: totalIncome,
+      totalCount: periodIncome.length
+    };
 
-      addArchivedIncome(archiveData);
-      alert(`Данные за период "${getPeriodLabel()}" успешно отправлены в архив`);
-    }
+    addArchivedIncome(archiveData);
+    setShowArchiveConfirm(false);
+    alert(`Данные за период "${getPeriodLabel()}" успешно отправлены в архив`);
   };
 
   const handleOpenModal = (incomeData?: IncomeType) => {
@@ -332,6 +335,52 @@ export default function Income() {
               >
                 Сохранить
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно подтверждения архивирования */}
+      {showArchiveConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-2xl">
+                  📦
+                </div>
+                <h3 className="text-lg font-bold text-gray-800">Отправить в архив?</h3>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <p className="text-sm text-gray-700 mb-2">
+                  <span className="font-medium">Период:</span> {getPeriodLabel()}
+                </p>
+                <p className="text-sm text-gray-700 mb-2">
+                  <span className="font-medium">Сотрудников:</span> {new Set(periodIncome.map(i => i.employeeId)).size}
+                </p>
+                <p className="text-sm text-gray-700 mb-2">
+                  <span className="font-medium">Приходов:</span> {periodIncome.length}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Общая сумма:</span> {totalIncome.toLocaleString('ru')} ₽
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowArchiveConfirm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={confirmArchive}
+                  className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition"
+                >
+                  Отправить в архив
+                </button>
+              </div>
             </div>
           </div>
         </div>
