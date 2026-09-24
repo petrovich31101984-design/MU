@@ -48,14 +48,14 @@ export default function StockStorekeeper() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 text-left">
-                <th className="px-4 py-3 font-medium text-gray-600 sticky left-0 bg-gray-50 z-10">Номенклатура</th>
-                <th className="px-4 py-3 font-medium text-gray-600 text-center">Ед. изм.</th>
+                <th className="px-4 py-3 font-medium text-gray-600 sticky left-0 bg-gray-50 z-10 whitespace-nowrap">Номенклатура</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-center whitespace-nowrap">Ед. изм.</th>
                 {activeEmployees.map(emp => (
-                  <th key={emp.id} className="px-4 py-3 font-medium text-gray-600 text-center">
+                  <th key={emp.id} className="px-4 py-3 font-medium text-gray-600 text-center whitespace-nowrap">
                     {formatEmployeeName(emp.fullName)}
                   </th>
                 ))}
-                <th className="px-4 py-3 font-medium text-gray-600 text-center">Итого</th>
+                <th className="px-4 py-3 font-medium text-gray-600 text-center whitespace-nowrap">Итого</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -63,18 +63,18 @@ export default function StockStorekeeper() {
                 let totalQty = 0;
  
                 return (                  <tr key={nom.id} className={`hover:bg-gray-50 ${nom.category === 'medicine_pku' ? 'bg-indigo-50' : ''}`}>
-                    <td className={`px-4 py-3 font-medium text-gray-800 sticky left-0 z-10 ${nom.category === 'medicine_pku' ? 'bg-indigo-50' : 'bg-white'}`}>
+                    <td className={`px-4 py-3 font-medium text-gray-800 sticky left-0 z-10 whitespace-nowrap ${nom.category === 'medicine_pku' ? 'bg-indigo-50' : 'bg-white'}`}>
                       {nom.name}
                       {nom.category === 'medicine_pku' && (
                         <span className="ml-2 text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">ПКУ</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-center text-gray-600">{formatUnit(nom.unit)}</td>
+                    <td className="px-4 py-3 text-center text-gray-600 whitespace-nowrap">{formatUnit(nom.unit)}</td>
                     {activeEmployees.map(emp => {
                       const stock = getEmployeeStock(emp.id, nom.id);
                       totalQty += stock;
  
-                      return (                        <td key={emp.id} className="px-4 py-3 text-center">
+                      return (                        <td key={emp.id} className="px-4 py-3 text-center whitespace-nowrap">
                           {stock > 0 ? (
                             <span className="font-medium text-blue-700">{stock}</span>
                           ) : (
@@ -83,7 +83,7 @@ export default function StockStorekeeper() {
                         </td>
                       );
                     })}
-                    <td className="px-4 py-3 text-center font-bold text-purple-700">
+                    <td className="px-4 py-3 text-center font-bold text-purple-700 whitespace-nowrap">
                       {totalQty > 0 ? totalQty : '—'}
                     </td>
                   </tr>
